@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แอปบทที่ 4 ข้อมูล กลุ่มตัวอย่าง และกำลังการทดสอบก่อนใช้ SEM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f5f7; --paper:#ffffff; --ink:#15233a; --muted:#5a6678; --line:#d5dbe3;
+  --accent:#0d6466; --accent-soft:#e1efef; --gate:#a86a12; --gate-soft:#f7ecd9;
+  --ok:#2f7d32; --stop:#b3261e; --stop-soft:#f8e3e1;
+  --display:"Noto Serif Thai",Georgia,serif; --body:"Noto Sans Thai",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0f1620; --paper:#17212d; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3a4a;
+  --accent:#4fb8b4; --accent-soft:#163334; --gate:#e2a54a; --gate-soft:#3a2c14;
+  --ok:#74c27a; --stop:#f08a80; --stop-soft:#3c1d1b; color-scheme:dark;}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.65;font-size:16px}
+main{max-width:980px;margin:0 auto;padding:24px 16px 48px;display:grid;gap:24px}
+.brand{display:inline-flex;align-items:center;gap:12px;background:#ffffff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin-bottom:14px}
+.brand img{height:40px;width:auto;display:block}
+.brand .org{font-family:var(--display);font-weight:700;font-size:1.15rem;color:#15233a;border-left:2px solid #d5dbe3;padding-left:12px;line-height:1.2}
+header h1{font-family:var(--display);font-size:1.7rem;line-height:1.3;margin:0 0 6px;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:68ch}
+.note{font-size:.88rem;color:var(--muted);border-left:3px solid var(--gate);padding:4px 10px;background:var(--gate-soft);border-radius:0 6px 6px 0}
+section.lab{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px}
+section.lab h2{font-family:var(--display);font-size:1.25rem;margin:0 0 4px}
+.lab-tag{font-size:.8rem;color:var(--accent);font-weight:700;letter-spacing:.02em}
+.lab > p{margin:4px 0 14px;color:var(--muted);max-width:70ch}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:620px){.grid4{grid-template-columns:1fr 1fr}}
+.num label{display:block;font-size:.85rem;color:var(--muted)}
+.num input{width:100%;font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:10px}
+.stat{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.stat .k{font-size:.8rem;color:var(--muted)} .stat .v{font-size:1.2rem;font-weight:700;font-variant-numeric:tabular-nums}
+.stat.warn{border-color:var(--stop);background:var(--stop-soft)}
+.msg{font-size:.92rem;padding:8px 12px;border-radius:8px;background:var(--accent-soft);margin-top:10px}
+.msg.warn{background:var(--stop-soft)}
+canvas{width:100%;height:auto;display:block;margin-top:12px}
+label.opt{display:flex;gap:8px;align-items:flex-start;padding:3px 0;cursor:pointer}
+fieldset{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0}
+legend{font-weight:700;font-size:.92rem;padding:0 4px}
+button.main{font:inherit;font-weight:700;padding:8px 14px;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gate);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.score{font-weight:700;font-variant-numeric:tabular-nums}
+.q{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.q .stem{font-weight:500;margin-bottom:6px}
+.q .lo{font-size:.78rem;color:var(--gate);font-weight:700}
+.q .fb{margin-top:6px;font-size:.92rem;padding:6px 10px;border-radius:6px;display:none}
+.q .fb.show{display:block}
+.q .fb.ok{background:var(--accent-soft)} .q .fb.no{background:var(--stop-soft)}
+footer{font-size:.85rem;color:var(--muted)}
+select{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);max-width:100%}
+table.res{width:100%;border-collapse:collapse;font-size:.92rem;min-width:560px}
+table.res th,table.res td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.res th{font-size:.8rem;color:var(--muted)}
+.tbl{overflow-x:auto}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.seg button{font:inherit;font-size:.9rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.mark{font-weight:700}.mark.ok{color:var(--ok)}.mark.no{color:var(--stop)}
+</style>
+<style>@media (max-width:640px){body *{min-width:0}table{display:block;overflow-x:auto;max-width:100%}th,td{white-space:normal}select,input,canvas,img,svg{max-width:100%}[class*=grid],.row,.seg,.stats{grid-template-columns:1fr!important;flex-wrap:wrap}pre{overflow-x:auto;white-space:pre-wrap}}</style></head>
+<body><style>#gate{position:fixed;inset:0;background:#F2F7FB;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:Sarabun,'Noto Sans Thai',sans-serif}
+#gate .gb{background:#fff;border-top:4px solid #1F3864;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.08);padding:28px 26px;max-width:380px;width:88%;color:#222}
+#gate h2{color:#1F3864;font-size:19px;margin:0 0 6px}#gate p{font-size:14px;margin:0 0 14px;line-height:1.6}
+#gate .row{display:flex;gap:6px}#gate input[type=password],#gate input[type=text]{flex:1;font-size:16px;padding:9px 10px;border:1px solid #b8c4d4;border-radius:6px}
+#gate button{font-family:inherit;font-size:15px;border:0;border-radius:6px;padding:9px 14px;cursor:pointer}#gate .sh{background:#E3E9F1;color:#1F3864}#gate .go{background:#1F3864;color:#fff;width:100%;margin-top:12px}
+#gate label{font-size:13px;display:flex;gap:6px;align-items:center;margin-top:10px}#gate .err{color:#A93226;font-size:13px;min-height:18px;margin-top:8px}</style>
+<div id="gate"><div class="gb"><h2>แอปประจำตำรา</h2><p>สำหรับผู้อ่านตำรา<br><b>SEM และ GenAI ในการวิจัยทางบัญชีและการสอบบัญชี</b><br>ใส่รหัสเข้าแอปที่พิมพ์ไว้ในตำรา</p>
+<div class="row"><input id="gk" type="password" autocomplete="off" placeholder="รหัสเข้าแอป"><button class="sh" type="button" onclick="var i=document.getElementById('gk');i.type=i.type==='password'?'text':'password'">แสดง</button></div>
+<label><input id="gr" type="checkbox"> จำรหัสในเครื่องนี้</label><button class="go" type="button" id="gg">เปิดแอป</button><div class="err" id="ge"></div></div></div>
+<script>(function(){var H="467e451224101a2f5f9b367b93804929e3d8a0a9be77cb73f13736ca0c64e694",K="semgenai_gate";
+function ok(){var g=document.getElementById('gate');if(g)g.remove();}
+try{if(localStorage.getItem(K)===H||sessionStorage.getItem(K)===H){ok();return;}}catch(e){}
+async function chk(){var v=document.getElementById('gk').value.replace(/[\s\-]/g,'').toUpperCase();
+var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));var h=Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('');
+if(h===H){try{(document.getElementById('gr').checked?localStorage:sessionStorage).setItem(K,H)}catch(e){}ok();}else{document.getElementById('ge').textContent='รหัสไม่ถูกต้อง โปรดดูรหัสที่พิมพ์ไว้ในตำรา';}}
+document.getElementById('gg').onclick=chk;document.getElementById('gk').addEventListener('keydown',function(e){if(e.key==='Enter')chk();});})();</script><div style="font-family:Sarabun,sans-serif;font-size:13px;padding:8px 14px;background:#1F3864"><a href="index.html" style="color:#fff;text-decoration:none">← สารบัญแอปประจำตำรา</a></div>
+<main>
+<header>
+  <div class="brand"><img src="logo.png" alt="Dr VIT" width="154" height="40"><span class="org">Siam edu.</span></div>
+  <h1>แอปบทที่ 4 ข้อมูล กลุ่มตัวอย่าง และกำลังการทดสอบก่อนใช้ SEM</h1>
+  <p>ฝึกสามเรื่องของบทที่ 4 คือ ติดตามจำนวนแบบสอบถามที่ใช้ได้ต่อกลุ่ม คัดกรองแฟ้มดิบ 400 ชุดตามกฎที่เขียนไว้ก่อน และอ่านผลการจำลองกำลังทดสอบของ H9–H10 และ H11</p>
+  <p class="note" style="margin-top:10px">แฟ้มดิบ 400 ชุดและผลจำลองทั้งหมดเป็นข้อมูลสังเคราะห์จาก ch4_lab.R กฎคัดกรองเป็นกฎสอนที่ผู้เขียนยังไม่ได้กำหนดในแผนวิเคราะห์ ห้ามนำข้อมูลผู้ตอบจริงใส่แอปนี้หรือเครื่องมือ GenAI</p>
+</header>
+
+<section class="lab" id="lab1">
+  <div class="lab-tag">ใบงาน 1 · LO1 · LO5</div>
+  <h2>ติดตามจำนวนที่ใช้ได้ต่อกลุ่ม</h2>
+  <p>โควตาไม่ได้ทำให้ตัวอย่างเป็นตัวแทน แต่ช่วยให้แต่ละกลุ่มมีจำนวนพอเทียบกันได้ ใส่จำนวนที่รับคืนแล้วและอัตราผ่านการคัดกรองที่คาด (ค่าตั้งต้น .80 มาจาก 320 จาก 400 ชุดในตารางที่ 4.2)</p>
+  <div class="grid4">
+    <div class="num"><label for="qT">เป้าต่อกลุ่ม</label><input id="qT" type="number" min="1" value="160"></div>
+    <div class="num"><label for="qR">อัตราผ่านการคัดกรอง</label><input id="qR" type="number" min="0.05" max="1" step="0.01" value="0.80"></div>
+    <div class="num"><label for="qC">รับคืนแล้ว กลุ่ม CPA</label><input id="qC" type="number" min="0" value="200"></div>
+    <div class="num"><label for="qA">รับคืนแล้ว กลุ่ม TA</label><input id="qA" type="number" min="0" value="200"></div>
+  </div>
+  <div class="stats" id="qOut"></div>
+  <div class="msg" id="qMsg"></div>
+</section>
+
+<section class="lab" id="lab2">
+  <div class="lab-tag">ใบงาน 2 · LO2</div>
+  <h2>คัดกรองแฟ้มดิบ 400 ชุด</h2>
+  <p>ลำดับตั้งต้นตรงกับตารางที่ 4.2 ลองปิดกฎหรือเลื่อนลำดับ แล้วดูว่าจำนวนที่ตัดในแต่ละขั้นเปลี่ยนอย่างไร ผลสุดท้ายของลำดับตั้งต้นคือ 320 ราย (กลุ่ม CPA 160 รวมผู้ถือสองใบอนุญาต 24 ราย และ TA 160)</p>
+  <div class="tbl"><table class="res"><thead><tr><th>ลำดับ</th><th>ใช้</th><th>กฎ</th><th>ตัดออก</th><th>เหลือ</th><th>เลื่อน</th></tr></thead><tbody id="sBody"></tbody></table></div>
+  <div class="row"><button class="main" id="sReset">กลับลำดับตารางที่ 4.2</button></div>
+  <div class="msg" id="sMsg"></div>
+</section>
+
+<section class="lab" id="lab3">
+  <div class="lab-tag">ใบงาน 3 · LO4 · LO5</div>
+  <h2>อ่านผลจำลองกำลังทดสอบ</h2>
+  <p>ค่าจุดมาจากตารางที่ 4.3 (500 รอบต่อเงื่อนไข) และตารางที่ 4.4 (2,000 รอบ) แถบรอบจุดคือ ±2 เท่าของความคลาดเคลื่อนมาตรฐาน Monte Carlo ซึ่งบอกว่าค่ากำลังที่จำลองได้ยังแกว่งเท่าใด</p>
+  <div class="seg" role="group" aria-label="เลือกการทดสอบ">
+    <button id="tP" aria-pressed="true">H9–H10 ผลต่างเส้นทาง</button>
+    <button id="tH" aria-pressed="false">H11 ถดถอยโลจิสติก</button>
+  </div>
+  <canvas id="pc" width="900" height="380" aria-label="กราฟกำลังทดสอบ"></canvas>
+  <div class="grid4" style="margin-top:12px">
+    <div class="num"><label for="pE" id="pEl">ขนาดผล D</label><select id="pE"></select></div>
+    <div class="num"><label for="pG">กำลังเป้าหมาย</label><input id="pG" type="number" min="0.5" max="0.99" step="0.01" value="0.80"></div>
+  </div>
+  <div class="msg" id="pMsg"></div>
+</section>
+
+<section class="lab" id="quiz">
+  <div class="lab-tag">แบบทดสอบท้ายบท</div>
+  <h2>8 ข้อ ตรวจทันทีหลังเลือก</h2>
+  <div id="qz"></div>
+  <div class="row"><span class="score" id="qzS">ได้ 0 จาก 8</span></div>
+</section>
+
+<footer>
+  <p>ที่มาของตัวเลข: ch4_lab.R (R 4.3.3, lavaan 0.6.17) เมล็ดสุ่ม 20261215 (แฟ้มดิบ), 20261216 (ตารางที่ 4.3), 20261217 (ตารางที่ 4.4) ผลคัดกรองตรงกับชุดข้อมูลกลางของเล่มทุกไบต์</p>
+  <p>เรื่องที่รอผู้เขียนตัดสิน: กฎคัดกรองและเกณฑ์ตัวเลข (5 นาที ครึ่งหนึ่งของข้อ), ขนาดผลต่างเส้นทางที่มีความหมายต่อการกำกับดูแลวิชาชีพ, จำนวน TA ทางการจากกรมสรรพากร</p>
+</footer>
+</main>
+<script>
+const RAW = [[1,1,0,27,5,11.8,"TA"],[1,1,1,10,5,22.5,"CPA"],[1,1,2,30,5,21.1,"TA"],[1,1,3,30,5,12.7,"CPA"],[1,1,4,29,7,24.7,"TA"],[1,1,5,28,4,26.8,"TA"],[1,1,6,29,6,9.4,"BOTH"],[1,1,7,30,1,14.2,"TA"],[1,1,8,28,6,20.5,"TA"],[1,1,9,30,5,20.3,"CPA"],[1,1,10,30,4,23.5,"CPA"],[1,1,11,30,5,13.9,"TA"],[1,1,12,29,6,21.3,"TA"],[1,1,13,30,5,14.4,"TA"],[1,1,14,28,5,19.8,"CPA"],[0,1,15,0,0,18.2,"TA"],[1,1,16,29,5,25.6,"CPA"],[1,1,17,28,5,11.6,"TA"],[1,1,18,30,6,18.3,"TA"],[1,1,19,30,5,4.0,"TA"],[1,1,20,30,5,25.2,"TA"],[1,1,21,29,5,16.9,"BOTH"],[1,1,22,27,6,26.2,"TA"],[1,1,23,29,5,13.5,"CPA"],[0,1,15,0,0,16.9,"BOTH"],[1,1,24,29,5,23.6,"CPA"],[1,1,25,29,5,25.0,"CPA"],[1,1,26,30,4,15.5,"TA"],[1,1,27,28,5,12.9,"CPA"],[1,1,28,30,5,11.1,"BOTH"],[1,1,29,30,6,10.1,"TA"],[1,1,30,29,6,10.0,"BOTH"],[1,1,31,30,5,25.7,"TA"],[1,1,32,29,6,21.7,"CPA"],[1,1,33,30,5,23.7,"CPA"],[1,1,34,29,6,14.7,"BOTH"],[1,0,15,0,0,13.4,"NONE"],[1,1,35,30,5,19.3,"TA"],[1,1,36,28,5,21.6,"TA"],[0,1,15,0,0,10.7,"CPA"],[1,1,37,29,7,14.0,"CPA"],[1,1,38,30,1,16.9,"BOTH"],[1,1,39,30,1,21.1,"TA"],[1,1,40,30,5,10.6,"TA"],[1,1,41,29,5,18.7,"CPA"],[1,1,42,30,1,21.9,"TA"],[1,1,43,29,5,26.3,"TA"],[1,1,44,30,6,9.7,"TA"],[1,1,45,26,4,22.8,"CPA"],[1,1,46,28,6,22.4,"TA"],[0,1,15,0,0,11.4,"TA"],[1,1,47,30,5,21.3,"CPA"],[1,1,48,30,5,9.1,"TA"],[1,1,49,28,6,15.6,"TA"],[1,1,50,28,7,24.7,"TA"],[1,1,51,30,1,26.3,"TA"],[1,1,52,30,4,9.3,"TA"],[1,1,53,30,5,27.8,"CPA"],[1,1,54,29,5,23.3,"TA"],[1,1,55,28,5,17.3,"TA"],[1,1,56,30,1,13.4,"TA"],[1,1,57,30,5,13.2,"TA"],[1,1,58,29,5,16.6,"CPA"],[1,1,59,30,5,17.6,"TA"],[1,1,60,29,4,24.2,"TA"],[1,1,61,30,4,14.7,"CPA"],[1,1,62,28,5,13.3,"TA"],[1,1,63,28,6,22.1,"CPA"],[1,1,64,10,3,16.0,"TA"],[1,0,15,0,0,22.8,"NONE"],[1,1,65,27,5,20.7,"CPA"],[1,1,66,27,5,12.2,"CPA"],[1,1,67,29,4,25.1,"TA"],[1,1,68,29,6,3.2,"TA"],[1,1,69,30,1,22.4,"TA"],[1,1,70,30,1,21.7,"CPA"],[1,1,71,29,4,20.0,"TA"],[1,1,72,29,6,17.0,"TA"],[1,1,73,29,5,24.1,"CPA"],[1,1,74,29,6,17.4,"CPA"],[1,1,75,28,5,21.7,"CPA"],[1,1,76,29,5,10.6,"CPA"],[1,1,77,10,3,16.4,"TA"],[0,1,15,0,0,15.5,"CPA"],[1,1,78,30,6,10.7,"TA"],[1,1,79,29,6,22.8,"BOTH"],[1,1,80,30,6,10.6,"CPA"],[1,1,81,28,5,13.5,"CPA"],[1,1,82,8,5,13.3,"TA"],[1,1,83,29,6,15.1,"CPA"],[1,1,84,28,5,4.0,"CPA"],[1,1,85,30,5,13.4,"CPA"],[1,1,86,30,5,3.0,"TA"],[1,1,87,27,4,22.8,"TA"],[1,1,88,29,5,12.9,"TA"],[1,1,89,30,6,23.0,"CPA"],[1,0,15,0,0,26.9,"NONE"],[1,1,90,30,5,18.5,"CPA"],[1,1,91,28,5,26.5,"TA"],[1,1,92,28,4,15.4,"CPA"],[0,1,15,0,0,16.6,"CPA"],[1,1,93,29,6,22.0,"CPA"],[1,1,94,28,5,21.3,"TA"],[1,1,95,29,5,10.2,"TA"],[1,1,96,29,5,22.3,"TA"],[1,1,97,28,6,15.7,"TA"],[1,1,98,30,5,10.8,"CPA"],[1,1,99,27,5,13.4,"TA"],[1,1,100,28,6,15.2,"TA"],[1,1,101,27,5,20.3,"TA"],[1,1,102,9,5,15.3,"CPA"],[1,1,103,30,6,24.0,"TA"],[1,1,104,30,6,13.9,"TA"],[1,1,105,30,5,21.3,"CPA"],[1,1,106,26,5,14.6,"TA"],[1,1,107,29,3,21.1,"TA"],[1,1,108,28,4,16.1,"TA"],[1,1,109,28,4,15.5,"CPA"],[1,1,110,29,5,15.3,"CPA"],[1,1,111,30,6,14.1,"TA"],[0,1,15,0,0,16.2,"TA"],[1,1,112,28,5,27.1,"TA"],[1,1,113,28,5,15.9,"CPA"],[1,1,114,30,5,21.2,"CPA"],[1,1,115,28,5,15.5,"TA"],[1,1,116,29,5,20.7,"TA"],[1,1,117,30,1,22.5,"CPA"],[1,1,118,29,5,27.5,"CPA"],[1,1,119,30,5,24.9,"TA"],[1,1,120,30,5,26.3,"TA"],[1,1,121,29,6,19.8,"CPA"],[1,1,122,30,4,22.0,"CPA"],[1,1,123,26,6,26.2,"CPA"],[1,1,124,30,1,12.0,"TA"],[1,1,125,29,5,22.0,"TA"],[1,1,126,27,5,17.9,"BOTH"],[1,1,127,29,6,9.4,"TA"],[1,1,128,29,4,9.5,"BOTH"],[1,1,129,30,5,21.6,"TA"],[1,0,15,0,0,23.3,"NONE"],[1,1,130,30,6,27.1,"BOTH"],[1,1,131,29,5,23.0,"BOTH"],[1,1,132,29,4,20.7,"CPA"],[1,1,133,27,6,12.8,"CPA"],[1,1,134,29,5,14.8,"CPA"],[1,0,15,0,0,13.8,"NONE"],[1,1,135,28,4,13.5,"CPA"],[1,1,136,30,4,10.8,"BOTH"],[1,1,137,30,5,25.7,"CPA"],[1,1,138,28,5,22.8,"TA"],[1,1,139,28,6,10.5,"CPA"],[1,1,140,9,4,15.9,"CPA"],[1,1,141,29,5,25.8,"TA"],[1,1,142,29,4,24.8,"CPA"],[1,1,143,30,5,18.2,"TA"],[1,1,144,28,6,9.8,"TA"],[1,1,145,30,4,16.6,"CPA"],[1,1,146,30,1,10.8,"TA"],[1,0,15,0,0,23.3,"NONE"],[1,1,147,28,5,24.5,"CPA"],[1,1,148,27,5,15.2,"CPA"],[1,1,149,30,6,23.1,"CPA"],[1,1,150,29,5,11.0,"CPA"],[1,1,151,27,5,16.9,"TA"],[0,1,15,0,0,19.0,"TA"],[1,1,152,30,5,20.7,"TA"],[1,1,153,9,3,17.1,"TA"],[1,1,154,29,4,25.5,"CPA"],[1,1,155,29,4,27.5,"CPA"],[1,1,156,28,5,16.4,"TA"],[1,1,157,29,6,18.5,"CPA"],[1,1,158,10,5,25.6,"TA"],[0,1,15,0,0,21.1,"TA"],[1,1,159,29,4,19.0,"TA"],[1,1,160,29,5,14.4,"CPA"],[1,1,161,30,6,10.0,"CPA"],[1,1,162,27,5,13.2,"CPA"],[1,1,163,29,6,24.1,"TA"],[1,1,164,26,5,22.0,"CPA"],[1,1,165,29,5,4.5,"TA"],[1,0,15,0,0,14.4,"NONE"],[1,1,166,28,6,24.9,"TA"],[1,1,167,10,3,22.7,"TA"],[1,1,168,30,5,9.4,"TA"],[1,1,169,29,6,11.3,"CPA"],[1,1,170,29,7,24.0,"BOTH"],[1,1,171,29,5,19.9,"TA"],[1,1,172,29,5,19.6,"BOTH"],[1,1,173,30,5,25.6,"CPA"],[1,1,174,26,6,17.5,"TA"],[1,1,175,27,5,23.0,"CPA"],[1,1,176,28,5,13.7,"CPA"],[1,1,177,29,5,22.1,"TA"],[1,1,178,30,5,26.0,"CPA"],[1,1,179,29,5,23.3,"TA"],[1,1,180,10,3,10.6,"TA"],[1,1,181,28,5,11.3,"CPA"],[1,1,182,30,6,20.0,"TA"],[1,1,183,30,6,13.9,"CPA"],[1,1,184,29,4,11.8,"TA"],[1,1,185,27,5,17.7,"CPA"],[1,1,186,29,5,15.2,"CPA"],[1,1,187,28,4,23.3,"CPA"],[1,1,188,29,6,17.0,"CPA"],[1,1,189,29,6,20.6,"CPA"],[1,1,190,30,6,26.9,"CPA"],[1,1,191,29,5,19.2,"BOTH"],[1,1,192,28,5,20.1,"CPA"],[1,1,193,29,5,12.0,"TA"],[1,1,194,29,5,13.8,"CPA"],[1,1,195,29,4,19.9,"TA"],[1,1,196,24,4,14.0,"TA"],[1,1,197,28,4,14.4,"TA"],[1,1,198,10,5,20.9,"TA"],[1,1,199,27,5,23.2,"BOTH"],[1,1,200,30,6,2.4,"TA"],[1,1,78,30,6,10.7,"TA"],[1,1,201,30,6,20.2,"CPA"],[1,1,202,28,6,23.4,"TA"],[1,1,203,29,5,24.3,"TA"],[1,1,204,30,6,15.4,"TA"],[1,1,205,29,6,21.2,"CPA"],[1,1,206,28,6,23.6,"TA"],[1,1,207,29,4,9.9,"CPA"],[1,1,208,29,6,17.1,"TA"],[1,1,209,30,4,20.0,"TA"],[1,0,15,0,0,21.2,"NONE"],[1,1,210,29,5,23.7,"TA"],[1,1,211,29,4,3.3,"TA"],[1,1,212,30,5,19.4,"CPA"],[1,1,213,28,6,24.1,"TA"],[1,1,214,30,6,11.8,"TA"],[1,1,215,28,4,14.2,"TA"],[1,1,216,27,5,11.7,"CPA"],[0,1,15,0,0,12.2,"CPA"],[1,1,217,29,5,4.3,"TA"],[1,1,218,30,5,11.5,"CPA"],[1,1,219,29,3,22.5,"BOTH"],[1,1,220,29,4,15.8,"TA"],[1,1,221,29,5,10.6,"TA"],[1,1,222,29,4,26.1,"CPA"],[0,1,15,0,0,16.8,"TA"],[1,1,223,30,5,20.1,"CPA"],[1,1,224,29,5,26.2,"CPA"],[1,1,225,28,6,11.7,"CPA"],[1,1,226,30,5,13.6,"CPA"],[1,1,227,30,5,10.2,"TA"],[1,1,228,29,6,22.8,"CPA"],[1,1,229,30,1,9.8,"TA"],[1,1,230,29,5,17.8,"TA"],[1,1,231,26,4,24.1,"CPA"],[1,0,15,0,0,21.7,"NONE"],[1,1,232,28,6,16.4,"TA"],[1,1,233,28,5,17.3,"CPA"],[1,1,234,27,4,3.9,"TA"],[0,1,15,0,0,21.6,"TA"],[1,1,235,27,4,14.2,"TA"],[1,1,236,28,5,17.8,"CPA"],[1,1,237,30,5,10.7,"CPA"],[1,1,238,10,3,19.9,"TA"],[0,1,15,0,0,25.0,"CPA"],[1,1,239,27,6,24.5,"CPA"],[1,1,240,30,5,10.8,"TA"],[1,1,241,30,6,18.5,"TA"],[1,1,242,30,6,10.9,"CPA"],[1,1,243,30,5,16.4,"TA"],[1,1,244,28,4,27.7,"CPA"],[1,1,245,27,6,18.6,"CPA"],[1,1,246,30,7,12.6,"TA"],[1,1,247,29,4,11.4,"TA"],[1,1,248,27,6,18.1,"CPA"],[1,1,249,29,5,14.9,"TA"],[1,1,250,10,4,24.8,"CPA"],[1,1,251,28,6,21.5,"TA"],[1,1,252,29,6,13.4,"CPA"],[1,0,15,0,0,25.7,"NONE"],[1,1,253,29,6,22.1,"TA"],[1,1,254,28,6,26.8,"CPA"],[1,1,255,30,1,20.7,"CPA"],[1,1,256,28,5,20.6,"TA"],[1,1,257,30,4,15.9,"CPA"],[1,1,258,30,5,12.1,"CPA"],[1,1,259,29,5,14.3,"BOTH"],[1,1,260,29,5,17.1,"TA"],[1,1,261,29,4,17.1,"TA"],[1,1,262,29,6,15.5,"CPA"],[0,1,15,0,0,23.7,"TA"],[1,1,263,29,5,10.2,"TA"],[0,1,15,0,0,22.1,"TA"],[1,1,264,30,5,22.7,"TA"],[0,1,15,0,0,21.7,"CPA"],[1,1,265,30,1,15.8,"TA"],[1,1,266,29,4,13.8,"CPA"],[1,1,267,29,5,10.0,"CPA"],[1,1,268,29,5,25.8,"BOTH"],[1,1,269,29,4,26.9,"CPA"],[1,1,270,29,5,24.6,"CPA"],[1,1,23,29,5,13.5,"CPA"],[1,1,271,29,5,14.8,"TA"],[1,1,272,27,6,9.0,"CPA"],[1,1,273,29,5,24.1,"CPA"],[0,1,15,0,0,13.9,"TA"],[1,1,274,29,5,27.7,"TA"],[1,1,275,29,5,9.5,"BOTH"],[1,1,276,28,4,13.4,"TA"],[1,1,277,28,6,12.1,"TA"],[1,1,278,28,5,12.0,"TA"],[1,1,279,28,6,27.6,"TA"],[1,0,15,0,0,22.1,"NONE"],[1,1,280,27,6,27.4,"TA"],[1,1,281,29,4,20.4,"TA"],[1,1,282,28,5,26.3,"CPA"],[1,1,283,28,4,23.9,"TA"],[1,1,284,10,4,16.6,"CPA"],[1,1,285,29,6,12.9,"BOTH"],[1,1,286,27,6,27.5,"TA"],[0,1,15,0,0,15.5,"TA"],[1,1,287,30,6,16.1,"CPA"],[1,1,288,28,6,11.9,"CPA"],[1,1,289,29,5,14.9,"BOTH"],[1,1,290,28,4,21.5,"TA"],[1,1,291,27,4,27.6,"CPA"],[1,1,292,10,4,16.2,"TA"],[1,1,293,30,6,17.9,"CPA"],[1,1,294,29,6,13.7,"TA"],[1,1,295,30,5,21.4,"CPA"],[1,1,296,28,5,17.3,"TA"],[1,1,297,29,6,14.6,"TA"],[1,1,298,30,5,25.6,"TA"],[1,1,299,29,4,21.6,"TA"],[1,1,134,29,5,14.8,"CPA"],[1,1,300,30,5,22.5,"CPA"],[1,1,301,29,4,26.8,"CPA"],[1,1,302,29,6,16.1,"TA"],[1,1,303,30,6,22.3,"TA"],[1,1,304,29,5,16.0,"TA"],[1,1,305,30,6,18.9,"TA"],[1,1,306,28,6,20.6,"CPA"],[1,1,307,28,5,10.5,"TA"],[1,1,308,29,6,27.5,"TA"],[1,1,309,28,5,16.6,"CPA"],[0,1,15,0,0,21.3,"TA"],[1,1,310,30,5,13.0,"TA"],[1,1,311,28,5,11.5,"TA"],[1,1,312,29,5,25.2,"CPA"],[1,1,313,28,5,16.8,"TA"],[1,1,314,29,5,17.8,"TA"],[1,1,315,10,6,20.2,"CPA"],[1,1,316,29,5,10.2,"TA"],[0,1,15,0,0,23.3,"TA"],[1,1,317,30,5,16.7,"TA"],[1,1,318,29,5,17.4,"BOTH"],[1,1,319,29,4,19.1,"TA"],[1,1,320,9,4,27.5,"TA"],[1,1,321,29,4,13.9,"TA"],[1,1,322,27,4,4.0,"CPA"],[1,1,323,28,5,13.0,"CPA"],[1,1,324,30,5,19.8,"CPA"],[1,1,325,29,6,11.7,"TA"],[1,1,326,29,7,16.7,"BOTH"],[1,1,327,30,5,25.1,"CPA"],[1,1,328,29,5,24.5,"CPA"],[1,1,329,29,4,16.6,"CPA"],[1,1,330,10,4,19.8,"CPA"],[1,1,331,29,6,14.9,"BOTH"],[1,0,15,0,0,13.5,"NONE"],[1,1,174,26,6,17.5,"TA"],[1,1,332,29,7,11.2,"TA"],[1,1,333,25,6,21.9,"TA"],[1,1,334,30,1,24.5,"CPA"],[1,1,335,29,5,20.9,"TA"],[1,1,336,28,5,13.1,"CPA"],[1,1,337,29,4,18.2,"TA"],[1,1,338,30,6,14.3,"TA"],[1,1,339,28,5,25.8,"CPA"],[1,1,340,29,5,17.0,"TA"],[1,1,341,29,5,14.1,"TA"],[1,1,342,29,6,16.8,"TA"],[1,1,343,30,4,24.5,"TA"],[1,1,225,28,6,11.7,"CPA"],[1,1,344,28,4,16.2,"TA"],[1,1,345,28,5,26.3,"TA"],[1,1,346,30,5,20.9,"TA"],[1,1,347,30,6,25.9,"TA"],[1,1,348,28,5,10.6,"CPA"],[1,1,349,27,6,16.0,"TA"],[1,1,350,29,4,12.9,"TA"],[1,1,351,28,5,19.9,"CPA"],[1,1,352,29,4,24.9,"TA"],[1,1,353,29,5,26.7,"CPA"],[1,1,354,28,5,18.0,"CPA"],[1,1,355,29,5,16.2,"TA"],[1,1,356,28,5,12.0,"TA"],[1,1,357,26,4,18.3,"CPA"],[1,1,358,28,5,13.1,"CPA"],[1,1,359,28,5,15.7,"TA"],[1,1,360,28,5,15.1,"CPA"],[1,1,361,30,4,19.0,"CPA"],[1,1,362,30,6,14.4,"CPA"],[1,1,363,29,5,23.1,"TA"]];
+const RULES = [
+ {k:'consent', t:'1 ไม่ยินยอม'},
+ {k:'licence', t:'2 ไม่ใช่ CPA หรือ TA (ข้อ 1.1)'},
+ {k:'dup', t:'3 ส่งซ้ำ'},
+ {k:'half', t:'4 ตอบข้อคำถามหลักไม่ถึงครึ่ง (น้อยกว่า 15 จาก 30)'},
+ {k:'straight', t:'5 ตอบค่าเดียวทั้งชุด'},
+ {k:'fast', t:'6 ใช้เวลาน้อยกว่า 5 นาที'}
+];
+const PATHS = {120:[.048,.256,.686],160:[.058,.320,.784],200:[.060,.376,.818]};
+const H11 = {40:[.310,.611,.905],65:[.454,.814,.984],90:[.568,.909,.998]};
+const EFF = {P:[0,.15,.30], H:[1.5,2,3]};
+const REPS = {P:500, H:2000};
+
+// ---------- pure functions ----------
+function quota(target, rate, ret){
+  const usable = Math.floor(ret*rate + 1e-9);
+  const gap = Math.max(0, target-usable);
+  return {usable, gap, more: gap>0 ? Math.ceil(gap/rate - 1e-9) : 0};
+}
+function keepRow(r, k){ // r = [consent, licOK, dupGroup, nAnswered, nUnique, minutes, licence]
+  if(k==='consent') return r[0]===1;
+  if(k==='licence') return r[1]===1;
+  if(k==='half') return r[3]>=15;
+  if(k==='straight') return r[4]>1;
+  if(k==='fast') return r[5]>=5;
+  return true;
+}
+function screen(raw, order){ // order = array of rule keys applied in sequence
+  let s = raw.map((r,i)=>i); const steps=[];
+  for(const k of order){
+    let keep;
+    if(k==='dup'){ const seen=new Set(); keep = s.filter(i=>{const g=raw[i][2]; if(seen.has(g)) return false; seen.add(g); return true;}); }
+    else keep = s.filter(i=>keepRow(raw[i],k));
+    steps.push({k, removed:s.length-keep.length, left:keep.length}); s=keep;
+  }
+  const cpa = s.filter(i=>raw[i][6]!=='TA').length, both = s.filter(i=>raw[i][6]==='BOTH').length;
+  return {steps, final:s.length, cpa, both, ta:s.length-cpa};
+}
+function mcse(p, reps){ return Math.sqrt(p*(1-p)/reps); }
+function interpN(table, j, goal){ // linear interpolation of n reaching goal power at effect index j
+  const ns = Object.keys(table).map(Number).sort((a,b)=>a-b);
+  if(table[ns[0]][j]>=goal) return {n:ns[0], note:'below'};
+  for(let a=0;a<ns.length-1;a++){
+    const p0=table[ns[a]][j], p1=table[ns[a+1]][j];
+    if(p0<goal && p1>=goal) return {n: ns[a] + (ns[a+1]-ns[a])*(goal-p0)/(p1-p0), note:'within'};
+  }
+  return {n:null, note:'above'};
+}
+if(typeof module!=='undefined') module.exports={quota,screen,mcse,interpN,PATHS,H11};
+
+// ---------- UI ----------
+if(typeof document!=='undefined'){
+const $=id=>document.getElementById(id);
+const f3=x=>x.toFixed(3).replace(/^0/,'').replace(/^-0/,'-');
+
+function drawQuota(){
+  const T=+$('qT').value, R=+$('qR').value;
+  if(!(T>0 && R>0 && R<=1)){ $('qMsg').textContent='ใส่เป้ามากกว่า 0 และอัตราผ่านระหว่าง 0 ถึง 1'; return; }
+  const c=quota(T,R,+$('qC').value), a=quota(T,R,+$('qA').value);
+  $('qOut').innerHTML = [['คาดว่าใช้ได้ CPA',c.usable,c.gap>0],['คาดว่าใช้ได้ TA',a.usable,a.gap>0],['ต้องรับคืนเพิ่ม CPA',c.more,c.more>0],['ต้องรับคืนเพิ่ม TA',a.more,a.more>0]]
+    .map(([k,v,w])=>`<div class="stat${w?' warn':''}"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+  const m=$('qMsg');
+  if(c.gap||a.gap){ m.className='msg warn'; m.textContent='ยังไม่ถึงเป้าอย่างน้อยหนึ่งกลุ่ม การเร่งเก็บกลุ่มที่ขาดผ่านเครือข่ายเดิมเพิ่มจำนวนได้ แต่ไม่ได้แก้ปัญหาความเป็นตัวแทน ควรบันทึกช่องทางที่ได้มาของแต่ละชุดเพื่อตรวจความต่างระหว่างช่องทาง'; }
+  else { m.className='msg'; m.textContent='ทั้งสองกลุ่มถึงเป้าตามอัตราที่คาด แต่จำนวนครบไม่ได้แปลว่าตัวอย่างเป็นตัวแทน CPA หรือ TA ทั้งประเทศ เพราะเป็นการเลือกตัวอย่างแบบไม่อาศัยความน่าจะเป็น'; }
+}
+['qT','qR','qC','qA'].forEach(id=>$(id).addEventListener('input',drawQuota));
+
+const DEF = RULES.map(r=>r.k);
+let order = DEF.slice(), on = Object.fromEntries(DEF.map(k=>[k,true]));
+function drawScreen(){
+  const res = screen(RAW, order.filter(k=>on[k]));
+  const byK = Object.fromEntries(res.steps.map(s=>[s.k,s]));
+  $('sBody').innerHTML = order.map((k,i)=>{
+    const r=RULES.find(x=>x.k===k), s=byK[k];
+    return `<tr><td>${i+1}</td><td><input type="checkbox" data-k="${k}" ${on[k]?'checked':''} aria-label="ใช้กฎ ${r.t}"></td><td>${r.t}</td><td>${s?s.removed:'–'}</td><td>${s?s.left:'–'}</td>
+    <td><button class="main" style="padding:2px 8px" data-up="${i}" ${i===0?'disabled':''} aria-label="เลื่อนขึ้น">▲</button> <button class="main" style="padding:2px 8px" data-dn="${i}" ${i===order.length-1?'disabled':''} aria-label="เลื่อนลง">▼</button></td></tr>`;}).join('');
+  const isDef = order.join()===DEF.join() && DEF.every(k=>on[k]);
+  const m=$('sMsg');
+  m.className = isDef ? 'msg' : 'msg warn';
+  m.textContent = `เหลือ ${res.final} ราย (กลุ่ม CPA ${res.cpa} ราย ในนี้ถือสองใบอนุญาต ${res.both} ราย, TA ${res.ta} ราย) ` +
+    (isDef ? 'ตรงกับตารางที่ 4.2 และชุดข้อมูลกลางของเล่ม'
+           : 'ลำดับหรือชุดกฎต่างจากที่เขียนไว้ก่อน จำนวนที่ตัดต่อขั้นจึงเปลี่ยน ถ้าเปลี่ยนกฎหลังเห็นข้อมูล ต้องรายงานทั้งสองแบบและเหตุผล');
+}
+$('sBody').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  if(b.dataset.up){const i=+b.dataset.up; [order[i-1],order[i]]=[order[i],order[i-1]];}
+  if(b.dataset.dn){const i=+b.dataset.dn; [order[i+1],order[i]]=[order[i],order[i+1]];}
+  drawScreen();
+});
+$('sBody').addEventListener('change',e=>{ if(e.target.dataset.k){ on[e.target.dataset.k]=e.target.checked; drawScreen(); }});
+$('sReset').addEventListener('click',()=>{ order=DEF.slice(); DEF.forEach(k=>on[k]=true); drawScreen(); });
+
+let test='P';
+function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function fillEff(){
+  $('pEl').textContent = test==='P' ? 'ขนาดผล D (หน่วยมาตรฐาน)' : 'อัตราส่วนออดส์ (OR)';
+  $('pE').innerHTML = EFF[test].map((e,j)=>`<option value="${j}" ${j===EFF[test].length-1?'selected':''}>${test==='P'?'D = '+e.toFixed(2):'OR = '+e}</option>`).join('');
+}
+function drawPower(){
+  const tbl = test==='P'?PATHS:H11, reps=REPS[test], cv=$('pc'), g=cv.getContext('2d');
+  const W=cv.width,H=cv.height,L=60,R=150,T=20,B=50; g.clearRect(0,0,W,H);
+  const ns=Object.keys(tbl).map(Number), nmin=ns[0]-10, nmax=ns[ns.length-1]+10;
+  const X=n=>L+(n-nmin)/(nmax-nmin)*(W-L-R), Y=p=>T+(1-p)*(H-T-B);
+  g.font='14px "Noto Sans Thai",sans-serif'; g.strokeStyle=css('--line'); g.fillStyle=css('--muted'); g.lineWidth=1;
+  for(let p=0;p<=1.001;p+=.2){ g.beginPath(); g.moveTo(L,Y(p)); g.lineTo(W-R,Y(p)); g.stroke(); g.fillText(p.toFixed(1),L-36,Y(p)+5); }
+  ns.forEach(n=>g.fillText(n,X(n)-12,H-B+22));
+  g.fillText(test==='P'?'รายต่อกลุ่ม':'จำนวน CPA ที่วิเคราะห์ได้',(L+W-R)/2-50,H-8);
+  const goal=+$('pG').value; g.setLineDash([6,4]); g.strokeStyle=css('--gate'); g.beginPath(); g.moveTo(L,Y(goal)); g.lineTo(W-R,Y(goal)); g.stroke(); g.setLineDash([]);
+  const cols=[css('--muted'),css('--gate'),css('--accent')], sel=+$('pE').value;
+  EFF[test].forEach((e,j)=>{
+    g.strokeStyle=cols[j]; g.fillStyle=cols[j]; g.lineWidth = j===sel?3:1.5;
+    g.beginPath(); ns.forEach((n,i)=>{const y=Y(tbl[n][j]); i?g.lineTo(X(n),y):g.moveTo(X(n),y);}); g.stroke();
+    ns.forEach(n=>{const p=tbl[n][j], s=2*mcse(p,reps); g.lineWidth=1.5; g.beginPath(); g.moveTo(X(n),Y(Math.min(1,p+s))); g.lineTo(X(n),Y(Math.max(0,p-s))); g.stroke(); g.beginPath(); g.arc(X(n),Y(p),4,0,7); g.fill();});
+    const last=ns[ns.length-1]; g.fillText(test==='P'?'D = '+e.toFixed(2):'OR = '+e, W-R+12, Y(tbl[last][j])+5);
+  });
+  const ip=interpN(tbl,sel,goal), m=$('pMsg'), last=ns[ns.length-1], pl=tbl[last][sel];
+  let t;
+  if(ip.note==='above') t=`ไม่มีจุดใดในตารางที่ถึงกำลัง ${goal.toFixed(2)} ที่ขนาดผลนี้ ค่าสูงสุดคือ ${f3(pl)} ที่ ${last} ราย ต้องจำลองเพิ่มที่จำนวนมากกว่านี้ อย่าต่อเส้นออกนอกตาราง`;
+  else if(ip.note==='below') t=`ถึงกำลัง ${goal.toFixed(2)} ตั้งแต่จุดแรกของตารางแล้ว (${ns[0]} ราย)`;
+  else t=`ประมาณเชิงเส้นระหว่างจุดได้ราว ${Math.round(ip.n)} ราย ค่านี้หยาบ เพราะเส้นกำลังไม่เป็นเส้นตรงและแต่ละจุดมีความคลาดเคลื่อน Monte Carlo ควรจำลองซ้ำที่จำนวนนั้นก่อนใช้`;
+  const near = ns.filter(n=>Math.abs(tbl[n][sel]-goal) < 2*mcse(tbl[n][sel],reps));
+  if(near.length) t += ` · จุด ${near.join(', ')} ราย ห่างจากเป้าไม่ถึง 2 เท่าของ MCSE จึงยังบอกไม่ได้ว่าต่ำหรือสูงกว่าเป้าจริง`;
+  if(test==='P' && sel===0) t='ที่ D = 0 ค่าที่เห็นคืออัตราความคลาดเคลื่อนประเภทที่ 1 ซึ่งควรอยู่ใกล้ .05 (ได้ .048–.060) ไม่ใช่กำลัง';
+  m.textContent=t;
+}
+function setTest(t){ test=t; $('tP').setAttribute('aria-pressed',t==='P'); $('tH').setAttribute('aria-pressed',t==='H'); fillEff(); drawPower(); }
+$('tP').addEventListener('click',()=>setTest('P')); $('tH').addEventListener('click',()=>setTest('H'));
+$('pE').addEventListener('change',drawPower); $('pG').addEventListener('input',drawPower);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',drawPower);
+
+const QZ=[
+ {lo:'LO1',s:'เก็บตัวอย่างแบบลูกโซ่ผ่านสมาคมวิชาชีพจนได้ 160 รายต่อกลุ่มตามโควตา ข้อสรุปใดถูก',o:['ผลอ้างถึง CPA และ TA ทั้งประเทศได้เพราะครบโควตา','จำนวนพอเทียบกลุ่มได้ แต่ค่าเฉลี่ยอาจเอนไปทางผู้ที่ตื่นตัวในวิชาชีพ','โควตาทำให้เป็นการสุ่มแบบแบ่งชั้น','ลูกโซ่ไม่มีผลต่อความสัมพันธ์ระหว่างตัวแปร'],a:1,e:'โควตาควบคุมจำนวน ไม่ได้ควบคุมว่าใครเข้ามา ผู้ที่อยู่ในเครือข่ายสมาคมอาจตื่นตัวกว่า ค่าเฉลี่ยจึงอ้างไปทั้งประเทศไม่ได้ ความสัมพันธ์อ้างได้ดีกว่าแต่ก็ยังมีเงื่อนไข'},
+ {lo:'LO2',s:'ทำไมต้องเขียนกฎคัดกรองและลำดับไว้ก่อนเปิดดูผลวิเคราะห์',o:['เพื่อให้ได้จำนวนรายมากที่สุด','เพื่อป้องกันการเลือกกฎตามผลที่อยากได้ และให้ผู้อื่นตรวจย้อนได้','เพราะ JASP บังคับ','เพราะคณะกรรมการจริยธรรมกำหนดเกณฑ์ 5 นาทีไว้แล้ว'],a:1,e:'กฎที่เลือกหลังเห็นผลเปิดช่องให้ปรับข้อมูลจนได้ผลที่ต้องการ ส่วนเกณฑ์ 5 นาทีเป็นกฎสอน โครงร่างยังไม่ได้กำหนด'},
+ {lo:'LO2',s:'ในใบงาน 2 ถ้าย้ายกฎ "ส่งซ้ำ" ขึ้นเป็นข้อแรก จำนวนที่ตัดในขั้นนั้นเพิ่มขึ้นมาก เพราะอะไร',o:['ระบบสุ่มใหม่ทุกครั้ง','ชุดที่ไม่ยินยอมและไม่ใช่ CPA หรือ TA มีคำตอบว่างเหมือนกัน จึงถูกนับว่าซ้ำกัน','กฎส่งซ้ำตรวจเวลาตอบด้วย','จำนวนสุดท้ายเปลี่ยนเป็นศูนย์'],a:1,e:'ชุดที่คำตอบว่างทั้งหมดดูเหมือนกันในทุกคอลัมน์ จึงถูกตัดในฐานะ "ซ้ำ" ทั้งที่เหตุจริงคือไม่ยินยอม จำนวนสุดท้ายอาจเท่าเดิม แต่บันทึกเหตุผลผิด นี่คือเหตุที่ต้องรายงานลำดับ'},
+ {lo:'LO3',s:'CPA ที่ยังไม่มีงานเข้าเงื่อนไขมักไม่ตอบแบบติดตาม เพราะคิดว่าไม่เกี่ยว กลไกการสูญหายนี้ใกล้เคียงข้อใดที่สุด',o:['MCAR','MAR ถ้าการสูญหายขึ้นกับสิ่งที่วัดได้แล้วในระยะที่ 1 เท่านั้น','MNAR เพราะการสูญหายขึ้นกับค่าที่หายไปเอง (สถานะงาน)','ไม่ใช่การสูญหาย'],a:2,e:'สถานะ AA0 คือสิ่งที่หายไป ถ้าการไม่ตอบขึ้นกับค่านั้นเองเป็น MNAR FIML หรือการแทนค่าพหุคูณภายใต้ MAR แก้ได้ไม่ครบ ต้องวิเคราะห์ความไวและรายงานเป็นข้อจำกัด'},
+ {lo:'LO4',s:'ตารางที่ 4.3 ที่ D = 0 ได้ค่า .048–.060 ค่านี้คืออะไร',o:['กำลังทดสอบ','อัตราความคลาดเคลื่อนประเภทที่ 1 ซึ่งควรใกล้ .05','ขนาดผล','ความน่าจะเป็นที่ลู่เข้า'],a:1,e:'เมื่อไม่มีผลต่างจริง สัดส่วนรอบที่ปฏิเสธ H0 คืออัตราความคลาดเคลื่อนประเภทที่ 1 ค่าใกล้ .05 บอกว่าการทดสอบในการจำลองทำงานถูก'},
+ {lo:'LO4',s:'ที่ 160 รายต่อกลุ่ม D = .30 ได้กำลัง .784 จาก 500 รอบ ข้อสรุปใดเหมาะที่สุด',o:['ต่ำกว่า .80 แน่นอน','MCSE ราว .018 จึงยังแยกไม่ออกจาก .80 และในสถานการณ์ที่เอื้อนี้ผลต่างเล็กยังมีกำลังต่ำ','สูงพอสำหรับทุกขนาดผล','ต้องลด α เป็น .10'],a:1,e:'√(.784×.216/500) ≈ .018 ช่วง ±2 MCSE ครอบ .80 อีกทั้งที่ D = .15 กำลังเพียง .32 ข้อจำกัดนี้ต้องรายงาน'},
+ {lo:'LO4',s:'ผลต่างเส้นทาง H9–H10 ไม่มีนัยสำคัญในงานจริงที่กำลังต่ำ ควรเขียนว่าอย่างไร',o:['CPA และ TA ไม่ต่างกัน','ไม่พบหลักฐานว่าต่างกัน และรายงานช่วงความเชื่อมั่นของผลต่างพร้อมข้อจำกัดเรื่องกำลัง','สมมติฐานถูกปฏิเสธจึงตัดทิ้ง','ต้องเพิ่มตัวอย่างจนมีนัยสำคัญ'],a:1,e:'ผลไม่มีนัยสำคัญไม่ใช่หลักฐานว่าเท่ากัน การรายงานช่วงความเชื่อมั่นบอกผู้อ่านว่าผลต่างที่เข้ากันได้กับข้อมูลกว้างเพียงใด'},
+ {lo:'LO5',s:'H11 ใช้ตัวหารใด และมีผลต่อแผนตัวอย่างอย่างไร',o:['ผู้ตอบทั้งหมด 320 ราย','CPA ที่ตอบแบบติดตามและมีงานเข้าเงื่อนไข (AA0 = มี) ตัวหารจึงเล็กกว่าเป้าเชื่อมข้อมูล 100 รายมาก','ทั้ง CPA และ TA ที่ตอบแบบติดตาม','เฉพาะ TA'],a:1,e:'H11 ทดสอบเฉพาะ CPA ที่มีโอกาสใช้ ในข้อมูลสอนเชื่อมได้ 101 ราย แต่มี AA0 = มี 65 ราย ตารางที่ 4.4 จึงคิดกำลังที่ 40, 65 และ 90 ราย TA ไม่ได้รับแบบติดตาม'}
+];
+let ans={};
+$('qz').innerHTML=QZ.map((q,i)=>`<div class="q"><div class="lo">ข้อ ${i+1} · ${q.lo}</div><div class="stem">${q.s}</div>${q.o.map((o,j)=>j).map(j=>(j+i*3)%q.o.length).map(j=>`<label class="opt"><input type="radio" name="z${i}" value="${j}"> <span>${q.o[j]}</span></label>`).join('')}<div class="fb" id="zf${i}"></div></div>`).join('');
+$('qz').addEventListener('change',e=>{
+  const m=e.target.name&&e.target.name.match(/^z(\d+)$/); if(!m) return; const i=+m[1], q=QZ[i], ok=+e.target.value===q.a;
+  ans[i]=ok; const f=$('zf'+i); f.className='fb show '+(ok?'ok':'no'); f.textContent=(ok?'ถูก: ':'ยังไม่ใช่: ')+q.e;
+  $('qzS').textContent=`ได้ ${Object.values(ans).filter(Boolean).length} จาก 8`;
+});
+
+drawQuota(); drawScreen(); fillEff(); drawPower();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แอปบทที่ 8 SEM หลายกลุ่ม CPA กับ TA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: one column workbook; three labs stacked, each a bordered "ใบงาน" with controls left, result right */
+:root{
+  --bg:#f3f5f7; --paper:#ffffff; --ink:#15233a; --muted:#5a6678; --line:#d5dbe3;
+  --accent:#0d6466; --accent-soft:#e1efef; --gate:#a86a12; --gate-soft:#f7ecd9;
+  --ok:#2f7d32; --stop:#b3261e; --stop-soft:#f8e3e1;
+  --display:"Noto Serif Thai",Georgia,serif; --body:"Noto Sans Thai",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1620; --paper:#17212d; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3a4a;
+  --accent:#4fb8b4; --accent-soft:#163334; --gate:#e2a54a; --gate-soft:#3a2c14;
+  --ok:#74c27a; --stop:#f08a80; --stop-soft:#3c1d1b; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0f1620; --paper:#17212d; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3a4a;
+  --accent:#4fb8b4; --accent-soft:#163334; --gate:#e2a54a; --gate-soft:#3a2c14;
+  --ok:#74c27a; --stop:#f08a80; --stop-soft:#3c1d1b; color-scheme:dark;}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.65;font-size:16px}
+main{max-width:980px;margin:0 auto;padding:24px 16px 48px;display:grid;gap:24px}
+.brand{display:inline-flex;align-items:center;background:#ffffff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin-bottom:14px}
+.brand{gap:12px}
+.brand img{height:40px;width:auto;display:block}
+.brand .org{font-family:var(--display);font-weight:700;font-size:1.15rem;color:#15233a;border-left:2px solid #d5dbe3;padding-left:12px;line-height:1.2}
+header h1{font-family:var(--display);font-size:1.7rem;line-height:1.3;margin:0 0 6px;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:68ch}
+.note{font-size:.88rem;color:var(--muted);border-left:3px solid var(--gate);padding:4px 10px;background:var(--gate-soft);border-radius:0 6px 6px 0}
+section.lab{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px}
+section.lab h2{font-family:var(--display);font-size:1.25rem;margin:0 0 4px}
+.lab-tag{font-size:.8rem;color:var(--accent);font-weight:700;letter-spacing:.02em}
+.lab > p{margin:4px 0 14px;color:var(--muted);max-width:70ch}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:20px}
+@media (max-width:720px){.cols{grid-template-columns:1fr}}
+fieldset{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0 0 12px}
+legend{font-weight:700;font-size:.92rem;padding:0 4px}
+label.opt{display:flex;gap:8px;align-items:flex-start;padding:3px 0;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.val{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent)}
+.chain{display:grid;gap:8px}
+.gate{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;padding:10px 12px;border-radius:8px;border:1px solid var(--line)}
+.gate .dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;background:var(--muted)}
+.gate.pass{border-color:var(--ok)} .gate.pass .dot{background:var(--ok)}
+.gate.stop{border-color:var(--stop);background:var(--stop-soft)} .gate.stop .dot{background:var(--stop)}
+.gate.skip{opacity:.45}
+.gate b{display:block}
+.gate small{color:var(--muted)}
+.codes{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.codes table{width:100%;border-collapse:collapse;font-size:.9rem}
+.codes td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.codes td:first-child{font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--accent)}
+.persona{margin-top:10px;font-size:.92rem;background:var(--accent-soft);padding:8px 12px;border-radius:8px}
+.tbl{overflow-x:auto}
+table.match{width:100%;border-collapse:collapse;font-size:.92rem;min-width:620px}
+table.match th,table.match td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.match th{font-size:.82rem;color:var(--muted);font-weight:700}
+select{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);max-width:100%}
+.mark{font-weight:700;white-space:nowrap}
+.mark.ok{color:var(--ok)} .mark.no{color:var(--stop)}
+button{font:inherit;font-weight:700;padding:8px 14px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--accent)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--gate);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.score{font-weight:700;font-variant-numeric:tabular-nums}
+.q{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.q .stem{font-weight:500;margin-bottom:6px}
+.q .lo{font-size:.78rem;color:var(--gate);font-weight:700}
+.q .fb{margin-top:6px;font-size:.92rem;padding:6px 10px;border-radius:6px;display:none}
+.q .fb.show{display:block}
+.q .fb.ok{background:var(--accent-soft)} .q .fb.no{background:var(--stop-soft)}
+footer{font-size:.85rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style>
+.grid3{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:620px){.grid3{grid-template-columns:1fr 1fr}}
+.num label{display:block;font-size:.85rem;color:var(--muted)}
+.num input{width:100%;font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);font-variant-numeric:tabular-nums}
+table.res{width:100%;border-collapse:collapse;font-size:.92rem;font-variant-numeric:tabular-nums;min-width:560px}
+table.res th,table.res td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right}
+table.res th:first-child,table.res td:first-child{text-align:left}
+table.res th{font-size:.8rem;color:var(--muted)}
+table.res input{width:5.2em;text-align:right;font:inherit;padding:3px 5px;border:1px solid var(--line);border-radius:5px;background:var(--paper);color:var(--ink)}
+.pill{display:inline-block;padding:1px 9px;border-radius:999px;font-size:.82rem;font-weight:700}
+.pill.ok{background:var(--accent-soft);color:var(--ok)} .pill.no{background:var(--stop-soft);color:var(--stop)} .pill.na{background:var(--gate-soft);color:var(--gate)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:6px}
+.stat{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.stat .k{font-size:.8rem;color:var(--muted)} .stat .v{font-size:1.25rem;font-weight:700;font-variant-numeric:tabular-nums}
+.msg{font-size:.92rem;padding:8px 12px;border-radius:8px;background:var(--accent-soft);margin-top:10px}
+</style>
+<style>@media (max-width:640px){body *{min-width:0}table{display:block;overflow-x:auto;max-width:100%}th,td{white-space:normal}select,input,canvas,img,svg{max-width:100%}[class*=grid],.row,.seg,.stats{grid-template-columns:1fr!important;flex-wrap:wrap}pre{overflow-x:auto;white-space:pre-wrap}}</style></head>
+<body><style>#gate{position:fixed;inset:0;background:#F2F7FB;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:Sarabun,'Noto Sans Thai',sans-serif}
+#gate .gb{background:#fff;border-top:4px solid #1F3864;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.08);padding:28px 26px;max-width:380px;width:88%;color:#222}
+#gate h2{color:#1F3864;font-size:19px;margin:0 0 6px}#gate p{font-size:14px;margin:0 0 14px;line-height:1.6}
+#gate .row{display:flex;gap:6px}#gate input[type=password],#gate input[type=text]{flex:1;font-size:16px;padding:9px 10px;border:1px solid #b8c4d4;border-radius:6px}
+#gate button{font-family:inherit;font-size:15px;border:0;border-radius:6px;padding:9px 14px;cursor:pointer}#gate .sh{background:#E3E9F1;color:#1F3864}#gate .go{background:#1F3864;color:#fff;width:100%;margin-top:12px}
+#gate label{font-size:13px;display:flex;gap:6px;align-items:center;margin-top:10px}#gate .err{color:#A93226;font-size:13px;min-height:18px;margin-top:8px}</style>
+<div id="gate"><div class="gb"><h2>แอปประจำตำรา</h2><p>สำหรับผู้อ่านตำรา<br><b>SEM และ GenAI ในการวิจัยทางบัญชีและการสอบบัญชี</b><br>ใส่รหัสเข้าแอปที่พิมพ์ไว้ในตำรา</p>
+<div class="row"><input id="gk" type="password" autocomplete="off" placeholder="รหัสเข้าแอป"><button class="sh" type="button" onclick="var i=document.getElementById('gk');i.type=i.type==='password'?'text':'password'">แสดง</button></div>
+<label><input id="gr" type="checkbox"> จำรหัสในเครื่องนี้</label><button class="go" type="button" id="gg">เปิดแอป</button><div class="err" id="ge"></div></div></div>
+<script>(function(){var H="467e451224101a2f5f9b367b93804929e3d8a0a9be77cb73f13736ca0c64e694",K="semgenai_gate";
+function ok(){var g=document.getElementById('gate');if(g)g.remove();}
+try{if(localStorage.getItem(K)===H||sessionStorage.getItem(K)===H){ok();return;}}catch(e){}
+async function chk(){var v=document.getElementById('gk').value.replace(/[\s\-]/g,'').toUpperCase();
+var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));var h=Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('');
+if(h===H){try{(document.getElementById('gr').checked?localStorage:sessionStorage).setItem(K,H)}catch(e){}ok();}else{document.getElementById('ge').textContent='รหัสไม่ถูกต้อง โปรดดูรหัสที่พิมพ์ไว้ในตำรา';}}
+document.getElementById('gg').onclick=chk;document.getElementById('gk').addEventListener('keydown',function(e){if(e.key==='Enter')chk();});})();</script><div style="font-family:Sarabun,sans-serif;font-size:13px;padding:8px 14px;background:#1F3864"><a href="index.html" style="color:#fff;text-decoration:none">← สารบัญแอปประจำตำรา</a></div>
+<main>
+<header>
+  <div class="brand"><img src="logo.png" alt="Dr VIT" width="154" height="40"><span class="org">Siam edu.</span></div>
+  <h1>แอปบทที่ 8 SEM หลายกลุ่ม: เปรียบเทียบ CPA กับ TA</h1>
+  <p>ใช้คู่กับบทที่ 8 มีสามใบงาน: ตัดสินระดับความไม่แปรเปลี่ยน คำนวณผลต่างเส้นทางของ H9–H10 แบบทางเดียวพร้อมปรับ Holm และแยก B กับ β แล้วปิดด้วยแบบทดสอบ</p>
+  <p class="note" style="margin-top:10px">ค่าตั้งต้นมาจากข้อมูลสังเคราะห์ในบทที่ 8 ไม่ใช่ผลวิจัย ห้ามนำข้อมูลผู้ตอบจริงมาใส่ในแอปนี้หรือในเครื่องมือ GenAI</p>
+</header>
+
+<section class="lab" aria-labelledby="l1">
+  <div class="lab-tag">ใบงาน 1 · LO2</div>
+  <h2 id="l1">ตัดสินระดับความไม่แปรเปลี่ยน</h2>
+  <p>ค่าตั้งต้นตรงกับตารางที่ 8.3 แก้ตัวเลขได้ทุกช่อง แอปคำนวณ ΔCFI, ΔRMSEA และ p ของ Δχ² แบบ Satorra–Bentler แล้วตัดสินตามเกณฑ์ของ Chen (2007): CFI ลดตั้งแต่ .010 ร่วมกับ RMSEA เพิ่มตั้งแต่ .015</p>
+  <div class="tbl"><table class="res">
+    <thead><tr><th>ขั้น</th><th>CFI</th><th>RMSEA</th><th>Δχ² SB</th><th>Δdf</th><th>ΔCFI</th><th>ΔRMSEA</th><th>p</th><th>ผล</th></tr></thead>
+    <tbody id="invbody"></tbody>
+  </table></div>
+  <div class="msg" id="invmsg"></div>
+</section>
+
+<section class="lab" aria-labelledby="l2">
+  <div class="lab-tag">ใบงาน 2 · LO3</div>
+  <h2 id="l2">ผลต่างเส้นทาง H9–H10 ทางเดียวและ Holm</h2>
+  <p>ใส่ B และ SE ของแต่ละกลุ่ม พร้อม Cov ของค่าประมาณ แอปคำนวณ D, SE(D), ช่วง 95%, p สองด้าน, p ทางเดียว (CPA &gt; TA) และ p ที่ปรับ Holm สำหรับสองเส้นรวมกัน</p>
+  <div class="row" style="margin:0 0 10px"><button type="button" id="ldex">ตัวอย่างหัวข้อ 8.3.1</button><button type="button" class="ghost" id="ldlab">ผลห้องปฏิบัติการ ตารางที่ 8.4</button></div>
+  <div class="tbl"><table class="res">
+    <thead><tr><th>เส้นทาง</th><th>B CPA</th><th>SE</th><th>B TA</th><th>SE</th><th>Cov</th><th>D</th><th>SE(D)</th><th>ช่วง 95%</th><th>p สองด้าน</th><th>p ทางเดียว</th><th>p Holm</th></tr></thead>
+    <tbody id="dbody"></tbody>
+  </table></div>
+  <div class="msg" id="dmsg"></div>
+</section>
+
+<section class="lab" aria-labelledby="l3">
+  <div class="lab-tag">ใบงาน 3 · LO4</div>
+  <h2 id="l3">B เท่ากัน แต่ β ต่างกันได้</h2>
+  <p>ค่าตั้งต้นตรงกับหัวข้อ 8.3.3 เปลี่ยน SD ของตัวทำนายในแต่ละกลุ่มแล้วดูว่า β เปลี่ยนอย่างไร ขณะที่ B คงเดิม</p>
+  <div class="grid3">
+    <div class="num"><label for="bB">B (ทั้งสองกลุ่ม)</label><input id="bB" type="number" step="0.01" value="0.30"></div>
+    <div class="num"><label for="sdy">SD ของผลลัพธ์ (ทั้งสองกลุ่ม)</label><input id="sdy" type="number" step="0.1" min="0.1" value="1"></div>
+    <div class="num"><label for="sdc">SD ตัวทำนาย CPA</label><input id="sdc" type="number" step="0.1" min="0.1" value="1.2"></div>
+    <div class="num"><label for="sdt">SD ตัวทำนาย TA</label><input id="sdt" type="number" step="0.1" min="0.1" value="0.8"></div>
+  </div>
+  <div class="stats"><div class="stat"><div class="k">β CPA</div><div class="v" id="betc"></div></div><div class="stat"><div class="k">β TA</div><div class="v" id="bett"></div></div><div class="stat"><div class="k">ผลต่าง β</div><div class="v" id="betd"></div></div><div class="stat"><div class="k">ผลต่าง B</div><div class="v">0</div></div></div>
+  <div class="msg" id="betmsg"></div>
+</section>
+
+<section class="lab" aria-labelledby="l4">
+  <div class="lab-tag">ใบงาน 4 · LO1–LO5</div>
+  <h2 id="l4">แบบทดสอบท้ายบท</h2>
+  <p>ตอบทีละข้อ คำอธิบายจะแสดงทันทีหลังเลือก</p>
+  <div id="quiz"></div>
+  <div class="row"><span class="score" id="qscore"></span><button type="button" class="ghost" id="qreset">เริ่มใหม่</button></div>
+</section>
+
+<footer>ตัวเลขตั้งต้นมาจากสคริปต์ ch8_lab.R ในบทที่ 8 (R 4.3.3, lavaan 0.6.17, semTools 0.5.6, MLR กับ FIML) ค่า Cov ในปุ่มผลห้องปฏิบัติการคำนวณย้อนจาก SE(D) ในตารางที่ 8.4 เรื่องที่รอผู้เขียนตัดสิน: ใช้ measEq.syntax ใน WLSMV หรือไม่ และการสัมภาษณ์เชิงรู้คิดกับ TA เรื่องความตั้งใจแบบมีเงื่อนไข</footer>
+</main>
+
+<script>
+/* ===== logic (pure) ===== */
+function normCdf(x){ // Abramowitz-Stegun 7.1.26 via erf
+  const t=1/(1+0.3275911*Math.abs(x)/Math.SQRT2);
+  const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x/2);
+  return x>=0 ? (1+y)/2 : (1-y)/2;
+}
+function lgamma(z){const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];
+  let x=z,y=z,t=x+5.5; t-=(x+0.5)*Math.log(t); let s=1.000000000190015; for(const k of c){y+=1; s+=k/y;} return -t+Math.log(2.5066282746310005*s/x);}
+function gammaP(a,x){ // regularized lower incomplete gamma
+  if(x<=0) return 0;
+  if(x<a+1){let sum=1/a,del=sum,ap=a; for(let n=0;n<500;n++){ap+=1;del*=x/ap;sum+=del;if(Math.abs(del)<Math.abs(sum)*1e-14)break;} return sum*Math.exp(-x+a*Math.log(x)-lgamma(a));}
+  let b=x+1-a,c=1e300,d=1/b,h=d; for(let i=1;i<500;i++){const an=-i*(i-a);b+=2;d=an*d+b;if(Math.abs(d)<1e-300)d=1e-300;c=b+an/c;if(Math.abs(c)<1e-300)c=1e-300;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<1e-14)break;}
+  return 1-Math.exp(-x+a*Math.log(x)-lgamma(a))*h;
+}
+function chi2Sf(x,df){ return 1-gammaP(df/2,x/2); }
+function invStep(prev,cur){ // cur: {cfi,rmsea,dchi,ddf}
+  const dcfi=cur.cfi-prev.cfi, drmsea=cur.rmsea-prev.rmsea, p=chi2Sf(cur.dchi,cur.ddf);
+  const chen = dcfi<=-0.010 && drmsea>=0.015;
+  return {dcfi,drmsea,p,chen,pass:!chen && p>=.05, mixed:(!chen && p<.05)||(chen && p>=.05)};
+}
+function pathDiff(r){ // r:{bc,sc,bt,st,cov}
+  const D=r.bc-r.bt, se=Math.sqrt(r.sc*r.sc+r.st*r.st-2*r.cov), z=D/se;
+  return {D,se,z,lo:D-1.959964*se,hi:D+1.959964*se,p2:2*(1-normCdf(Math.abs(z))),p1:1-normCdf(z)};
+}
+function holm(ps){const idx=ps.map((p,i)=>[p,i]).sort((a,b)=>a[0]-b[0]); const m=ps.length, out=new Array(m); let run=0;
+  idx.forEach(([p,i],k)=>{run=Math.max(run,Math.min(1,(m-k)*p)); out[i]=run;}); return out;}
+const INV=[{name:'Configural',cfi:.989,rmsea:.035,dchi:null,ddf:null,base:null},
+  {name:'Metric',cfi:.991,rmsea:.030,dchi:5.30,ddf:8,base:0},
+  {name:'Scalar',cfi:.974,rmsea:.050,dchi:32.46,ddf:8,base:1},
+  {name:'Partial scalar (ปลด NO4)',cfi:.992,rmsea:.028,dchi:6.27,ddf:7,base:1}];
+const EX=[{name:'ตัวอย่าง',bc:.30,sc:.12,bt:.05,st:.05,cov:0}];
+const LAB=[{name:'H9 CO',bc:.596,sc:.113,bt:.127,st:.099,cov:.00106},{name:'H10 NO',bc:.325,sc:.101,bt:.271,st:.109,cov:.00038}];
+const QUIZ=[
+ {lo:'LO1',stem:'ทำไม H9–H10 จึงตีความเป็นความต่างภายใต้เงื่อนไขเชิงสถาบัน ไม่ใช่ความต่างของพฤติกรรม',opts:['เพราะตัวอย่างเล็ก','เพราะ TA ตอบความตั้งใจแบบมีเงื่อนไข "หากกรมสรรพากรอนุญาต" ขณะที่ CPA ตอบความตั้งใจต่อสิ่งที่ทำได้จริง','เพราะใช้ MLR','เพราะทดสอบทางเดียว'],a:1,why:'TA ใช้ TSA for LCE ไม่ได้ตามระเบียบ ความตั้งใจของสองกลุ่มจึงอยู่ภายใต้สถาบันที่เปิดและไม่เปิดให้ใช้'},
+ {lo:'LO1',stem:'สิ่งใดที่งานวิจัยนี้ไม่เทียบระหว่าง CPA กับ TA',opts:['เส้นทางจาก CO ไปยัง AI','เส้นทางจาก NO ไปยัง AI','อัตราการใช้จริง AA1','ค่าเฉลี่ยแฝงของ CO เพื่อบรรยายบริบท'],a:2,why:'การใช้ของ TA เป็นศูนย์เชิงโครงสร้าง การเทียบอัตราจึงไม่มีความหมาย และ TA ไม่อยู่ในการสำรวจติดตาม'},
+ {lo:'LO2',stem:'ระดับความไม่แปรเปลี่ยนขั้นต่ำที่ต้องผ่านก่อนเทียบเส้นทางคือ',opts:['Configural','Metric','Scalar','Strict'],a:1,why:'Metric ทำให้หน่วยของตัวแปรแฝงเท่ากันในสองกลุ่ม ซึ่งพอสำหรับการเทียบ B ส่วน scalar จำเป็นเมื่อเทียบค่าเฉลี่ยแฝง'},
+ {lo:'LO2',stem:'ภายใต้ MLR ทำไมจึงลบค่า χ² ที่ปรับแก้แล้วของสองโมเดลตรง ๆ ไม่ได้',opts:['เพราะ df ไม่เท่ากัน','เพราะผลต่างของค่าที่ปรับแก้ไม่ได้แจกแจงแบบไคสแควร์ ต้องใช้สูตร Satorra–Bentler','เพราะ JASP ไม่อนุญาต','เพราะข้อมูลมีค่าขาด'],a:1,why:'ผลต่างต้องปรับด้วยตัวคูณมาตราส่วนของทั้งสองโมเดล (Satorra & Bentler, 2001) ซึ่ง lavTestLRT คำนวณให้ใน R'},
+ {lo:'LO3',stem:'D = .25, SE(D) = .13 ได้ p สองด้าน .054 และ p ทางเดียว .027 ข้อใดถูกต้อง',opts:['เลือกทางเดียวหลังเห็นผลได้เพราะ p ดีกว่า','ทางเดียวใช้ได้เมื่อกำหนดทิศไว้ในโครงร่างก่อนเก็บข้อมูล','ทางเดียวผิดเสมอ','ต้องรายงานเฉพาะ p ที่น้อยกว่า'],a:1,why:'การเลือกหลังเห็นข้อมูลเพิ่มโอกาสผิดพลาดชนิดที่ 1 โครงร่างฉบับที่ 1.5 กำหนดทางเดียวไว้ล่วงหน้าแล้วเพราะ H9–H10 ระบุทิศ CPA > TA'},
+ {lo:'LO3',stem:'ในห้องปฏิบัติการ B ของ NO ใน CPA มีนัยสำคัญ ส่วนของ TA ก็มีนัยสำคัญ แต่ D ไม่มีนัยสำคัญ ข้อสรุปที่ถูกคือ',opts:['H10 ได้รับการสนับสนุน','ไม่มีหลักฐานว่าเส้นทาง NO ของสองกลุ่มต่างกัน และช่วงความเชื่อมั่นยังกว้าง','สองกลุ่มเท่ากันแน่นอน','ต้องตัด TA ออก'],a:1,why:'คำตอบของ H10 อยู่ที่ D และช่วง [−.232, .340] ซึ่งเข้ากันได้ทั้งกับศูนย์และผลต่างขนาดกลาง การไม่ปฏิเสธไม่ได้พิสูจน์ว่าเท่ากัน'},
+ {lo:'LO4',stem:'B ของสองกลุ่มเท่ากัน แต่ β ของ CPA สูงกว่า สาเหตุที่เป็นไปได้มากที่สุดคือ',opts:['ความสัมพันธ์ใน CPA แรงกว่า','SD ของตัวทำนายใน CPA สูงกว่า','ใช้ WLSMV','ข้อมูลขาด'],a:1,why:'β = B × SDx ÷ SDy ความต่างของ β จึงอาจมาจากการกระจายของตัวทำนาย ไม่ใช่ความสัมพันธ์ต่อหนึ่งหน่วย'},
+ {lo:'LO5',stem:'ข้อใดเป็นจุดอ่อนที่การผ่าน metric ทางสถิติแก้ไม่ได้',opts:['ค่าขาดของข้อมูล','ความเทียบเคียงเชิงแนวคิดระหว่างความตั้งใจจริงกับความตั้งใจแบบมีเงื่อนไข','ขนาดตัวอย่าง','ค่า SE'],a:1,why:'น้ำหนักเท่ากันไม่ได้บอกว่าผู้ตอบนึกถึงสถานการณ์เดียวกัน ต้องตรวจด้วยการสัมภาษณ์เชิงรู้คิดกับ TA'}];
+/* ===== UI ===== */
+if(typeof document!=='undefined'){
+  const $=id=>document.getElementById(id);
+  const f3=v=>isFinite(v)?(v<0?'−':'')+Math.abs(v).toFixed(3).replace(/^0\./,'.'):'–';
+  const fp=p=>!isFinite(p)?'–':p<.001?'< .001':p.toFixed(3).replace(/^0\./,'.');
+  const sgn=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(3).replace(/^0\./,'.');
+  // lab 1
+  $('invbody').innerHTML=INV.map((r,i)=>`<tr><td>${r.name}</td><td><input id="cfi${i}" type="number" step="0.001" value="${r.cfi}" aria-label="CFI ${r.name}"></td><td><input id="rm${i}" type="number" step="0.001" value="${r.rmsea}" aria-label="RMSEA ${r.name}"></td>`+
+    (i?`<td><input id="dc${i}" type="number" step="0.01" value="${r.dchi}" aria-label="Δχ² ${r.name}"></td><td><input id="dd${i}" type="number" step="1" min="1" value="${r.ddf}" aria-label="Δdf ${r.name}"></td>`:'<td>—</td><td>—</td>')+
+    `<td id="ocfi${i}">—</td><td id="orm${i}">—</td><td id="op${i}">—</td><td id="ores${i}">ฐาน</td></tr>`).join('');
+  function lab1(){
+    const v=INV.map((r,i)=>({cfi:+$('cfi'+i).value,rmsea:+$('rm'+i).value,dchi:i?+$('dc'+i).value:0,ddf:i?+$('dd'+i).value:1}));
+    let msg=[];
+    INV.forEach((r,i)=>{ if(!i) return; const s=invStep(v[r.base],v[i]);
+      $('ocfi'+i).textContent=sgn(s.dcfi); $('orm'+i).textContent=sgn(s.drmsea); $('op'+i).textContent=fp(s.p);
+      $('ores'+i).innerHTML=s.mixed?'<span class="pill na">หลักฐานขัดกัน</span>':s.pass?'<span class="pill ok">ผ่าน</span>':'<span class="pill no">ไม่ผ่าน</span>';
+      if(i===1) msg.push(s.pass?'Metric ผ่าน: ทดสอบ H9–H10 ได้':'Metric ยังไม่ผ่าน: ยังไม่ควรเทียบเส้นทาง');
+      if(i===2) msg.push(s.pass?'Scalar ผ่าน: เทียบค่าเฉลี่ยแฝงของ CO และ NO ได้':'Scalar ไม่ผ่าน: ตรวจข้อที่ score test ชี้ แล้วอ่านถ้อยคำก่อนปลด');
+      if(i===3) msg.push(s.pass?'Partial scalar ผ่านเมื่อปลด NO4: รายงานข้อที่ปลดและสถานะเชิงสำรวจ':'Partial scalar ยังไม่ผ่าน');
+      if(s.mixed) msg.push(`ขั้น ${r.name} หลักฐานสองชนิดไม่ตรงกัน ให้ดูส่วนเหลือรายข้อและขนาดตัวอย่างประกอบ`);
+    });
+    $('invmsg').textContent=msg.join(' · ');
+  }
+  $('invbody').addEventListener('input',lab1); lab1();
+  // lab 2
+  let rows=EX;
+  function drawD(){
+    $('dbody').innerHTML=rows.map((r,i)=>`<tr><td>${r.name}</td>`+['bc','sc','bt','st','cov'].map(k=>`<td><input id="${k}${i}" type="number" step="0.001" value="${r[k]}" aria-label="${k} ${r.name}"></td>`).join('')+
+      `<td id="D${i}"></td><td id="S${i}"></td><td id="C${i}"></td><td id="P2${i}"></td><td id="P1${i}"></td><td id="PH${i}"></td></tr>`).join('');
+    lab2();
+  }
+  function lab2(){
+    const res=rows.map((r,i)=>pathDiff({bc:+$('bc'+i).value,sc:+$('sc'+i).value,bt:+$('bt'+i).value,st:+$('st'+i).value,cov:+$('cov'+i).value}));
+    const ph=holm(res.map(r=>r.p1));
+    res.forEach((r,i)=>{$('D'+i).textContent=f3(r.D);$('S'+i).textContent=f3(r.se);$('C'+i).textContent=`[${f3(r.lo)}, ${f3(r.hi)}]`;
+      $('P2'+i).textContent=fp(r.p2);$('P1'+i).textContent=fp(r.p1);$('PH'+i).textContent=rows.length>1?fp(ph[i]):'ไม่ต้องปรับ';});
+    const m=$('dmsg');
+    if(rows.length===1){const r=res[0]; m.textContent=`p สองด้าน ${fp(r.p2)} แต่ p ทางเดียว ${fp(r.p1)} ข้อสรุปที่ α = .05 ${(r.p2<.05)===(r.p1<.05)?'ไม่เปลี่ยน':'เปลี่ยนตามการเลือก'} จึงต้องกำหนดทางเดียวไว้ในโครงร่างก่อนเก็บข้อมูล`;}
+    else m.textContent=res.map((r,i)=>`${rows[i].name}: ${ph[i]<.05?'สนับสนุน':'ไม่สนับสนุน'} (D ${f3(r.D)}, ช่วง [${f3(r.lo)}, ${f3(r.hi)}])`).join(' · ')+' ตัวเลขต่างจากตารางที่ 8.4 ได้ในหลักที่สามเพราะปัดเศษ Cov';
+  }
+  $('dbody').addEventListener('input',lab2);
+  $('ldex').onclick=()=>{rows=EX;drawD();}; $('ldlab').onclick=()=>{rows=LAB;drawD();}; drawD();
+  // lab 3
+  function lab3(){const B=+$('bB').value,sy=+$('sdy').value,c=+$('sdc').value,t=+$('sdt').value;
+    const bc=B*c/sy, bt=B*t/sy; $('betc').textContent=f3(bc);$('bett').textContent=f3(bt);$('betd').textContent=f3(bc-bt);
+    $('betmsg').textContent=`B เท่ากันที่ ${f3(B)} แต่ β ต่างกัน ${f3(bc-bt)} เพราะ SD ของตัวทำนายต่างกัน H9–H10 จึงทดสอบด้วย D ของ B`;}
+  ['bB','sdy','sdc','sdt'].forEach(id=>$(id).addEventListener('input',lab3)); lab3();
+  // quiz
+  let answered={};
+  function drawQuiz(){answered={};
+    $('quiz').innerHTML=QUIZ.map((q,i)=>`<div class="q"><div class="lo">${q.lo}</div><div class="stem">${i+1}. ${q.stem}</div>`+q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}"> ${o}</label>`).join('')+`<div class="fb" id="fb${i}"></div></div>`).join('');
+    QUIZ.forEach((q,i)=>document.querySelectorAll(`input[name=q${i}]`).forEach(el=>el.addEventListener('change',()=>{const ok=+el.value===q.a;answered[i]=ok;const fb=$('fb'+i);fb.className='fb show '+(ok?'ok':'no');fb.textContent=(ok?'ถูกต้อง. ':'ยังไม่ใช่. ')+q.why;score();})));
+    score();}
+  function score(){const k=Object.keys(answered).length,c=Object.values(answered).filter(Boolean).length;$('qscore').textContent=k?`ตอบแล้ว ${k}/${QUIZ.length} · ถูก ${c}`:`${QUIZ.length} ข้อ`;}
+  $('qreset').onclick=drawQuiz; drawQuiz();
+}
+if(typeof module!=='undefined') module.exports={normCdf,chi2Sf,invStep,pathDiff,holm,INV,LAB,EX,QUIZ};
+</script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แอปบทที่ 10 การวิเคราะห์ที่ทำซ้ำได้</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f5f7; --paper:#ffffff; --ink:#15233a; --muted:#5a6678; --line:#d5dbe3;
+  --accent:#0d6466; --accent-soft:#e1efef; --gate:#a86a12; --gate-soft:#f7ecd9;
+  --ok:#2f7d32; --stop:#b3261e; --stop-soft:#f8e3e1;
+  --display:"Noto Serif Thai",Georgia,serif; --body:"Noto Sans Thai",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0f1620; --paper:#17212d; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3a4a;
+  --accent:#4fb8b4; --accent-soft:#163334; --gate:#e2a54a; --gate-soft:#3a2c14;
+  --ok:#74c27a; --stop:#f08a80; --stop-soft:#3c1d1b; color-scheme:dark;}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.65;font-size:16px}
+main{max-width:980px;margin:0 auto;padding:24px 16px 48px;display:grid;gap:24px}
+.brand{display:inline-flex;align-items:center;gap:12px;background:#ffffff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin-bottom:14px}
+.brand img{height:40px;width:auto;display:block}
+.brand .org{font-family:var(--display);font-weight:700;font-size:1.15rem;color:#15233a;border-left:2px solid #d5dbe3;padding-left:12px;line-height:1.2}
+header h1{font-family:var(--display);font-size:1.7rem;line-height:1.3;margin:0 0 6px;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:68ch}
+.note{font-size:.88rem;color:var(--muted);border-left:3px solid var(--gate);padding:4px 10px;background:var(--gate-soft);border-radius:0 6px 6px 0}
+section.lab{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px}
+section.lab h2{font-family:var(--display);font-size:1.25rem;margin:0 0 4px}
+.lab-tag{font-size:.8rem;color:var(--accent);font-weight:700;letter-spacing:.02em}
+.lab > p{margin:4px 0 14px;color:var(--muted);max-width:70ch}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:620px){.grid4{grid-template-columns:1fr 1fr}}
+.num label{display:block;font-size:.85rem;color:var(--muted)}
+.num input{width:100%;font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:10px}
+.stat{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.stat .k{font-size:.8rem;color:var(--muted)} .stat .v{font-size:1.2rem;font-weight:700;font-variant-numeric:tabular-nums}
+.stat.warn{border-color:var(--stop);background:var(--stop-soft)}
+.msg{font-size:.92rem;padding:8px 12px;border-radius:8px;background:var(--accent-soft);margin-top:10px}
+.msg.warn{background:var(--stop-soft)}
+canvas{width:100%;height:auto;display:block;margin-top:12px}
+label.opt{display:flex;gap:8px;align-items:flex-start;padding:3px 0;cursor:pointer}
+fieldset{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0}
+legend{font-weight:700;font-size:.92rem;padding:0 4px}
+button.main{font:inherit;font-weight:700;padding:8px 14px;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gate);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.score{font-weight:700;font-variant-numeric:tabular-nums}
+.q{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.q .stem{font-weight:500;margin-bottom:6px}
+.q .lo{font-size:.78rem;color:var(--gate);font-weight:700}
+.q .fb{margin-top:6px;font-size:.92rem;padding:6px 10px;border-radius:6px;display:none}
+.q .fb.show{display:block}
+.q .fb.ok{background:var(--accent-soft)} .q .fb.no{background:var(--stop-soft)}
+footer{font-size:.85rem;color:var(--muted)}
+</style>
+<style>@media (max-width:640px){body *{min-width:0}table{display:block;overflow-x:auto;max-width:100%}th,td{white-space:normal}select,input,canvas,img,svg{max-width:100%}[class*=grid],.row,.seg,.stats{grid-template-columns:1fr!important;flex-wrap:wrap}pre{overflow-x:auto;white-space:pre-wrap}}</style></head>
+<body><style>#gate{position:fixed;inset:0;background:#F2F7FB;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:Sarabun,'Noto Sans Thai',sans-serif}
+#gate .gb{background:#fff;border-top:4px solid #1F3864;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.08);padding:28px 26px;max-width:380px;width:88%;color:#222}
+#gate h2{color:#1F3864;font-size:19px;margin:0 0 6px}#gate p{font-size:14px;margin:0 0 14px;line-height:1.6}
+#gate .row{display:flex;gap:6px}#gate input[type=password],#gate input[type=text]{flex:1;font-size:16px;padding:9px 10px;border:1px solid #b8c4d4;border-radius:6px}
+#gate button{font-family:inherit;font-size:15px;border:0;border-radius:6px;padding:9px 14px;cursor:pointer}#gate .sh{background:#E3E9F1;color:#1F3864}#gate .go{background:#1F3864;color:#fff;width:100%;margin-top:12px}
+#gate label{font-size:13px;display:flex;gap:6px;align-items:center;margin-top:10px}#gate .err{color:#A93226;font-size:13px;min-height:18px;margin-top:8px}</style>
+<div id="gate"><div class="gb"><h2>แอปประจำตำรา</h2><p>สำหรับผู้อ่านตำรา<br><b>SEM และ GenAI ในการวิจัยทางบัญชีและการสอบบัญชี</b><br>ใส่รหัสเข้าแอปที่พิมพ์ไว้ในตำรา</p>
+<div class="row"><input id="gk" type="password" autocomplete="off" placeholder="รหัสเข้าแอป"><button class="sh" type="button" onclick="var i=document.getElementById('gk');i.type=i.type==='password'?'text':'password'">แสดง</button></div>
+<label><input id="gr" type="checkbox"> จำรหัสในเครื่องนี้</label><button class="go" type="button" id="gg">เปิดแอป</button><div class="err" id="ge"></div></div></div>
+<script>(function(){var H="467e451224101a2f5f9b367b93804929e3d8a0a9be77cb73f13736ca0c64e694",K="semgenai_gate";
+function ok(){var g=document.getElementById('gate');if(g)g.remove();}
+try{if(localStorage.getItem(K)===H||sessionStorage.getItem(K)===H){ok();return;}}catch(e){}
+async function chk(){var v=document.getElementById('gk').value.replace(/[\s\-]/g,'').toUpperCase();
+var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));var h=Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('');
+if(h===H){try{(document.getElementById('gr').checked?localStorage:sessionStorage).setItem(K,H)}catch(e){}ok();}else{document.getElementById('ge').textContent='รหัสไม่ถูกต้อง โปรดดูรหัสที่พิมพ์ไว้ในตำรา';}}
+document.getElementById('gg').onclick=chk;document.getElementById('gk').addEventListener('keydown',function(e){if(e.key==='Enter')chk();});})();</script><div style="font-family:Sarabun,sans-serif;font-size:13px;padding:8px 14px;background:#1F3864"><a href="index.html" style="color:#fff;text-decoration:none">← สารบัญแอปประจำตำรา</a></div>
+<main>
+<header>
+  <div class="brand"><img src="logo.png" alt="Dr VIT" width="154" height="40"><span class="org">Siam edu.</span></div>
+  <h1>แอปบทที่ 10 การวิเคราะห์ที่ทำซ้ำได้ด้วย R, lavaan และ JASP</h1>
+  <p>ใช้คู่กับบทที่ 10 มีสามใบงาน: นับ df ของแบบจำลองด้วยมือ ดูผลของวิธีจัดการค่าสูญหายและตัวประมาณ และวินิจฉัยว่าผลสองรอบที่ไม่ตรงกันเกิดจากอะไร แล้วปิดด้วยแบบทดสอบ</p>
+  <p class="note" style="margin-top:10px">ตัวเลขทุกค่ามาจากผลรันจริงของ ch10_lab.R บนข้อมูลสังเคราะห์ ไม่ใช่ผลวิจัย ห้ามนำข้อมูลผู้ตอบจริงมาใส่ในแอปนี้หรือในเครื่องมือ GenAI</p>
+</header>
+
+<section class="lab" aria-labelledby="l1">
+  <div class="lab-tag">ใบงาน 1 · LO3</div>
+  <h2 id="l1">นับ df ของแบบจำลองสามปัจจัย</h2>
+  <p>ค่าตั้งต้นตรงกับหัวข้อ 10.3.1 (RA และ AI สี่ข้อ CX สามข้อตามแบบสอบถามจริง เส้นทาง 2 เส้น df = 41) ลองตัด RA4 ออก (ตั้ง RA เป็น 3 ข้อ) แล้วดูว่า df เปลี่ยนเป็นเท่าไร (แบบฝึกหัดข้อ 4)</p>
+  <div class="grid4">
+    <div class="num"><label for="kRA">จำนวนข้อของ RA</label><input id="kRA" type="number" min="2" max="10" value="4"></div>
+    <div class="num"><label for="kCX">จำนวนข้อของ CX</label><input id="kCX" type="number" min="2" max="10" value="3"></div>
+    <div class="num"><label for="kAI">จำนวนข้อของ AI</label><input id="kAI" type="number" min="2" max="10" value="4"></div>
+    <div class="num"><label>เส้นทางไป AI</label><input value="2 (RA, CX)" disabled></div>
+  </div>
+  <div class="stats" id="s1"></div>
+  <div class="msg" id="m1"></div>
+</section>
+
+<section class="lab" aria-labelledby="l2">
+  <div class="lab-tag">ใบงาน 2 · LO4</div>
+  <h2 id="l2">ค่าสูญหายและตัวประมาณเปลี่ยนผลอย่างไร</h2>
+  <p>ส่วนบนนับจำนวนผู้ตอบครบจากค่าที่ขาด ค่าตั้งต้นตรงกับหัวข้อ 10.5 ส่วนล่างวาด B ของเส้นทาง RA ไป AI พร้อมช่วง 95% ของทั้งสี่กรณีในตารางที่ 10.7</p>
+  <div class="grid4">
+    <div class="num"><label for="n">ผู้ตอบทั้งหมด</label><input id="n" type="number" min="1" value="320"></div>
+    <div class="num"><label for="mA">RA2 ขาด</label><input id="mA" type="number" min="0" value="24"></div>
+    <div class="num"><label for="mB">AI4 ขาด</label><input id="mB" type="number" min="0" value="60"></div>
+    <div class="num"><label for="mAB">ขาดทั้งสองข้อ</label><input id="mAB" type="number" min="0" value="5"></div>
+  </div>
+  <div class="stats" id="s2"></div>
+  <canvas id="cv" width="900" height="300" role="img" aria-label="B และช่วงความเชื่อมั่นของสี่กรณี"></canvas>
+  <div class="msg" id="m2"></div>
+</section>
+
+<section class="lab" aria-labelledby="l3">
+  <div class="lab-tag">ใบงาน 3 · LO1 · LO2</div>
+  <h2 id="l3">ผลสองรอบไม่ตรงกัน เกิดจากอะไร</h2>
+  <p>เลือกสิ่งที่ต่างกันระหว่างสองรอบตาม manifest.txt และ session.txt แอปจะบอกว่ากำลังตอบคำถามแบบใด และควรตรวจอะไรก่อน</p>
+  <fieldset><legend>สิ่งที่ต่างกันระหว่างรอบ 1 กับรอบ 2</legend>
+    <label class="opt"><input type="checkbox" id="dMD5"> ค่า MD5 ของไฟล์ข้อมูล</label>
+    <label class="opt"><input type="checkbox" id="dVer"> รุ่น R หรือ lavaan หรือ JASP</label>
+    <label class="opt"><input type="checkbox" id="dOpt"> ตัวประมาณหรือวิธีจัดการค่าสูญหาย</label>
+    <label class="opt"><input type="checkbox" id="dSeed"> เมล็ดสุ่ม (มีผลเมื่อใช้ bootstrap หรือข้อมูลจำลอง)</label>
+  </fieldset>
+  <div class="msg" id="m3"></div>
+</section>
+
+<section class="lab" aria-labelledby="l4">
+  <div class="lab-tag">แบบทดสอบ · LO1–LO5</div>
+  <h2 id="l4">แบบทดสอบท้ายบท</h2>
+  <p>ตอบทีละข้อ คำอธิบายจะแสดงทันทีหลังเลือก</p>
+  <div id="quiz"></div>
+  <div class="row"><span class="score" id="qscore"></span><button type="button" class="main" id="qreset">เริ่มใหม่</button></div>
+</section>
+
+<footer>ตัวเลขตั้งต้นมาจาก ch10_lab.R (R 4.3.3, lavaan 0.6.17, seed 20261118, n = 320) ชื่อเมนูของ JASP และ AMOS ในบทยังรอผู้เขียนตรวจกับรุ่นที่ใช้ ชุดหลักฐานสองชั้นเป็นข้อเสนอของตำรา ยังไม่อยู่ในโครงร่างฉบับ 1.5</footer>
+</main>
+
+<script>
+/* ===== pure logic ===== */
+function dfCount(k){ // k = [kRA,kCX,kAI]; โครงสร้าง AI ~ RA + CX
+  const p = k.reduce((a,b)=>a+b,0), moments = p*(p+1)/2;
+  const loadings = k.reduce((a,b)=>a+(b-1),0), resid = p, lv = 3 + 1 + 2; // var RA, var CX, cov, resid AI, 2 paths
+  const npar = loadings + resid + lv;
+  return {p, moments, loadings, resid, lv, npar, df: moments - npar};
+}
+function completeCases(n,a,b,ab){
+  const errs=[]; if(ab>Math.min(a,b)) errs.push('ขาดทั้งสองข้อมากกว่าจำนวนที่ขาดของข้อใดข้อหนึ่ง'); if(a+b-ab>n) errs.push('จำนวนที่ขาดรวมมากกว่าผู้ตอบทั้งหมด');
+  const any=a+b-ab; return {errs, any, complete:n-any, lost:any/n};
+}
+const CASES=[
+  {k:'A_MLR',lab:'ฐาน ข้อมูลครบ',n:320,B:.478,se:.066,lo:.350,hi:.607,beta:.412},
+  {k:'B_listwise',lab:'ตัดทิ้งทั้งราย',n:241,B:.525,se:.094,lo:.342,hi:.709,beta:.393},
+  {k:'B_FIML',lab:'FIML',n:320,B:.474,se:.068,lo:.341,hi:.607,beta:.406},
+  {k:'C_WLSMV',lab:'WLSMV (หน่วยต่าง)',n:320,B:.479,se:.061,lo:.359,hi:.598,beta:.426}];
+function diagnose(o){ // {md5,ver,opt,seed}
+  if(!o.md5&&!o.ver&&!o.opt&&!o.seed) return {kind:'ทำซ้ำได้',text:'ทุกอย่างเหมือนกัน ผลควรตรงกันทุกไบต์ ถ้าไม่ตรง ให้ตรวจว่ารันสคริปต์เดียวกันจริงหรือไม่ และเปิด warnings.txt กับ completed.txt ของทั้งสองรอบ',warn:false};
+  if(o.md5) return {kind:'คนละข้อมูล',text:'ค่า MD5 ต่างกัน แปลว่าไฟล์ข้อมูลไม่ใช่ชุดเดียวกัน ต้องหาเหตุก่อนเรื่องอื่น เช่น มีการแก้ไข ตัดแถว หรือส่งออกใหม่ ผลที่ต่างจึงยังเปรียบเทียบไม่ได้'+(o.ver||o.opt?' และเพราะมีสิ่งอื่นเปลี่ยนพร้อมกัน จะแยกผลของแต่ละเรื่องไม่ได้':''),warn:true};
+  if(o.opt&&o.ver) return {kind:'เปลี่ยนสองเรื่องพร้อมกัน',text:'ทั้งรุ่นโปรแกรมและตัวเลือกการวิเคราะห์เปลี่ยน แยกไม่ได้ว่าผลต่างมาจากเรื่องใด ให้รันใหม่โดยเปลี่ยนทีละเรื่อง',warn:true};
+  if(o.opt) return {kind:'การตรวจความไว',text:'ข้อมูลเดิม เปลี่ยนวิธีวิเคราะห์ นี่คือการตรวจความไว ไม่ใช่ความล้มเหลวของการทำซ้ำ ตัวเลขต่างได้ แต่ต้องอธิบายว่าต่างเพราะอะไร (ตารางที่ 10.7)'+(o.seed?' ถ้าใช้ bootstrap ให้ตั้งเมล็ดเดิมด้วย':''),warn:false};
+  if(o.ver) return {kind:'สภาพแวดล้อมต่าง',text:'ข้อมูลและตัวเลือกเดิม แต่รุ่นโปรแกรมต่าง ผลควรต่างกันเฉพาะทศนิยมหลัง ๆ ถ้าต่างถึงระดับที่รายงาน ให้บันทึกรุ่นทั้งสองและตรวจค่าเริ่มต้นที่เปลี่ยนในรุ่นใหม่',warn:false};
+  return {kind:'เมล็ดสุ่มต่าง',text:'ถ้าแบบจำลองไม่ใช้การสุ่ม ผลควรเท่าเดิม ถ้าใช้ bootstrap ผลจะต่างทุกรอบ ให้ตั้งเมล็ดในสคริปต์และบันทึกใน manifest',warn:false};
+}
+const QUIZ=[
+ {lo:'LO1',stem:'ข้อใดเป็นการทำซ้ำได้เชิงคำนวณ (reproducibility)',opts:['เก็บข้อมูลใหม่ในปีถัดไปแล้วได้ผลทิศเดียวกัน','ใช้ข้อมูลและโค้ดเดิมแล้วได้ตัวเลขเดิม','เปลี่ยนจาก MLR เป็น WLSMV แล้วข้อสรุปเหมือนเดิม','ให้ผู้วิจัยอีกคนเขียนโค้ดใหม่บนข้อมูลใหม่'],a:1,why:'การทำซ้ำได้ใช้ข้อมูลและโค้ดเดิม การเก็บข้อมูลใหม่คือการศึกษาซ้ำ ส่วนการเปลี่ยนตัวประมาณคือการตรวจความไว'},
+ {lo:'LO2',stem:'ทำไมสคริปต์จึงหยุดเมื่อโฟลเดอร์ run01 มีอยู่แล้ว',opts:['เพราะ R เขียนไฟล์ซ้ำไม่ได้','เพื่อไม่ให้ผลรอบเก่าถูกทับ ผู้ตรวจจะได้เทียบสองรอบได้','เพื่อให้รันเร็วขึ้น','เพราะ lavaan ต้องการโฟลเดอร์ว่าง'],a:1,why:'ผลแต่ละรอบต้องเก็บแยก ถ้าทับกัน จะบอกไม่ได้ว่าตัวเลขในรายงานมาจากรอบใด'},
+ {lo:'LO2',stem:'completed.txt ถูกเขียนเป็นไฟล์สุดท้าย ประโยชน์คืออะไร',opts:['เก็บค่า MD5','ยืนยันว่าสคริปต์รันครบทุกขั้น ถ้าไม่มีไฟล์นี้แปลว่าหยุดกลางทาง','เก็บรุ่น R','เก็บคำเตือน'],a:1,why:'ถ้าสคริปต์หยุดกลางทาง ไฟล์ผลบางไฟล์อาจเป็นของรอบเก่าหรือไม่ครบ ไฟล์นี้บอกว่ารอบนั้นสมบูรณ์'},
+ {lo:'LO3',stem:'ML และ MLR ให้ B = .478 เท่ากัน แต่ SE ต่างกัน (.072 กับ .066) เพราะอะไร',opts:['MLR ใช้ข้อมูลคนละชุด','MLR ใช้ค่าจุดเดียวกับ ML แต่ปรับ SE และสถิติทดสอบให้ทนต่อการแจกแจงไม่ปกติ','MLR ตัดค่าผิดปกติออก','เป็นความผิดพลาดของโปรแกรม'],a:1,why:'hand_checks.txt ยืนยันว่าค่าจุดของสองตัวประมาณต่างกันเป็นศูนย์ ส่วนที่เปลี่ยนคือ SE, ช่วงความเชื่อมั่น และ χ²'},
+ {lo:'LO3',stem:'ข้อใดเขียนผล RA ไป AI ถูกต้อง',opts:['β = .412, 95% CI [.350, .607]','B = .478, 95% CI [.350, .607]; β = .412, 95% CI [.315, .508]','β = .478, 95% CI [.315, .508]','B = .412, SE = .066'],a:1,why:'ช่วงของ B มาจาก parameterEstimates ช่วงของ β มาจาก standardizedSolution วางสลับกันไม่ได้'},
+ {lo:'LO4',stem:'ทำไม FIML จึงให้ B ใกล้กรณีข้อมูลครบมากกว่าการตัดทิ้งทั้งราย ในห้องปฏิบัติการนี้',opts:['FIML เติมค่าเฉลี่ยให้ค่าที่ขาด','การสูญหายของ AI4 ขึ้นกับ RA1 ซึ่งอยู่ในแบบจำลอง FIML ใช้ข้อมูลนั้นได้ ส่วนการตัดทิ้งเหลือกลุ่มที่ RA สูงกว่าเดิม','FIML ใช้ข้อมูลน้อยกว่า','FIML ไม่ต้องอาศัยข้อสมมติใด'],a:1,why:'FIML ถูกต้องภายใต้ MAR เมื่อตัวแปรที่อธิบายการสูญหายอยู่ในแบบจำลอง และไม่ได้เติมค่าแทน'},
+ {lo:'LO4',stem:'WLSMV ให้ B = .479 ใกล้ MLR (.478) ข้อสรุปใดถูก',opts:['สองตัวประมาณให้ผลเหมือนกันทุกด้าน','เทียบ B ตรง ๆ ไม่ได้เพราะ WLSMV ใช้หน่วยของตัวแปรตอบสนองแฝง ค่าที่เทียบได้คือ β','WLSMV ดีกว่าเพราะ RMSEA = 0','ควรเปลี่ยนเป็น WLSMV เป็นการวิเคราะห์หลัก'],a:1,why:'ความใกล้กันของ B เป็นเรื่องบังเอิญของข้อมูลชุดนี้ β (.426 กับ .412) เป็นค่าที่เทียบได้ และโครงร่างกำหนด WLSMV เป็นการตรวจความไว'},
+ {lo:'LO5',stem:'ข้อมูลจริงเปิดเผยไม่ได้ ผู้วิจัยควรส่งอะไรให้ผู้ประเมินวารสาร',opts:['ไฟล์ .jasp ที่มีข้อมูลจริง','ไม่ต้องส่งอะไร','สคริปต์ พจนานุกรม manifest และข้อมูลสังเคราะห์ที่โครงสร้างเดียวกัน พร้อมช่องทางให้ผู้มีสิทธิรันกับข้อมูลจริง','ภาพหน้าจอผลจาก JASP'],a:2,why:'ไฟล์ .jasp เก็บข้อมูลไว้ในตัวจึงต้องจำกัดสิทธิ ชุดหลักฐานสองชั้นให้ผู้ตรวจตรวจลำดับคำสั่งได้โดยไม่เห็นข้อมูลผู้ตอบ'}];
+/* ===== UI ===== */
+if(typeof document!=='undefined'){
+  const $=id=>document.getElementById(id);
+  const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const stat=(k,v,w)=>`<div class="stat${w?' warn':''}"><div class="k">${k}</div><div class="v">${v}</div></div>`;
+  function lab1(){const k=['kRA','kCX','kAI'].map(id=>Math.max(2,Math.min(10,+$(id).value||2))), r=dfCount(k);
+    $('s1').innerHTML=stat('ความแปรปรวน+ความแปรปรวนร่วม',r.moments)+stat('น้ำหนักอิสระ',r.loadings)+stat('ความคลาดเคลื่อนของข้อ',r.resid)+stat('ระดับตัวแปรแฝง',r.lv)+stat('df',r.df,r.df<0);
+    $('m1').textContent=`${r.p} ข้อ ให้ ${r.p} × ${r.p+1} ÷ 2 = ${r.moments} ค่า พารามิเตอร์อิสระ ${r.npar} ค่า df = ${r.moments} − ${r.npar} = ${r.df}`+(r.df<0?' · df ติดลบ แบบจำลองระบุค่าไม่ได้':'');}
+  ['kRA','kCX','kAI'].forEach(id=>$(id).addEventListener('input',lab1)); lab1();
+  function draw(){const cv=$('cv'),g=cv.getContext('2d'),W=cv.width,H=cv.height,L=200,R=30,T=20,Bm=36;g.clearRect(0,0,W,H);
+    const lo=.25,hi=.8,x=v=>L+(v-lo)/(hi-lo)*(W-L-R);g.font='15px "Noto Sans Thai",sans-serif';
+    g.strokeStyle=css('--line');g.fillStyle=css('--muted');g.textAlign='center';
+    for(let v=.3;v<=.801;v+=.1){g.beginPath();g.moveTo(x(v),T);g.lineTo(x(v),H-Bm);g.stroke();g.fillText(v.toFixed(1),x(v),H-Bm+22);}
+    g.strokeStyle=css('--gate');g.setLineDash([5,4]);g.beginPath();g.moveTo(x(CASES[0].B),T);g.lineTo(x(CASES[0].B),H-Bm);g.stroke();g.setLineDash([]);
+    const rowH=(H-T-Bm)/CASES.length;
+    CASES.forEach((c,i)=>{const y=T+rowH*(i+.5);g.fillStyle=css('--ink');g.textAlign='right';g.fillText(`${c.lab} (n=${c.n})`,L-12,y+5);
+      g.strokeStyle=css('--accent');g.lineWidth=3;g.beginPath();g.moveTo(x(c.lo),y);g.lineTo(x(c.hi),y);g.stroke();g.lineWidth=1;
+      g.fillStyle=css('--accent');g.beginPath();g.arc(x(c.B),y,7,0,2*Math.PI);g.fill();});}
+  function lab2(){const r=completeCases(+$('n').value,+$('mA').value,+$('mB').value,+$('mAB').value);
+    $('s2').innerHTML=stat('ขาดอย่างน้อยหนึ่งข้อ',r.any)+stat('ตอบครบ',r.complete,r.lost>.2)+stat('สัดส่วนที่ตัดทิ้งเสีย',(100*r.lost).toFixed(1)+'%',r.lost>.2);
+    $('m2').className='msg'+(r.errs.length?' warn':''); $('m2').textContent=r.errs.length?'ตรวจตัวเลข: '+r.errs.join(' · '):`ถ้าตัดทิ้งทั้งราย จะเหลือ ${r.complete} ราย ในกราฟ ช่วงของการตัดทิ้งทั้งรายกว้างที่สุด (SE .094) ส่วน FIML ใช้ทั้ง 320 ราย และอยู่ใกล้เส้นประของกรณีฐาน กรณี WLSMV วาดไว้เพื่อให้เห็นว่าค่าใกล้กัน แต่หน่วยของ B ต่างจากสามกรณีแรก จึงต้องเทียบด้วย β`; draw();}
+  ['n','mA','mB','mAB'].forEach(id=>$(id).addEventListener('input',lab2)); lab2();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+  function lab3(){const r=diagnose({md5:$('dMD5').checked,ver:$('dVer').checked,opt:$('dOpt').checked,seed:$('dSeed').checked});
+    $('m3').className='msg'+(r.warn?' warn':''); $('m3').innerHTML=`<b>${r.kind}</b> · ${r.text}`;}
+  ['dMD5','dVer','dOpt','dSeed'].forEach(id=>$(id).addEventListener('change',lab3)); lab3();
+  let answered={};
+  function drawQuiz(){answered={};
+    $('quiz').innerHTML=QUIZ.map((q,i)=>`<div class="q"><div class="lo">${q.lo}</div><div class="stem">${i+1}. ${q.stem}</div>`+q.opts.map((o,j)=>j).sort((x,y)=>((x*3+i)%4)-((y*3+i)%4)).map(j=>`<label class="opt"><input type="radio" name="q${i}" value="${j}"> ${q.opts[j]}</label>`).join('')+`<div class="fb" id="fb${i}"></div></div>`).join('');
+    QUIZ.forEach((q,i)=>document.querySelectorAll(`input[name=q${i}]`).forEach(el=>el.addEventListener('change',()=>{const ok=+el.value===q.a;answered[i]=ok;const fb=$('fb'+i);fb.className='fb show '+(ok?'ok':'no');fb.textContent=(ok?'ถูกต้อง. ':'ยังไม่ใช่. ')+q.why;score();})));
+    score();}
+  function score(){const k=Object.keys(answered).length,c=Object.values(answered).filter(Boolean).length;$('qscore').textContent=k?`ตอบแล้ว ${k}/${QUIZ.length} · ถูก ${c}`:`${QUIZ.length} ข้อ`;}
+  $('qreset').onclick=drawQuiz; drawQuiz();
+}
+if(typeof module!=='undefined') module.exports={dfCount,completeCases,CASES,diagnose,QUIZ};
+</script>
+</body>
+</html>

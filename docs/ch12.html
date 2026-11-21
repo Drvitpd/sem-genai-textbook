@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แอปบทที่ 12 การวิจัยผสมผสานและ H12</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: one column workbook; three labs stacked, each a bordered "ใบงาน" with controls left, result right */
+:root{
+  --bg:#f3f5f7; --paper:#ffffff; --ink:#15233a; --muted:#5a6678; --line:#d5dbe3;
+  --accent:#0d6466; --accent-soft:#e1efef; --gate:#a86a12; --gate-soft:#f7ecd9;
+  --ok:#2f7d32; --stop:#b3261e; --stop-soft:#f8e3e1;
+  --display:"Noto Serif Thai",Georgia,serif; --body:"Noto Sans Thai",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1620; --paper:#17212d; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3a4a;
+  --accent:#4fb8b4; --accent-soft:#163334; --gate:#e2a54a; --gate-soft:#3a2c14;
+  --ok:#74c27a; --stop:#f08a80; --stop-soft:#3c1d1b; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0f1620; --paper:#17212d; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3a4a;
+  --accent:#4fb8b4; --accent-soft:#163334; --gate:#e2a54a; --gate-soft:#3a2c14;
+  --ok:#74c27a; --stop:#f08a80; --stop-soft:#3c1d1b; color-scheme:dark;}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.65;font-size:16px}
+main{max-width:980px;margin:0 auto;padding:24px 16px 48px;display:grid;gap:24px}
+.brand{display:inline-flex;align-items:center;background:#ffffff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin-bottom:14px}
+.brand{gap:12px}
+.brand img{height:40px;width:auto;display:block}
+.brand .org{font-family:var(--display);font-weight:700;font-size:1.15rem;color:#15233a;border-left:2px solid #d5dbe3;padding-left:12px;line-height:1.2}
+header h1{font-family:var(--display);font-size:1.7rem;line-height:1.3;margin:0 0 6px;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:68ch}
+.note{font-size:.88rem;color:var(--muted);border-left:3px solid var(--gate);padding:4px 10px;background:var(--gate-soft);border-radius:0 6px 6px 0}
+section.lab{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px}
+section.lab h2{font-family:var(--display);font-size:1.25rem;margin:0 0 4px}
+.lab-tag{font-size:.8rem;color:var(--accent);font-weight:700;letter-spacing:.02em}
+.lab > p{margin:4px 0 14px;color:var(--muted);max-width:70ch}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:20px}
+@media (max-width:720px){.cols{grid-template-columns:1fr}}
+fieldset{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0 0 12px}
+legend{font-weight:700;font-size:.92rem;padding:0 4px}
+label.opt{display:flex;gap:8px;align-items:flex-start;padding:3px 0;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.val{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent)}
+.chain{display:grid;gap:8px}
+.gate{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;padding:10px 12px;border-radius:8px;border:1px solid var(--line)}
+.gate .dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;background:var(--muted)}
+.gate.pass{border-color:var(--ok)} .gate.pass .dot{background:var(--ok)}
+.gate.stop{border-color:var(--stop);background:var(--stop-soft)} .gate.stop .dot{background:var(--stop)}
+.gate.skip{opacity:.45}
+.gate b{display:block}
+.gate small{color:var(--muted)}
+.codes{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.codes table{width:100%;border-collapse:collapse;font-size:.9rem}
+.codes td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.codes td:first-child{font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--accent)}
+.persona{margin-top:10px;font-size:.92rem;background:var(--accent-soft);padding:8px 12px;border-radius:8px}
+.tbl{overflow-x:auto}
+table.match{width:100%;border-collapse:collapse;font-size:.92rem;min-width:620px}
+table.match th,table.match td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.match th{font-size:.82rem;color:var(--muted);font-weight:700}
+select{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);max-width:100%}
+.mark{font-weight:700;white-space:nowrap}
+.mark.ok{color:var(--ok)} .mark.no{color:var(--stop)}
+button{font:inherit;font-weight:700;padding:8px 14px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--accent)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--gate);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.score{font-weight:700;font-variant-numeric:tabular-nums}
+.q{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.q .stem{font-weight:500;margin-bottom:6px}
+.q .lo{font-size:.78rem;color:var(--gate);font-weight:700}
+.q .fb{margin-top:6px;font-size:.92rem;padding:6px 10px;border-radius:6px;display:none}
+.q .fb.show{display:block}
+.q .fb.ok{background:var(--accent-soft)} .q .fb.no{background:var(--stop-soft)}
+footer{font-size:.85rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style>
+.grid3{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:620px){.grid3{grid-template-columns:1fr 1fr}}
+.num label{display:block;font-size:.85rem;color:var(--muted)}
+.num input{width:100%;font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);font-variant-numeric:tabular-nums}
+table.res{width:100%;border-collapse:collapse;font-size:.92rem;font-variant-numeric:tabular-nums;min-width:560px}
+table.res th,table.res td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right}
+table.res th:first-child,table.res td:first-child{text-align:left}
+table.res th{font-size:.8rem;color:var(--muted)}
+table.res input{width:5.2em;text-align:right;font:inherit;padding:3px 5px;border:1px solid var(--line);border-radius:5px;background:var(--paper);color:var(--ink)}
+.pill{display:inline-block;padding:1px 9px;border-radius:999px;font-size:.82rem;font-weight:700}
+.pill.ok{background:var(--accent-soft);color:var(--ok)} .pill.no{background:var(--stop-soft);color:var(--stop)} .pill.na{background:var(--gate-soft);color:var(--gate)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:6px}
+.stat{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.stat.warn{border-color:var(--stop);background:var(--stop-soft)}
+.stat .k{font-size:.8rem;color:var(--muted)} .stat .v{font-size:1.25rem;font-weight:700;font-variant-numeric:tabular-nums}
+.msg{font-size:.92rem;padding:8px 12px;border-radius:8px;background:var(--accent-soft);margin-top:10px}
+</style>
+<style>@media (max-width:640px){body *{min-width:0}table{display:block;overflow-x:auto;max-width:100%}th,td{white-space:normal}select,input,canvas,img,svg{max-width:100%}[class*=grid],.row,.seg,.stats{grid-template-columns:1fr!important;flex-wrap:wrap}pre{overflow-x:auto;white-space:pre-wrap}}</style></head>
+<body><style>#gate{position:fixed;inset:0;background:#F2F7FB;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:Sarabun,'Noto Sans Thai',sans-serif}
+#gate .gb{background:#fff;border-top:4px solid #1F3864;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.08);padding:28px 26px;max-width:380px;width:88%;color:#222}
+#gate h2{color:#1F3864;font-size:19px;margin:0 0 6px}#gate p{font-size:14px;margin:0 0 14px;line-height:1.6}
+#gate .row{display:flex;gap:6px}#gate input[type=password],#gate input[type=text]{flex:1;font-size:16px;padding:9px 10px;border:1px solid #b8c4d4;border-radius:6px}
+#gate button{font-family:inherit;font-size:15px;border:0;border-radius:6px;padding:9px 14px;cursor:pointer}#gate .sh{background:#E3E9F1;color:#1F3864}#gate .go{background:#1F3864;color:#fff;width:100%;margin-top:12px}
+#gate label{font-size:13px;display:flex;gap:6px;align-items:center;margin-top:10px}#gate .err{color:#A93226;font-size:13px;min-height:18px;margin-top:8px}</style>
+<div id="gate"><div class="gb"><h2>แอปประจำตำรา</h2><p>สำหรับผู้อ่านตำรา<br><b>SEM และ GenAI ในการวิจัยทางบัญชีและการสอบบัญชี</b><br>ใส่รหัสเข้าแอปที่พิมพ์ไว้ในตำรา</p>
+<div class="row"><input id="gk" type="password" autocomplete="off" placeholder="รหัสเข้าแอป"><button class="sh" type="button" onclick="var i=document.getElementById('gk');i.type=i.type==='password'?'text':'password'">แสดง</button></div>
+<label><input id="gr" type="checkbox"> จำรหัสในเครื่องนี้</label><button class="go" type="button" id="gg">เปิดแอป</button><div class="err" id="ge"></div></div></div>
+<script>(function(){var H="467e451224101a2f5f9b367b93804929e3d8a0a9be77cb73f13736ca0c64e694",K="semgenai_gate";
+function ok(){var g=document.getElementById('gate');if(g)g.remove();}
+try{if(localStorage.getItem(K)===H||sessionStorage.getItem(K)===H){ok();return;}}catch(e){}
+async function chk(){var v=document.getElementById('gk').value.replace(/[\s\-]/g,'').toUpperCase();
+var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));var h=Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('');
+if(h===H){try{(document.getElementById('gr').checked?localStorage:sessionStorage).setItem(K,H)}catch(e){}ok();}else{document.getElementById('ge').textContent='รหัสไม่ถูกต้อง โปรดดูรหัสที่พิมพ์ไว้ในตำรา';}}
+document.getElementById('gg').onclick=chk;document.getElementById('gk').addEventListener('keydown',function(e){if(e.key==='Enter')chk();});})();</script><div style="font-family:Sarabun,sans-serif;font-size:13px;padding:8px 14px;background:#1F3864"><a href="index.html" style="color:#fff;text-decoration:none">← สารบัญแอปประจำตำรา</a></div>
+<main>
+<header>
+  <div class="brand"><img src="logo.png" alt="Dr VIT" width="154" height="40"><span class="org">Siam edu.</span></div>
+  <h1>แอปบทที่ 12 การวิจัยผสมผสาน: บูรณาการ H12</h1>
+  <p>ใช้คู่กับบทที่ 12 มีสามใบงาน: อ่านส่วนพรรณนาของ H12 ให้ถูกตัวหาร วางแผนโควตาผู้ให้สัมภาษณ์ และฝึกอ่านแถวของตารางบูรณาการ แล้วปิดด้วยแบบทดสอบ</p>
+  <p class="note" style="margin-top:10px">ค่าตั้งต้นทุกค่ามาจากข้อมูลสังเคราะห์ในบทที่ 12 แก่นเรื่องเป็นข้อความแต่งเพื่อการสอน ห้ามนำข้อมูลผู้ตอบหรือบทสัมภาษณ์จริงมาใส่ในแอปนี้หรือในเครื่องมือ GenAI</p>
+</header>
+
+<section class="lab" aria-labelledby="l1">
+  <div class="lab-tag">ใบงาน 1 · LO2</div>
+  <h2 id="l1">ส่วนพรรณนาของ H12: ตัวหารต่างกัน ชนิดต่างกัน</h2>
+  <p>ค่าตั้งต้นตรงกับตารางที่ 12.2 ปรับตัวเลขแล้วดูว่าแต่ละอัตราตอบคำถามอะไร</p>
+  <div class="grid3">
+    <div class="num"><label for="cHi">CPA ตั้งใจสูงที่เชื่อมได้</label><input id="cHi" type="number" min="1" value="50"></div>
+    <div class="num"><label for="cOpp">ในนั้นตอบ AA0 ว่ามี</label><input id="cOpp" type="number" min="0" value="32"></div>
+    <div class="num"><label for="cNon">ผู้มีโอกาสที่ไม่ใช้</label><input id="cNon" type="number" min="0" value="7"></div>
+    <div class="num"><label for="cUns">ตอบ AA0 ว่าไม่แน่ใจ</label><input id="cUns" type="number" min="0" value="12"></div>
+    <div class="num"><label for="tAll">TA ทั้งหมด</label><input id="tAll" type="number" min="1" value="160"></div>
+    <div class="num"><label for="tHi">TA ตั้งใจแบบมีเงื่อนไขสูง</label><input id="tHi" type="number" min="0" value="54"></div>
+  </div>
+  <div class="stats" id="s1"></div>
+  <div class="msg" id="m1"></div>
+</section>
+
+<section class="lab" aria-labelledby="l2">
+  <div class="lab-tag">ใบงาน 2 · LO3</div>
+  <h2 id="l2">วางแผนโควตาผู้ให้สัมภาษณ์</h2>
+  <p>ตัวเลขในตารางคือจำนวนผู้ยินดีให้สัมภาษณ์ในแต่ละช่องและกลุ่มโปรไฟล์ (ตารางที่ 12.5) แก้ตัวเลขหรือจำนวนขั้นต่ำต่อช่อง แล้วดูว่าช่องใดมีปัญหา</p>
+  <div class="grid3" style="margin-bottom:8px"><div class="num"><label for="qMin">ขั้นต่ำต่อช่อง</label><input id="qMin" type="number" min="1" max="8" value="3"></div></div>
+  <div class="tbl"><table class="res"><thead><tr><th>ช่องโควตา</th><th>ความสามารถ–โอกาสต่ำ</th><th>แรงจูงใจต่ำ</th><th>สูงทุกด้าน</th><th>สถานะ</th></tr></thead><tbody id="qbody"></tbody></table></div>
+  <div class="msg" id="m2"></div>
+</section>
+
+<section class="lab" aria-labelledby="l3">
+  <div class="lab-tag">ใบงาน 3 · LO4</div>
+  <h2 id="l3">อ่านแถวของตารางบูรณาการ</h2>
+  <p>แต่ละแถวมีตัวเลขและแก่นเรื่อง (ข้อมูลสังเคราะห์) เลือกว่าหลักฐานสองชนิด ยืนยัน ขยายความ หรือขัดแย้งกัน แล้วดูเหตุผล</p>
+  <div id="jd"></div>
+  <div class="row"><span class="score" id="jscore"></span></div>
+</section>
+
+<section class="lab" aria-labelledby="l4">
+  <div class="lab-tag">ใบงาน 4 · LO1–LO5</div>
+  <h2 id="l4">แบบทดสอบท้ายบท</h2>
+  <p>ตอบทีละข้อ คำอธิบายจะแสดงทันทีหลังเลือก</p>
+  <div id="quiz"></div>
+  <div class="row"><span class="score" id="qscore"></span><button type="button" class="ghost" id="qreset">เริ่มใหม่</button></div>
+</section>
+
+<footer>ตัวเลขตั้งต้นมาจากสคริปต์ ch12_lab.R ในบทที่ 12 (R 4.3.3, seed 20261201) ซึ่งต่อจากข้อมูลบทที่ 9 เกณฑ์ตั้งใจสูง 5.0 เป็นค่าสอน รอผู้เขียนกำหนด ช่อง "CPA ตั้งใจสูงแต่ไม่แน่ใจ" เป็นข้อเสนอของตำรา ยังไม่อยู่ในโควตาของโครงร่าง</footer>
+</main>
+
+<script>
+/* ===== logic (pure) ===== */
+function h12desc(o){ // {cHi,cOpp,cNon,cUns,tAll,tHi}
+  const errs=[]; if(o.cOpp+o.cUns>o.cHi) errs.push('ผู้ตอบว่ามีรวมกับไม่แน่ใจ มากกว่าผู้ตั้งใจสูงที่เชื่อมได้'); if(o.cNon>o.cOpp) errs.push('ผู้ไม่ใช้มากกว่าผู้มีโอกาส'); if(o.tHi>o.tAll) errs.push('TA ตั้งใจสูงมากกว่า TA ทั้งหมด');
+  return {errs, cpaNon:o.cNon/o.cOpp, cpaUns:o.cUns/o.cHi, taHi:o.tHi/o.tAll, cpaBlocked:(o.cNon+o.cUns)/o.cHi};
+}
+const CELLS=[{name:'CPA ตั้งใจสูงและใช้',v:[0,2,8],core:true},{name:'CPA ตั้งใจสูงแต่ไม่ใช้',v:[0,0,3],core:true},{name:'CPA ตั้งใจสูงแต่ไม่แน่ใจ (ข้อเสนอ)',v:[0,1,4],core:false},{name:'CPA ตั้งใจต่ำ',v:[4,9,9],core:true},{name:'TA ตั้งใจแบบมีเงื่อนไขสูง',v:[2,2,7],core:true},{name:'TA ตั้งใจแบบมีเงื่อนไขต่ำ',v:[22,18,7],core:true}];
+function quotaCheck(cells,min){
+  const rows=cells.map(c=>{const tot=c.v.reduce((a,b)=>a+b,0), nonEmpty=c.v.filter(x=>x>0).length, take=Math.min(min,tot);
+    let status=tot<min?'ไม่ครบ':(nonEmpty<2?'ครบแต่ไม่กระจาย':'ครบและกระจาย'); return {name:c.name,tot,nonEmpty,take,status,core:c.core};});
+  const plan=rows.reduce((a,r)=>a+r.take,0), short=rows.filter(r=>r.status==='ไม่ครบ').map(r=>r.name), flat=rows.filter(r=>r.status==='ครบแต่ไม่กระจาย').map(r=>r.name);
+  return {rows,plan,short,flat,inRange:plan>=15&&plan<=24};
+}
+const JD=[
+ {row:'บริบท (CPA)',q:'ตั้งใจสูงแต่ไม่แน่ใจ 12 จาก 50 ราย · เหตุ "ไม่มีเกณฑ์เชิงปริมาณ" 6 ราย',t:'ใช้เกณฑ์ส่วนตัวแทนตัวเลข (I07, I09)',a:0,why:'ตัวเลขบอกว่าความไม่แน่ใจมีอยู่และเหตุหลักคือไม่มีเกณฑ์ แก่นเรื่องบอกเรื่องเดียวกันจากมุมผู้ตอบ จึงยืนยันกัน'},
+ {row:'กลไกความสามารถ (TA)',q:'TA อยู่กลุ่มความสามารถ–โอกาสต่ำ 69 จาก 160',t:'ไม่ลงทุนศึกษาเพราะใช้ไม่ได้ (I14)',a:1,why:'ตัวเลขบอกแค่ว่าความสามารถต่ำ แก่นเรื่องเสนอว่าความสามารถต่ำอาจเป็นผลของการถูกกีดกัน จึงขยายความและอาจกลับทิศของคำอธิบาย'},
+ {row:'กลไกแรงจูงใจ (CPA)',q:'AA4 แรงจูงใจ 1 จาก 7 ผู้ไม่ใช้',t:'ใช้ได้แม้แรงจูงใจต่ำเมื่อลูกค้าเข้าเงื่อนไขชัด (I02)',a:1,why:'กรณีสวนทางนี้บอกขอบเขตว่าเมื่อเกณฑ์ชัด แรงจูงใจอาจไม่ใช่เงื่อนไขสำคัญ จึงขยายความพร้อมขอบเขต ไม่ได้ขัดกับตัวเลข'},
+ {row:'ผลลัพธ์ (CPA)',q:'ผู้มีโอกาสที่ไม่ใช้ 7 จาก 32 (21.9%)',t:'สมมติว่าพบแก่นเรื่อง "ใช้มาตรฐานแล้วในงานส่วนใหญ่" จากผู้ให้สัมภาษณ์ในช่องนี้',a:2,why:'ถ้าคนในช่องตั้งใจสูงแต่ไม่ใช้เล่าว่าใช้แล้ว แปลว่าคำตอบ AA1 กับคำเล่าขัดกัน ต้องตรวจช่วงเวลาอ้างอิงและนิยามการใช้ก่อนสรุป'}];
+const OPTS=['ยืนยัน','ขยายความ','ขัดแย้ง'];
+const QUIZ=[
+ {lo:'LO1',stem:'จุดบูรณาการใดต้องทำก่อนสัมภาษณ์คนแรก',opts:['Merging เท่านั้น','Connecting และ Building','ไม่มี ทำหลังเก็บข้อมูลครบทั้งหมด','Building เท่านั้น'],a:1,why:'การคัดผู้ให้สัมภาษณ์และการเตรียมคำถามจากผลเชิงปริมาณต้องเสร็จก่อนสัมภาษณ์ ส่วน merging ทำหลังวิเคราะห์ทั้งสองส่วน'},
+ {lo:'LO1',stem:'ตำราฉบับนี้เลิกเรียกแบบติดตามว่า Wave 2 เพราะอะไร',opts:['ไม่มีแบบติดตามแล้ว','โครงร่างใช้ "ระยะที่ 2" หมายถึงการสัมภาษณ์ การเรียกแบบติดตามว่า Wave 2 ทำให้สับสน','แบบติดตามเก็บก่อนระยะที่ 1','เพราะ TA ไม่ได้รับแบบติดตาม'],a:1,why:'ระยะที่ 1 คือแบบสอบถาม ระยะที่ 2 คือการสัมภาษณ์ แบบติดตามเป็นเครื่องมือเชื่อมสองระยะ'},
+ {lo:'LO2',stem:'ตัว O ใน CMO กับตัว O ในโปรไฟล์ CAP–MOT–OPP หมายถึงอะไร',opts:['โอกาสทั้งคู่','ผลลัพธ์ทั้งคู่','CMO คือผลลัพธ์ ส่วน OPP คือโอกาส','CMO คือโอกาส ส่วน OPP คือผลลัพธ์'],a:2,why:'Outcome ใน CMO คือใช้หรือไม่ใช้ ส่วน Opportunity ใน COM-B คือปัจจัยภายนอกตัวผู้สอบบัญชี สับสนสองตัวนี้ทำให้ตีความผิดทั้งบท'},
+ {lo:'LO2',stem:'ทำไม H12 จึงไม่ทดสอบนัยสำคัญระหว่าง CPA กับ TA',opts:['ตัวอย่างเล็กเกินไป','ช่องว่างของสองกลุ่มเกิดจากเงื่อนไขต่างชนิด จึงเทียบชนิด ไม่เทียบขนาด','TA ไม่ตอบแบบสอบถาม','เพราะใช้ R'],a:1,why:'TA หยุดที่ด่านสิทธิ CPA หยุดที่ด่านโอกาสและการเลือก ตัวหารและความตั้งใจที่วัดก็ต่างกัน'},
+ {lo:'LO3',stem:'ในตารางที่ 12.5 ช่อง "CPA ตั้งใจสูงแต่ไม่ใช้" มีผู้ยินดี 3 รายในกลุ่มเดียว ควรทำอย่างไร',opts:['ตัดช่องนี้ทิ้ง','คัดทั้ง 3 ราย บันทึกว่าช่องนี้ไม่มีความหลากหลายของโปรไฟล์ และพิจารณาขยายการสรรหาตามที่คณะกรรมการอนุญาต','ย้ายผู้ตั้งใจต่ำเข้ามาแทน','เปลี่ยนเกณฑ์ตั้งใจสูงหลังเห็นข้อมูล'],a:1,why:'โครงร่างให้บันทึกเหตุผลเมื่อช่องหาคนได้ไม่ครบ การเปลี่ยนเกณฑ์หลังเห็นข้อมูลทำให้การคัดลำเอียง'},
+ {lo:'LO3',stem:'CPA ที่ไม่ได้ตอบแบบติดตามเข้าสัมภาษณ์ได้หรือไม่',opts:['ไม่ได้เลย','ได้ตามเกณฑ์อื่น แต่ไม่นับในช่องที่ใช้ผลติดตาม','ได้ และนับเป็นผู้ตั้งใจสูงแต่ไม่ใช้','ได้เฉพาะเมื่อเป็น TA'],a:1,why:'ตามหัวข้อ 3.4.3 ของโครงร่าง เพราะยังไม่รู้สถานะการใช้ของคนกลุ่มนี้'},
+ {lo:'LO4',stem:'ข้อสรุปร่วมข้อใดเขียนถูก',opts:['TA มีช่องว่างใหญ่กว่า CPA จึงควรอบรม TA','ในข้อมูลสังเคราะห์ ช่องว่างของ CPA มีสองชนิดตามตารางที่ 12.2 ส่วนของ TA เกิดที่ด่านสิทธิ และแก่นเรื่องจาก I14 เสนอว่าส่งผลย้อนไปที่ความสามารถ','ความสามารถต่ำทำให้ TA ไม่ใช้','CPA ไทยครึ่งหนึ่งไม่แน่ใจ'],a:1,why:'ข้อสรุปที่ดีบอกที่มาของหลักฐาน สถานะข้อมูล และไม่ขยายเกินตัวอย่าง'},
+ {lo:'LO5',stem:'ข้อเสนอ ป1 จะถูกหักล้างเมื่อพบอะไร',opts:['พบ CPA ไม่แน่ใจที่เลือกชุดเต็ม','พบ CPA ไม่แน่ใจที่ไม่มีแนวปฏิบัติของสำนักงานแต่เลือกใช้ TSA for LCE เป็นแบบแผน','พบ TA ตั้งใจสูง','พบผู้ใช้ที่ตั้งใจสูง'],a:1,why:'ข้อเสนอที่ทดสอบได้ต้องบอกว่าหลักฐานแบบใดจะทำให้ต้องแก้ ถ้าคนไม่มีแนวปฏิบัติก็ยังใช้ได้เป็นปกติ ป1 ต้องแก้'}];
+/* ===== UI ===== */
+if(typeof document!=='undefined'){
+  const $=id=>document.getElementById(id);
+  const pc=v=>isFinite(v)?(100*v).toFixed(1)+'%':'–';
+  function lab1(){const o={cHi:+$('cHi').value,cOpp:+$('cOpp').value,cNon:+$('cNon').value,cUns:+$('cUns').value,tAll:+$('tAll').value,tHi:+$('tHi').value}; const r=h12desc(o);
+    $('s1').innerHTML=[['CPA ไม่ใช้ ÷ ผู้มีโอกาส',pc(r.cpaNon)],['CPA ไม่แน่ใจ ÷ ผู้ตั้งใจสูง',pc(r.cpaUns)],['TA ตั้งใจสูง ÷ TA ทั้งหมด',pc(r.taHi)]].map(c=>`<div class="stat"><div class="k">${c[0]}</div><div class="v">${c[1]}</div></div>`).join('');
+    $('m1').textContent=r.errs.length?('ตรวจตัวเลข: '+r.errs.join(' · ')):`สามอัตรานี้ใช้ตัวหารคนละชุดและวัดคนละเรื่อง อัตราแรกคือผู้เลือกไม่ใช้เมื่อมีโอกาส อัตราที่สองคือผู้ที่ตัดสินด่านโอกาสไม่ได้ อัตราที่สามคือความตั้งใจที่ถูกระเบียบกักไว้ วางคู่กันเพื่อเทียบชนิดได้ แต่ห้ามสรุปว่ากลุ่มใดมีช่องว่าง "มากกว่า"`;}
+  ['cHi','cOpp','cNon','cUns','tAll','tHi'].forEach(id=>$(id).addEventListener('input',lab1)); lab1();
+  $('qbody').innerHTML=CELLS.map((c,i)=>`<tr><td>${c.name}</td>`+c.v.map((x,j)=>`<td><input id="q${i}_${j}" type="number" min="0" value="${x}" aria-label="${c.name} กลุ่ม ${j+1}" style="width:64px"></td>`).join('')+`<td id="qs${i}"></td></tr>`).join('');
+  function lab2(){const cells=CELLS.map((c,i)=>({name:c.name,core:c.core,v:[0,1,2].map(j=>Math.max(0,+$(`q${i}_${j}`).value))})); const r=quotaCheck(cells,Math.max(1,+$('qMin').value));
+    r.rows.forEach((x,i)=>{const el=$('qs'+i); el.textContent=`${x.status} (${x.tot})`; el.style.color=x.status==='ไม่ครบ'?'var(--stop)':(x.status==='ครบแต่ไม่กระจาย'?'var(--gate)':'var(--accent)');});
+    $('m2').textContent=`แผนนี้คัดได้ ${r.plan} ราย ${r.inRange?'อยู่ในช่วง 15–24 ราย ตามโครงร่าง':'อยู่นอกช่วง 15–24 ราย ต้องปรับจำนวนต่อช่องหรือเหตุผลการหยุดเก็บ'} `+(r.short.length?`ช่องที่ไม่ครบ: ${r.short.join(', ')} ต้องบันทึกเหตุผลและพิจารณาขยายการสรรหา `:'')+(r.flat.length?`ช่องที่ครบแต่ทุกคนอยู่กลุ่มเดียว: ${r.flat.join(', ')} ความแตกต่างภายในช่องจึงเกิดไม่ได้`:'');}
+  $('qbody').addEventListener('input',lab2); $('qMin').addEventListener('input',lab2); lab2();
+  let jdone={};
+  $('jd').innerHTML=JD.map((r,i)=>`<div class="q"><div class="lo">${r.row}</div><div class="stem">ตัวเลข: ${r.q}<br>แก่นเรื่อง: ${r.t}</div>`+OPTS.map((o,j)=>`<label class="opt"><input type="radio" name="j${i}" value="${j}"> ${o}</label>`).join('')+`<div class="fb" id="jf${i}"></div></div>`).join('');
+  JD.forEach((r,i)=>document.querySelectorAll(`input[name=j${i}]`).forEach(el=>el.addEventListener('change',()=>{const ok=+el.value===r.a; jdone[i]=ok; const f=$('jf'+i); f.className='fb show '+(ok?'ok':'no'); f.textContent=(ok?'ตรงกับเฉลย. ':`เฉลยคือ "${OPTS[r.a]}". `)+r.why; const k=Object.keys(jdone).length,c=Object.values(jdone).filter(Boolean).length; $('jscore').textContent=`อ่านแล้ว ${k}/${JD.length} · ตรงเฉลย ${c}`;})));
+  let answered={};
+  function drawQuiz(){answered={};
+    $('quiz').innerHTML=QUIZ.map((q,i)=>`<div class="q"><div class="lo">${q.lo}</div><div class="stem">${i+1}. ${q.stem}</div>`+q.opts.map((o,j)=>j).sort((x,y)=>((x*3+i)%4)-((y*3+i)%4)).map(j=>`<label class="opt"><input type="radio" name="q${i}" value="${j}"> ${q.opts[j]}</label>`).join('')+`<div class="fb" id="fb${i}"></div></div>`).join('');
+    QUIZ.forEach((q,i)=>document.querySelectorAll(`input[name=q${i}]`).forEach(el=>el.addEventListener('change',()=>{const ok=+el.value===q.a;answered[i]=ok;const fb=$('fb'+i);fb.className='fb show '+(ok?'ok':'no');fb.textContent=(ok?'ถูกต้อง. ':'ยังไม่ใช่. ')+q.why;score();})));
+    score();}
+  function score(){const k=Object.keys(answered).length,c=Object.values(answered).filter(Boolean).length;$('qscore').textContent=k?`ตอบแล้ว ${k}/${QUIZ.length} · ถูก ${c}`:`${QUIZ.length} ข้อ`;}
+  $('qreset').onclick=drawQuiz; drawQuiz();
+}
+if(typeof module!=='undefined') module.exports={h12desc,quotaCheck,CELLS,JD,QUIZ};
+</script>
+</body>
+</html>

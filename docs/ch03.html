@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แอปบทที่ 3 ตัวแปรแฝง ตัวแปรสังเกต และการสร้างเครื่องมือวัด</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f5f7; --paper:#ffffff; --ink:#15233a; --muted:#5a6678; --line:#d5dbe3;
+  --accent:#0d6466; --accent-soft:#e1efef; --gate:#a86a12; --gate-soft:#f7ecd9;
+  --ok:#2f7d32; --stop:#b3261e; --stop-soft:#f8e3e1;
+  --display:"Noto Serif Thai",Georgia,serif; --body:"Noto Sans Thai",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0f1620; --paper:#17212d; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3a4a;
+  --accent:#4fb8b4; --accent-soft:#163334; --gate:#e2a54a; --gate-soft:#3a2c14;
+  --ok:#74c27a; --stop:#f08a80; --stop-soft:#3c1d1b; color-scheme:dark;}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.65;font-size:16px}
+main{max-width:980px;margin:0 auto;padding:24px 16px 48px;display:grid;gap:24px}
+.brand{display:inline-flex;align-items:center;gap:12px;background:#ffffff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin-bottom:14px}
+.brand img{height:40px;width:auto;display:block}
+.brand .org{font-family:var(--display);font-weight:700;font-size:1.15rem;color:#15233a;border-left:2px solid #d5dbe3;padding-left:12px;line-height:1.2}
+header h1{font-family:var(--display);font-size:1.7rem;line-height:1.3;margin:0 0 6px;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:68ch}
+.note{font-size:.88rem;color:var(--muted);border-left:3px solid var(--gate);padding:4px 10px;background:var(--gate-soft);border-radius:0 6px 6px 0}
+section.lab{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px}
+section.lab h2{font-family:var(--display);font-size:1.25rem;margin:0 0 4px}
+.lab-tag{font-size:.8rem;color:var(--accent);font-weight:700;letter-spacing:.02em}
+.lab > p{margin:4px 0 14px;color:var(--muted);max-width:70ch}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:620px){.grid4{grid-template-columns:1fr 1fr}}
+.num label{display:block;font-size:.85rem;color:var(--muted)}
+.num input{width:100%;font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:10px}
+.stat{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.stat .k{font-size:.8rem;color:var(--muted)} .stat .v{font-size:1.2rem;font-weight:700;font-variant-numeric:tabular-nums}
+.stat.warn{border-color:var(--stop);background:var(--stop-soft)}
+.msg{font-size:.92rem;padding:8px 12px;border-radius:8px;background:var(--accent-soft);margin-top:10px}
+.msg.warn{background:var(--stop-soft)}
+canvas{width:100%;height:auto;display:block;margin-top:12px}
+label.opt{display:flex;gap:8px;align-items:flex-start;padding:3px 0;cursor:pointer}
+fieldset{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0}
+legend{font-weight:700;font-size:.92rem;padding:0 4px}
+button.main{font:inherit;font-weight:700;padding:8px 14px;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gate);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.score{font-weight:700;font-variant-numeric:tabular-nums}
+.q{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.q .stem{font-weight:500;margin-bottom:6px}
+.q .lo{font-size:.78rem;color:var(--gate);font-weight:700}
+.q .fb{margin-top:6px;font-size:.92rem;padding:6px 10px;border-radius:6px;display:none}
+.q .fb.show{display:block}
+.q .fb.ok{background:var(--accent-soft)} .q .fb.no{background:var(--stop-soft)}
+footer{font-size:.85rem;color:var(--muted)}
+select{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);max-width:100%}
+table.res{width:100%;border-collapse:collapse;font-size:.92rem;min-width:560px}
+table.res th,table.res td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.res th{font-size:.8rem;color:var(--muted)}
+.tbl{overflow-x:auto}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.seg button{font:inherit;font-size:.9rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.mark{font-weight:700}.mark.ok{color:var(--ok)}.mark.no{color:var(--stop)}
+</style>
+<style>@media (max-width:640px){body *{min-width:0}table{display:block;overflow-x:auto;max-width:100%}th,td{white-space:normal}select,input,canvas,img,svg{max-width:100%}[class*=grid],.row,.seg,.stats{grid-template-columns:1fr!important;flex-wrap:wrap}pre{overflow-x:auto;white-space:pre-wrap}}</style></head>
+<body><style>#gate{position:fixed;inset:0;background:#F2F7FB;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:Sarabun,'Noto Sans Thai',sans-serif}
+#gate .gb{background:#fff;border-top:4px solid #1F3864;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.08);padding:28px 26px;max-width:380px;width:88%;color:#222}
+#gate h2{color:#1F3864;font-size:19px;margin:0 0 6px}#gate p{font-size:14px;margin:0 0 14px;line-height:1.6}
+#gate .row{display:flex;gap:6px}#gate input[type=password],#gate input[type=text]{flex:1;font-size:16px;padding:9px 10px;border:1px solid #b8c4d4;border-radius:6px}
+#gate button{font-family:inherit;font-size:15px;border:0;border-radius:6px;padding:9px 14px;cursor:pointer}#gate .sh{background:#E3E9F1;color:#1F3864}#gate .go{background:#1F3864;color:#fff;width:100%;margin-top:12px}
+#gate label{font-size:13px;display:flex;gap:6px;align-items:center;margin-top:10px}#gate .err{color:#A93226;font-size:13px;min-height:18px;margin-top:8px}</style>
+<div id="gate"><div class="gb"><h2>แอปประจำตำรา</h2><p>สำหรับผู้อ่านตำรา<br><b>SEM และ GenAI ในการวิจัยทางบัญชีและการสอบบัญชี</b><br>ใส่รหัสเข้าแอปที่พิมพ์ไว้ในตำรา</p>
+<div class="row"><input id="gk" type="password" autocomplete="off" placeholder="รหัสเข้าแอป"><button class="sh" type="button" onclick="var i=document.getElementById('gk');i.type=i.type==='password'?'text':'password'">แสดง</button></div>
+<label><input id="gr" type="checkbox"> จำรหัสในเครื่องนี้</label><button class="go" type="button" id="gg">เปิดแอป</button><div class="err" id="ge"></div></div></div>
+<script>(function(){var H="467e451224101a2f5f9b367b93804929e3d8a0a9be77cb73f13736ca0c64e694",K="semgenai_gate";
+function ok(){var g=document.getElementById('gate');if(g)g.remove();}
+try{if(localStorage.getItem(K)===H||sessionStorage.getItem(K)===H){ok();return;}}catch(e){}
+async function chk(){var v=document.getElementById('gk').value.replace(/[\s\-]/g,'').toUpperCase();
+var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));var h=Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('');
+if(h===H){try{(document.getElementById('gr').checked?localStorage:sessionStorage).setItem(K,H)}catch(e){}ok();}else{document.getElementById('ge').textContent='รหัสไม่ถูกต้อง โปรดดูรหัสที่พิมพ์ไว้ในตำรา';}}
+document.getElementById('gg').onclick=chk;document.getElementById('gk').addEventListener('keydown',function(e){if(e.key==='Enter')chk();});})();</script><div style="font-family:Sarabun,sans-serif;font-size:13px;padding:8px 14px;background:#1F3864"><a href="index.html" style="color:#fff;text-decoration:none">← สารบัญแอปประจำตำรา</a></div>
+<main>
+<header>
+  <div class="brand"><img src="logo.png" alt="Dr VIT" width="154" height="40"><span class="org">Siam edu.</span></div>
+  <h1>แอปบทที่ 3 ตัวแปรแฝง ตัวแปรสังเกต และการสร้างเครื่องมือวัด</h1>
+  <p>ใช้คู่กับบทที่ 3 มีสามใบงาน: จับคู่ข้อคำถามกับตัวแปรแฝงและดูว่าข้อใดห่างจากนิยาม คำนวณ IOC, I-CVI และ k* โดยปรับคะแนนผู้ทรงคุณวุฒิทีละท่าน และจัดปัญหาจากบันทึกสัมภาษณ์เชิงรู้คิดตามขั้นของการตอบ แล้วปิดด้วยแบบทดสอบ</p>
+  <p class="note" style="margin-top:10px">คะแนนผู้ทรงคุณวุฒิและบันทึกสัมภาษณ์ในแอปนี้เป็นข้อมูลสังเคราะห์จาก ch3_lab.R ไม่ใช่ผลการตรวจเครื่องมือจริง ห้ามนำคะแนนผู้ทรงคุณวุฒิจริง บันทึกสัมภาษณ์ หรือคำตอบนำร่องจริงมาใส่ในแอปนี้หรือในเครื่องมือ GenAI</p>
+</header>
+
+<section class="lab" aria-labelledby="l1">
+  <div class="lab-tag">ใบงาน 1 · LO1</div>
+  <h2 id="l1">ข้อคำถามนี้วัดตัวแปรใด</h2>
+  <p>ข้อความมาจากแบบสอบถามระยะที่ 1 ฉบับ 1.2 เลือกตัวแปรแฝงที่ข้อคำถามสังกัดตามตารางที่ 3.2 แล้วกดตรวจ คำอธิบายจะบอกด้วยว่าข้อใดมีระยะห่างจากนิยามที่ควรส่งผู้ทรงคุณวุฒิและการสัมภาษณ์เชิงรู้คิดตรวจ</p>
+  <div class="tbl"><table class="res"><thead><tr><th>ข้อความ</th><th>ตัวแปร</th><th>ผล</th></tr></thead><tbody id="b1"></tbody></table></div>
+  <div class="row"><button type="button" class="main" id="c1">ตรวจ</button><span class="score" id="s1"></span></div>
+</section>
+
+<section class="lab" aria-labelledby="l2">
+  <div class="lab-tag">ใบงาน 2 · LO3</div>
+  <h2 id="l2">เครื่องคำนวณ IOC, I-CVI และ k*</h2>
+  <p>เลือกข้อคำถาม แล้วปรับคะแนนผู้ทรงคุณวุฒิ 5 ท่าน (IOC: +1, 0, −1 และความเกี่ยวข้อง: 1–4) ค่าตั้งต้นตรงกับตารางที่ 3.3 สรุปทั้งมาตรด้านล่างคำนวณใหม่ทุกครั้งที่แก้ เกณฑ์: IOC ≥ .50 ตามโครงร่าง, I-CVI = 1.00 ตาม Lynn (1986) และ I-CVI ≥ .78 ตาม Polit และคณะ (2007)</p>
+  <div class="row"><div class="num" style="min-width:200px"><label for="item">ข้อคำถาม</label><select id="item" style="width:100%"></select></div><button type="button" class="main" id="reset2">คืนค่าตั้งต้นทั้งหมด</button></div>
+  <div class="tbl" style="margin-top:10px"><table class="res" style="min-width:420px"><thead><tr><th>ผู้ทรงคุณวุฒิ</th><th>IOC</th><th>ความเกี่ยวข้อง (1–4)</th></tr></thead><tbody id="b2"></tbody></table></div>
+  <div class="stats" id="st2"></div>
+  <div class="msg" id="m2"></div>
+  <h3 style="font-family:var(--display);font-size:1.05rem;margin:16px 0 4px">ทั้งมาตร 30 ข้อ</h3>
+  <div class="stats" id="sc2"></div>
+</section>
+
+<section class="lab" aria-labelledby="l3">
+  <div class="lab-tag">ใบงาน 3 · LO4</div>
+  <h2 id="l3">จัดปัญหาตามขั้นของการตอบ</h2>
+  <p>บันทึกแต่งจากการสัมภาษณ์เชิงรู้คิด (C = CPA, T = TA) เลือกขั้นตามแบบของ Tourangeau และคณะ (2000) แล้วกดตรวจ ตารางสรุปท้ายใบงานนับจากบันทึกทั้ง 18 รายการและตรงกับตารางที่ 3.4</p>
+  <div class="tbl"><table class="res"><thead><tr><th>ผู้ให้ข้อมูล</th><th>ข้อ</th><th>บันทึก</th><th>ขั้น</th><th>ผล</th></tr></thead><tbody id="b3"></tbody></table></div>
+  <div class="row"><button type="button" class="main" id="c3">ตรวจ</button><span class="score" id="s3"></span></div>
+  <div class="tbl" style="margin-top:12px"><table class="res" style="min-width:420px"><thead><tr><th>ข้อ</th><th>รายที่พบปัญหา</th><th>ในนั้นเป็น TA</th><th>ขั้น</th></tr></thead><tbody id="t3"></tbody></table></div>
+</section>
+
+<section class="lab" aria-labelledby="l4">
+  <div class="lab-tag">แบบทดสอบ · LO1–LO5</div>
+  <h2 id="l4">แบบทดสอบท้ายบท</h2>
+  <p>ตอบทีละข้อ คำอธิบายจะแสดงทันทีหลังเลือก</p>
+  <div id="quiz"></div>
+  <div class="row"><span class="score" id="qscore"></span><button type="button" class="main" id="qreset">เริ่มใหม่</button></div>
+</section>
+
+<footer>คะแนนผู้ทรงคุณวุฒิและบันทึกสัมภาษณ์มาจาก ch3_lab.R (กำหนดด้วยมือ ไม่ใช้เลขสุ่ม ทดสอบกับ R 4.3.3) ค่าตั้งต้นให้ IOC ผ่าน 28 ข้อ เกณฑ์ Lynn 23 ข้อ เกณฑ์ Polit และคณะ 26 ข้อ S-CVI/Ave .913 และ S-CVI/UA .767 ตามบท ข้อความข้อคำถามมาจากแบบสอบถามระยะที่ 1 ฉบับ 1.2 สถานะ IOC และการทดสอบนำร่องจริงยังรอผู้วิจัยระบุในโครงร่าง การแก้ถ้อยคำข้อคำถามจริงต้องผ่านการแก้ไขโครงร่างต่อคณะกรรมการจริยธรรม</footer>
+</main>
+
+<script>
+/* ===== pure logic ===== */
+const ITEMS=['RA1','RA2','RA3','RA4','CP1','CP2','CP3','CX1','CX2','CX3','TR1','TR2','TR3','OB1','OB2','OB3','CO1','CO2','CO3','MI1','MI2','MI3','NO1','NO2','NO3','NO4','AI1','AI2','AI3','AI4'];
+const IOC_FLAG={RA4:[1,1,1,1,-1],CP2:[1,1,0,0,1],CO2:[1,0,0,1,0],MI3:[1,0,-1,1,0],OB1:[1,1,0,1,1],NO2:[1,1,1,0,1],AI3:[1,1,0,1,0]};
+const REL_FLAG={RA4:[4,3,3,3,2],CP2:[3,3,2,2,3],CO2:[3,2,2,3,2],MI3:[3,2,1,3,2],OB1:[4,3,2,3,3],NO2:[4,3,3,2,3],AI3:[3,3,2,3,2]};
+function defaults(){const ioc={},rel={};ITEMS.forEach(k=>{ioc[k]=(IOC_FLAG[k]||[1,1,1,1,1]).slice();rel[k]=(REL_FLAG[k]||[4,4,3,4,3]).slice();});return {ioc,rel};}
+function choose(n,k){let r=1;for(let i=1;i<=k;i++)r=r*(n-k+i)/i;return r;}
+function itemStats(ioc,rel){const N=rel.length,A=rel.filter(x=>x>=3).length,IOC=ioc.reduce((a,b)=>a+b,0)/ioc.length,ICVI=A/N,Pc=choose(N,A)*Math.pow(.5,N);
+  return {IOC,ICVI,A,Pc,kstar:(ICVI-Pc)/(1-Pc),passIOC:IOC>=.5-1e-9,passLynn:A===N,passPolit:ICVI>=.78,neg1:ioc.filter(x=>x===-1).length};}
+function scaleStats(d){const s=ITEMS.map(k=>itemStats(d.ioc[k],d.rel[k]));
+  return {nIOC:s.filter(x=>x.passIOC).length,nLynn:s.filter(x=>x.passLynn).length,nPolit:s.filter(x=>x.passPolit).length,
+    ave:s.reduce((a,x)=>a+x.ICVI,0)/s.length,ua:s.filter(x=>x.passLynn).length/s.length,
+    iocButNeg:ITEMS.filter((k,i)=>s[i].passIOC&&s[i].neg1>0),iocNotPolit:ITEMS.filter((k,i)=>s[i].passIOC&&!s[i].passPolit)};}
+const CONS=['RA','CP','CX','TR','OB','CO','MI','NO','AI'];
+const MATCH=[
+ {code:'RA4',t:'การใช้ TSA for LCE ช่วยให้ฉันสามารถให้บริการลูกค้ากลุ่ม LCE ได้อย่างมีคุณภาพในราคาที่เหมาะสมกว่า',a:'RA',why:'สังกัด RA แต่ถามคุณภาพและราคาในข้อเดียว ผู้ที่เห็นว่าคุณภาพดีขึ้นแต่ราคาไม่ต่างจะตอบไม่ถูก'},
+ {code:'TR1',t:'ฉันมีโอกาสได้ทดลองใช้ TSA for LCE ผ่านการอบรม กรณีศึกษา หรืองานจำลอง ก่อนนำไปใช้กับงานลูกค้าจริง',a:'TR',why:'ฉบับ 1.2 ระบุช่องทางทดลองชัดขึ้น ตรงนิยาม TR'},
+ {code:'TR3',t:'ฉันสามารถเริ่มใช้ TSA for LCE กับลูกค้าที่เข้าเงื่อนไขเพียงบางรายก่อนขยายไปยังงานอื่น (โดยงานที่ใช้ปฏิบัติตามมาตรฐานครบทั้งฉบับ)',a:'TR',why:'สังกัด TR แต่ผู้ตอบต้องตัดสินว่าลูกค้ารายใดเข้าเงื่อนไข ซึ่งเป็นปฏิทรรศน์ของการไม่มีเกณฑ์'},
+ {code:'CO1',t:'ฉันรู้สึกถึงแรงกดดันจากหน่วยงานกำกับดูแล (เช่น สภาวิชาชีพบัญชี หรือกรมสรรพากร) ให้ต้องยอมรับและใช้ TSA for LCE',a:'CO',why:'ตรงนิยาม CO แต่ CPA และ TA อาจนึกถึงหน่วยงานต่างกัน'},
+ {code:'CO2',t:'ฉันเชื่อว่ามีความเป็นไปได้จริงที่ข้อบังคับในอนาคตจะกำหนดให้การใช้ TSA for LCE เป็นภาคบังคับสำหรับงานบางประเภท',a:'CO',why:'ตรงนิยาม CO ของโครงร่างที่รวมความคาดหวังต่ออนาคต แต่ห่างจากความหมายของ DiMaggio และ Powell ที่เน้นแรงกดดันปัจจุบัน'},
+ {code:'MI1',t:'ฉันมองว่าการปฏิบัติที่สำนักงานสอบบัญชีชั้นนำในตลาดนำมาใช้เป็นแนวทางอ้างอิงที่มีคุณค่าสำหรับการตัดสินใจของฉัน',a:'MI',why:'ตรงแกนของแรงกดดันเชิงลอกเลียน คือการอ้างอิงผู้อื่นที่ประสบความสำเร็จ'},
+ {code:'MI3',t:'การยอมรับ TSA for LCE เป็นวิธีหนึ่งที่จะทำให้สำนักงานของฉันสามารถแข่งขันกับผู้อื่นในตลาดได้',a:'MI',why:'สังกัด MI แต่อ่านได้เป็นประโยชน์เชิงแข่งขัน ซึ่งใกล้ RA มากกว่าการเลียนแบบ'},
+ {code:'AI3',t:'ฉันคาดการณ์ว่าฉันจะได้ใช้มาตรฐาน TSA for LCE กับลูกค้าอย่างน้อย 1 รายภายในรอบปีบัญชีหน้า',a:'AI',why:'สังกัด AI แต่คำตอบขึ้นกับโอกาสมีลูกค้าเข้าเกณฑ์ ไม่ใช่ความตั้งใจล้วน'}];
+function checkMatch(ans){return MATCH.map((m,i)=>ans[i]===m.a);}
+const STAGES=['COMP','RETR','JUDG','RESP'];
+const STAGE_TH={COMP:'เข้าใจคำถาม',RETR:'นึกคืนข้อมูล',JUDG:'ตัดสิน',RESP:'เลือกคำตอบ'};
+const NOTES=[['C1','TR3','COMP','อ่านว่าใช้บางข้อกำหนดได้'],['C2','TR3','COMP','ไม่แน่ใจว่าคำว่าเพียงบางรายหมายถึงกี่ราย'],['C3','TR3','JUDG','ไม่แน่ใจว่าลูกค้ารายใดเข้าเงื่อนไข'],
+ ['C4','CO2','COMP','ตอบเรื่องอนาคต ไม่ใช่แรงกดดันตอนนี้'],['T1','CO2','COMP','ไม่คิดว่าจะบังคับกับ TA เพราะใช้ไม่ได้อยู่แล้ว'],['T2','CO2','JUDG','ตอบกลาง ๆ เพราะเป็นเรื่องคาดการณ์'],
+ ['C1','MI3','COMP','อ่านเป็นประโยชน์ทางธุรกิจ'],['C3','MI3','COMP','อ่านเป็นประโยชน์ทางธุรกิจ'],['T1','AI3','RETR','นึกไม่ออกว่ามีลูกค้าห้างฯ เข้าเกณฑ์กี่ราย'],
+ ['T2','AI3','COMP','ไม่แน่ใจว่าคำชี้แจงเชิงสมมติใช้กับข้อนี้'],['C2','RA4','JUDG','คุณภาพสูงแต่ราคาไม่ต่าง ตอบไม่ถูก'],['C4','RA4','JUDG','ให้น้ำหนักเรื่องราคามากกว่าคุณภาพ'],
+ ['T1','PC1','COMP','นึกถึงกรมสรรพากรไม่ใช่สภาวิชาชีพ'],['C1','AI4','COMP','ถามว่าแนะนำใคร ลูกค้าหรือทีมงาน'],['C2','AI4','JUDG','ผู้สอบบัญชีเป็นผู้เลือกมาตรฐานเอง ไม่ใช่แนะนำ'],
+ ['T2','AI1','COMP','นึกถึงงานตรวจและรับรองบัญชี ไม่ใช่งานสอบบัญชีงบการเงิน'],['C3','CX2','JUDG','ตอบตามภาระทรัพยากรของสำนักงาน'],['T1','CO1','COMP','นึกถึงการตรวจของกรมสรรพากร ไม่ใช่การกดดันให้ใช้มาตรฐาน']];
+const PICK=[0,2,3,8,10,12,13,16];
+function checkStages(ans){return PICK.map((n,i)=>ans[i]===NOTES[n][2]);}
+function tally(notes){const by={};notes.forEach(([id,item,st])=>{(by[item]=by[item]||{ids:new Set(),st:new Set()});by[item].ids.add(id);by[item].st.add(st);});
+  const rows=Object.keys(by).map(k=>({item:k,n:by[k].ids.size,ta:[...by[k].ids].filter(x=>x[0]==='T').length,stages:[...by[k].st].sort().join('/')}));
+  rows.sort((a,b)=>b.n-a.n||(a.item<b.item?-1:1));const st={};notes.forEach(n=>st[n[2]]=(st[n[2]]||0)+1);return {rows,stage:st};}
+const QUIZ=[
+ {lo:'LO1',stem:'มาลีเคยเห็นกระดาษทำการตามมาตรฐาน กิตติยังไม่เคยใช้ ทั้งคู่ให้ 6 คะแนนกับ RA2 ข้อสรุปใดถูก',opts:['ทั้งคู่รับรู้ประโยชน์เท่ากัน','คะแนนเท่ากันอาจหมายถึงคนละสิ่ง เพราะคนหนึ่งตอบจากประสบการณ์ อีกคนตอบจากความคาดหวัง','ต้องตัดคำตอบของกิตติ','ต้องกลับคะแนน RA2'],a:1,why:'ตัวเลขเหมือนกันไม่ได้แปลว่าผู้ตอบนึกถึงสิ่งเดียวกัน ซึ่งเป็นเหตุให้ต้องสัมภาษณ์เชิงรู้คิด'},
+ {lo:'LO2',stem:'ลักษณะใดบ่งชี้ว่าตัวแปรควรวัดแบบสะท้อน',opts:['ตัดข้อคำถามหนึ่งออกแล้วความหมายของตัวแปรไม่เปลี่ยน','ข้อคำถามแต่ละข้อเป็นส่วนประกอบที่ต่างกัน','ข้อคำถามไม่จำเป็นต้องสัมพันธ์กัน','ค่า α ต่ำ'],a:0,why:'ในแบบสะท้อน ตัวแปรแฝงเป็นต้นเหตุของคำตอบ ข้อคำถามจึงแทนกันได้ (Jarvis et al., 2003)'},
+ {lo:'LO2',stem:'ทำไมบทนี้จึงตั้งข้อสังเกตเรื่อง NO2 กับตัวแปรควบคุมการอบรม',opts:['เพราะ NO2 กลับคะแนน','เพราะ NO2 ถามผลของการอบรม ผู้ที่ไม่เคยอบรมตอบได้ยาก เส้นทางจากการอบรมไป NO จึงอาจมาจากถ้อยคำ','เพราะ NO2 ไม่ผ่าน IOC ในข้อมูลจริง','เพราะโครงร่างตัด NO2 แล้ว'],a:1,why:'เป็นข้อสังเกตของตำราที่ต้องตรวจด้วยการสัมภาษณ์เชิงรู้คิด ไม่ใช่ผลจริง และการแก้ต้องผ่านคณะกรรมการ'},
+ {lo:'LO3',stem:'RA4 ได้คะแนน IOC +1, +1, +1, +1, −1 ควรรายงานอย่างไร',opts:['IOC .60 ผ่าน ไม่ต้องกล่าวอะไรเพิ่ม','IOC .60 ผ่านเกณฑ์โครงร่าง แต่รายงานว่ามีผู้ทรงคุณวุฒิหนึ่งท่านให้ −1 และอ่านเหตุผลก่อนตัดสิน','ตัดทิ้งทันที','เปลี่ยนไปใช้ CVI แทน IOC'],a:1,why:'ค่าเฉลี่ยซ่อนความเห็นค้านที่แน่ใจ ตำราเสนอให้รายงานจำนวนผู้ให้ −1 ทุกข้อ โดยคง IOC ตามโครงร่าง'},
+ {lo:'LO3',stem:'ข้อมูลสอนให้ S-CVI/Ave = .913 แต่ S-CVI/UA = .767 เพราะอะไร',opts:['คำนวณผิด','Ave เฉลี่ย I-CVI ทุกข้อ ส่วน UA นับเฉพาะข้อที่ทุกท่านเห็นว่าเกี่ยวข้อง','UA ใช้มาตร 7 ระดับ','Ave หักโอกาสบังเอิญ'],a:1,why:'Polit และ Beck (2006) เตือนให้บอกว่าใช้สูตรใด เพราะสองสูตรให้ค่าต่างกันมาก'},
+ {lo:'LO3',stem:'ผู้ทรงคุณวุฒิ 4 ใน 5 ท่านให้ความเกี่ยวข้อง 3 หรือ 4 ค่า k* เท่าใด',opts:['.80','.76','.62','1.00'],a:1,why:'Pc = 5 × 0.5^5 = .156 และ k* = (.80 − .156)/(1 − .156) = .76'},
+ {lo:'LO4',stem:'ผู้ตอบ TR3 บอกว่าตัดสินไม่ได้ว่าลูกค้ารายใดเข้าเงื่อนไข ปัญหานี้อยู่ขั้นใดและแก้อย่างไร',opts:['ขั้นเข้าใจ แก้ด้วยถ้อยคำ','ขั้นตัดสิน และสะท้อนปฏิทรรศน์ของการไม่มีเกณฑ์ ซึ่งแก้ด้วยถ้อยคำไม่ได้','ขั้นเลือกคำตอบ แก้ด้วยการเพิ่มระดับ','ไม่ใช่ปัญหา'],a:1,why:'ปัญหาขั้นตัดสินบางครั้งเป็นข้อมูลเกี่ยวกับบริบท ไม่ใช่ข้อบกพร่องของถ้อยคำ'},
+ {lo:'LO5',stem:'ข้อคำถามส่วนที่ 4 เหมือนกันทั้ง CPA และ TA ข้อใดถูก',opts:['ถ้อยคำเหมือนกันจึงเทียบกันได้แน่นอน','ถ้อยคำเหมือนกันจำเป็นแต่ไม่พอ ต้องตรวจว่า TA ที่ตอบแบบมีเงื่อนไขนึกถึงสิ่งเดียวกับ CPA','ควรแก้ถ้อยคำสำหรับ TA ทันทีโดยไม่ต้องยื่นคณะกรรมการ','TA ไม่ควรตอบส่วนที่ 4'],a:1,why:'ความเทียบเคียงเชิงแนวคิดตรวจด้วยการสัมภาษณ์เชิงรู้คิดและตีความคู่กับบทที่ 8 การแก้เครื่องมือจริงต้องผ่านการแก้ไขโครงร่าง'}];
+/* ===== UI ===== */
+if(typeof document!=='undefined'){
+  const $=id=>document.getElementById(id), f2=x=>x.toFixed(2).replace(/^0/,'').replace(/^-0/,'−'), f3=x=>x.toFixed(3).replace(/^0/,'');
+  $('b1').innerHTML=MATCH.map((m,i)=>`<tr><td><b>${m.code}</b> ${m.t}</td><td><select id="w${i}" aria-label="ตัวแปรของ ${m.code}"><option value="">เลือก</option>${CONS.map(c=>`<option>${c}</option>`).join('')}</select></td><td id="mr${i}"></td></tr>`).join('');
+  $('c1').onclick=()=>{const ans=MATCH.map((_,i)=>$('w'+i).value||null),ok=checkMatch(ans);let n=0;
+    ok.forEach((v,i)=>{if(v)n++;$('mr'+i).innerHTML=ans[i]===null?'<small>ยังไม่เลือก</small>':`<span class="mark ${v?'ok':'no'}">${v?'ถูก':'ควรเป็น '+MATCH[i].a}</span><br><small>${MATCH[i].why}</small>`;});
+    $('s1').textContent=`ถูก ${n}/${MATCH.length}`;};
+  let D=defaults();
+  $('item').innerHTML=ITEMS.map(k=>`<option ${k==='RA4'?'selected':''}>${k}</option>`).join('');
+  function draw2(){const k=$('item').value;
+    $('b2').innerHTML=[0,1,2,3,4].map(e=>`<tr><td>E${e+1}</td><td><select data-k="ioc" data-e="${e}" aria-label="IOC ผู้ทรงคุณวุฒิ ${e+1}">${[1,0,-1].map(v=>`<option value="${v}" ${D.ioc[k][e]===v?'selected':''}>${v>0?'+1':v<0?'−1':'0'}</option>`).join('')}</select></td><td><select data-k="rel" data-e="${e}" aria-label="ความเกี่ยวข้อง ผู้ทรงคุณวุฒิ ${e+1}">${[4,3,2,1].map(v=>`<option ${D.rel[k][e]===v?'selected':''}>${v}</option>`).join('')}</select></td></tr>`).join('');
+    calc2();}
+  function calc2(){const k=$('item').value,s=itemStats(D.ioc[k],D.rel[k]),sc=scaleStats(D);
+    const st=(lab,v,w)=>`<div class="stat ${w?'warn':''}"><div class="k">${lab}</div><div class="v">${v}</div></div>`;
+    $('st2').innerHTML=st('IOC',f2(s.IOC),!s.passIOC)+st('ผู้ให้ −1',s.neg1,s.neg1>0)+st('I-CVI',f2(s.ICVI),!s.passPolit)+st('Pc',f3(s.Pc))+st('k*',f2(s.kstar),s.kstar<.74);
+    const msgs=[`IOC ${s.passIOC?'ผ่าน':'ไม่ผ่าน'}เกณฑ์ .50`,`Lynn ${s.passLynn?'ผ่าน':'ไม่ผ่าน'}`,`Polit และคณะ ${s.passPolit?'ผ่าน':'ไม่ผ่าน'}`];
+    let extra='';if(s.passIOC&&s.neg1>0)extra=' · ผ่าน IOC ทั้งที่มีผู้ให้ −1: อ่านเหตุผลของผู้ทรงคุณวุฒิก่อนตัดสิน';else if(s.passIOC&&!s.passPolit)extra=' · ผ่าน IOC แต่ I-CVI ต่ำ: IOC นับ 0 เป็นกลาง ขณะที่ CVI นับคะแนน 1–2 เป็นไม่เกี่ยวข้อง';
+    $('m2').className='msg'+(s.passIOC&&s.passPolit&&!s.neg1?'':' warn');$('m2').textContent=msgs.join(' · ')+extra;
+    $('sc2').innerHTML=st('ผ่าน IOC',`${sc.nIOC}/30`)+st('ผ่าน Lynn',`${sc.nLynn}/30`)+st('ผ่าน Polit',`${sc.nPolit}/30`)+st('S-CVI/Ave',f3(sc.ave))+st('S-CVI/UA',f3(sc.ua));}
+  $('item').addEventListener('change',draw2);
+  $('b2').addEventListener('change',e=>{const t=e.target;if(!t.dataset.k)return;D[t.dataset.k][$('item').value][+t.dataset.e]=+t.value;calc2();});
+  $('reset2').onclick=()=>{D=defaults();draw2();};draw2();
+  $('b3').innerHTML=PICK.map((n,i)=>{const r=NOTES[n];return `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[3]}</td><td><select id="g${i}" aria-label="ขั้นของบันทึก ${i+1}"><option value="">เลือก</option>${STAGES.map(s=>`<option value="${s}">${STAGE_TH[s]}</option>`).join('')}</select></td><td id="gr${i}"></td></tr>`;}).join('');
+  $('c3').onclick=()=>{const ans=PICK.map((_,i)=>$('g'+i).value||null),ok=checkStages(ans);let n=0;
+    ok.forEach((v,i)=>{if(v)n++;const r=NOTES[PICK[i]];$('gr'+i).innerHTML=ans[i]===null?'<small>ยังไม่เลือก</small>':`<span class="mark ${v?'ok':'no'}">${v?'ถูก':'ควรเป็น'+STAGE_TH[r[2]]}</span>${r[0][0]==='T'?'<br><small>ผู้ให้ข้อมูลเป็น TA: ตรวจความเทียบเคียงเชิงแนวคิด</small>':''}`;});
+    $('s3').textContent=`ถูก ${n}/${PICK.length}`;};
+  const T=tally(NOTES);$('t3').innerHTML=T.rows.map(r=>`<tr><td>${r.item}</td><td>${r.n}</td><td>${r.ta}</td><td>${r.stages.split('/').map(s=>STAGE_TH[s]).join(', ')}</td></tr>`).join('')+`<tr><td colspan="4"><small>นับรายการตามขั้น: เข้าใจ ${T.stage.COMP||0} · ตัดสิน ${T.stage.JUDG||0} · นึกคืน ${T.stage.RETR||0}</small></td></tr>`;
+  let answered={};
+  function drawQuiz(){answered={};
+    $('quiz').innerHTML=QUIZ.map((q,i)=>`<div class="q"><div class="lo">${q.lo}</div><div class="stem">${i+1}. ${q.stem}</div>`+q.opts.map((o,j)=>j).sort((x,y)=>((x*3+i)%4)-((y*3+i)%4)).map(j=>`<label class="opt"><input type="radio" name="q${i}" value="${j}"> ${q.opts[j]}</label>`).join('')+`<div class="fb" id="fb${i}"></div></div>`).join('');
+    QUIZ.forEach((q,i)=>document.querySelectorAll(`input[name=q${i}]`).forEach(el=>el.addEventListener('change',()=>{const ok=+el.value===q.a;answered[i]=ok;const fb=$('fb'+i);fb.className='fb show '+(ok?'ok':'no');fb.textContent=(ok?'ถูกต้อง. ':'ยังไม่ใช่. ')+q.why;score();})));
+    score();}
+  function score(){const k=Object.keys(answered).length,c=Object.values(answered).filter(Boolean).length;$('qscore').textContent=k?`ตอบแล้ว ${k}/${QUIZ.length} · ถูก ${c}`:`${QUIZ.length} ข้อ`;}
+  $('qreset').onclick=drawQuiz; drawQuiz();
+}
+if(typeof module!=='undefined') module.exports={ITEMS,defaults,itemStats,scaleStats,MATCH,checkMatch,NOTES,PICK,checkStages,tally,QUIZ};
+</script>
+</body>
+</html>

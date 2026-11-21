@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แอปบทที่ 7 แบบจำลองโครงสร้างและตัวแปรควบคุม</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f5f7; --paper:#ffffff; --ink:#15233a; --muted:#5a6678; --line:#d5dbe3;
+  --accent:#0d6466; --accent-soft:#e1efef; --gate:#a86a12; --gate-soft:#f7ecd9;
+  --ok:#2f7d32; --stop:#b3261e; --stop-soft:#f8e3e1;
+  --display:"Noto Serif Thai",Georgia,serif; --body:"Noto Sans Thai",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1620; --paper:#17212d; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3a4a;
+  --accent:#4fb8b4; --accent-soft:#163334; --gate:#e2a54a; --gate-soft:#3a2c14;
+  --ok:#74c27a; --stop:#f08a80; --stop-soft:#3c1d1b; color-scheme:dark;}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.65;font-size:16px}
+main{max-width:980px;margin:0 auto;padding:24px 16px 48px;display:grid;gap:24px}
+.brand{display:inline-flex;align-items:center;gap:12px;background:#ffffff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin-bottom:14px}
+.brand img{height:40px;width:auto;display:block}
+.brand .org{font-family:var(--display);font-weight:700;font-size:1.15rem;color:#15233a;border-left:2px solid #d5dbe3;padding-left:12px;line-height:1.2}
+header h1{font-family:var(--display);font-size:1.7rem;line-height:1.3;margin:0 0 6px;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:68ch}
+.note{font-size:.88rem;color:var(--muted);border-left:3px solid var(--gate);padding:4px 10px;background:var(--gate-soft);border-radius:0 6px 6px 0}
+section.lab{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px}
+section.lab h2{font-family:var(--display);font-size:1.25rem;margin:0 0 4px}
+.lab-tag{font-size:.8rem;color:var(--accent);font-weight:700;letter-spacing:.02em}
+.lab > p{margin:4px 0 14px;color:var(--muted);max-width:70ch}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.seg button{font:inherit;font-size:.9rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+canvas{width:100%;height:auto;display:block}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:10px}
+.stat{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.stat .k{font-size:.8rem;color:var(--muted)} .stat .v{font-size:1.2rem;font-weight:700;font-variant-numeric:tabular-nums}
+.msg{font-size:.92rem;padding:8px 12px;border-radius:8px;background:var(--accent-soft);margin-top:10px}
+.msg.warn{background:var(--stop-soft)}
+.tbl{overflow-x:auto}
+table.res{width:100%;border-collapse:collapse;font-size:.92rem;font-variant-numeric:tabular-nums;min-width:520px}
+table.res th,table.res td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right}
+table.res th:first-child,table.res td:first-child{text-align:left}
+table.res th{font-size:.8rem;color:var(--muted)}
+table.res input{width:6.5em;text-align:right;font:inherit;padding:3px 5px;border:1px solid var(--line);border-radius:5px;background:var(--paper);color:var(--ink)}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (max-width:620px){.grid3{grid-template-columns:1fr}}
+.num label{display:block;font-size:.85rem;color:var(--muted)}
+.num input{width:100%;font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:1px 9px;border-radius:999px;font-size:.82rem;font-weight:700}
+.pill.ok{background:var(--accent-soft);color:var(--ok)} .pill.no{background:var(--stop-soft);color:var(--stop)} .pill.na{background:var(--gate-soft);color:var(--gate)}
+ul.checks{margin:10px 0 0;padding-left:0;list-style:none;display:grid;gap:6px}
+ul.checks li{border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+button.main{font:inherit;font-weight:700;padding:8px 14px;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gate);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.score{font-weight:700;font-variant-numeric:tabular-nums}
+label.opt{display:flex;gap:8px;align-items:flex-start;padding:3px 0;cursor:pointer}
+.q{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.q .stem{font-weight:500;margin-bottom:6px}
+.q .lo{font-size:.78rem;color:var(--gate);font-weight:700}
+.q .fb{margin-top:6px;font-size:.92rem;padding:6px 10px;border-radius:6px;display:none}
+.q .fb.show{display:block}
+.q .fb.ok{background:var(--accent-soft)} .q .fb.no{background:var(--stop-soft)}
+footer{font-size:.85rem;color:var(--muted)}
+</style>
+<style>@media (max-width:640px){body *{min-width:0}table{display:block;overflow-x:auto;max-width:100%}th,td{white-space:normal}select,input,canvas,img,svg{max-width:100%}[class*=grid],.row,.seg,.stats{grid-template-columns:1fr!important;flex-wrap:wrap}pre{overflow-x:auto;white-space:pre-wrap}}</style></head>
+<body><style>#gate{position:fixed;inset:0;background:#F2F7FB;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:Sarabun,'Noto Sans Thai',sans-serif}
+#gate .gb{background:#fff;border-top:4px solid #1F3864;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.08);padding:28px 26px;max-width:380px;width:88%;color:#222}
+#gate h2{color:#1F3864;font-size:19px;margin:0 0 6px}#gate p{font-size:14px;margin:0 0 14px;line-height:1.6}
+#gate .row{display:flex;gap:6px}#gate input[type=password],#gate input[type=text]{flex:1;font-size:16px;padding:9px 10px;border:1px solid #b8c4d4;border-radius:6px}
+#gate button{font-family:inherit;font-size:15px;border:0;border-radius:6px;padding:9px 14px;cursor:pointer}#gate .sh{background:#E3E9F1;color:#1F3864}#gate .go{background:#1F3864;color:#fff;width:100%;margin-top:12px}
+#gate label{font-size:13px;display:flex;gap:6px;align-items:center;margin-top:10px}#gate .err{color:#A93226;font-size:13px;min-height:18px;margin-top:8px}</style>
+<div id="gate"><div class="gb"><h2>แอปประจำตำรา</h2><p>สำหรับผู้อ่านตำรา<br><b>SEM และ GenAI ในการวิจัยทางบัญชีและการสอบบัญชี</b><br>ใส่รหัสเข้าแอปที่พิมพ์ไว้ในตำรา</p>
+<div class="row"><input id="gk" type="password" autocomplete="off" placeholder="รหัสเข้าแอป"><button class="sh" type="button" onclick="var i=document.getElementById('gk');i.type=i.type==='password'?'text':'password'">แสดง</button></div>
+<label><input id="gr" type="checkbox"> จำรหัสในเครื่องนี้</label><button class="go" type="button" id="gg">เปิดแอป</button><div class="err" id="ge"></div></div></div>
+<script>(function(){var H="467e451224101a2f5f9b367b93804929e3d8a0a9be77cb73f13736ca0c64e694",K="semgenai_gate";
+function ok(){var g=document.getElementById('gate');if(g)g.remove();}
+try{if(localStorage.getItem(K)===H||sessionStorage.getItem(K)===H){ok();return;}}catch(e){}
+async function chk(){var v=document.getElementById('gk').value.replace(/[\s\-]/g,'').toUpperCase();
+var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));var h=Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('');
+if(h===H){try{(document.getElementById('gr').checked?localStorage:sessionStorage).setItem(K,H)}catch(e){}ok();}else{document.getElementById('ge').textContent='รหัสไม่ถูกต้อง โปรดดูรหัสที่พิมพ์ไว้ในตำรา';}}
+document.getElementById('gg').onclick=chk;document.getElementById('gk').addEventListener('keydown',function(e){if(e.key==='Enter')chk();});})();</script><div style="font-family:Sarabun,sans-serif;font-size:13px;padding:8px 14px;background:#1F3864"><a href="index.html" style="color:#fff;text-decoration:none">← สารบัญแอปประจำตำรา</a></div>
+<main>
+<header>
+  <div class="brand"><img src="logo.png" alt="Dr VIT" width="154" height="40"><span class="org">Siam edu.</span></div>
+  <h1>แอปบทที่ 7 แบบจำลองโครงสร้าง H1–H8 และตัวแปรควบคุม</h1>
+  <p>ใช้คู่กับบทที่ 7 มีสามใบงาน: ดูว่าตำแหน่งของตัวแปรควบคุมเปลี่ยนค่า B อย่างไร ปรับ p ด้วยวิธี Holm และอ่านผลตรวจอคติจากวิธีการวัดร่วม แล้วปิดด้วยแบบทดสอบ</p>
+  <p class="note" style="margin-top:10px">ตัวเลขทุกค่าเป็นผลจากข้อมูลสังเคราะห์ในห้องปฏิบัติการของบทที่ 7 ไม่ใช่ผลวิจัย ห้ามนำข้อมูลผู้ตอบจริงมาใส่ในแอปนี้หรือในเครื่องมือ GenAI</p>
+</header>
+
+<section class="lab" aria-labelledby="l1">
+  <div class="lab-tag">ใบงาน 1 · LO2</div>
+  <h2 id="l1">ตัวควบคุมอยู่ตรงไหน ค่า B ก็เปลี่ยนตาม</h2>
+  <p>เลือกแบบจำลองแล้วเทียบกับ M1 (แบบจำลองหลัก) แท่งสีเข้มคือแบบที่เลือก เส้นขีดคือ M1 ค่าตรงกับตารางที่ 7.3 และ 7.5</p>
+  <div class="seg" role="group" aria-label="เลือกแบบจำลอง" id="seg"></div>
+  <canvas id="cv" width="900" height="340" role="img" aria-label="ค่า B ของ H1–H8 ในแบบจำลองที่เลือกเทียบกับ M1"></canvas>
+  <div class="stats" id="s1"></div>
+  <div class="msg" id="m1"></div>
+</section>
+
+<section class="lab" aria-labelledby="l2">
+  <div class="lab-tag">ใบงาน 2 · LO3</div>
+  <h2 id="l2">ปรับ p ของแปดสมมติฐานด้วยวิธี Holm</h2>
+  <p>ค่าตั้งต้นคือ p ของ M1 แบบสี่ตำแหน่งนัยสำคัญ ผลที่ปัดสามตำแหน่งตรงกับตารางที่ 7.4 ลองแก้ p หรือระดับนัยสำคัญ แล้วดูว่าสมมติฐานใดยังคงอยู่</p>
+  <div class="grid3" style="margin-bottom:8px"><div class="num"><label for="alpha">ระดับนัยสำคัญ α</label><input id="alpha" type="number" min="0.001" max="0.2" step="0.005" value="0.05"></div></div>
+  <div class="tbl"><table class="res"><thead><tr><th>สมมติฐาน</th><th>p</th><th>ลำดับ</th><th>p (Holm)</th><th>ก่อนปรับ</th><th>หลังปรับ</th></tr></thead><tbody id="hbody"></tbody></table></div>
+  <div class="msg" id="m2"></div>
+</section>
+
+<section class="lab" aria-labelledby="l3">
+  <div class="lab-tag">ใบงาน 3 · LO4</div>
+  <h2 id="l3">อ่านผลตรวจอคติจากวิธีการวัดร่วม</h2>
+  <p>ค่าตั้งต้นตรงกับตารางที่ 7.6 แอปบอกว่าแต่ละผลพูดอะไรได้และพูดอะไรไม่ได้ ลองเปลี่ยนความแปรปรวนแฝงต่ำสุดเป็นค่าบวกแล้วดูว่าข้อความเปลี่ยนอย่างไร</p>
+  <div class="grid3">
+    <div class="num"><label for="harm">Harman: ร้อยละของปัจจัยแรก</label><input id="harm" type="number" min="0" max="100" step="0.1" value="21.8"></div>
+    <div class="num"><label for="vif">VIF สูงสุด (full collinearity)</label><input id="vif" type="number" min="1" step="0.01" value="1.46"></div>
+    <div class="num"><label for="lv">ความแปรปรวนแฝงต่ำสุดในแบบจำลองปัจจัยวิธี</label><input id="lv" type="number" step="0.001" value="-0.333"></div>
+  </div>
+  <ul class="checks" id="c3"></ul>
+  <div class="msg" id="m3"></div>
+</section>
+
+<section class="lab" aria-labelledby="l4">
+  <div class="lab-tag">แบบทดสอบ · LO1–LO5</div>
+  <h2 id="l4">แบบทดสอบท้ายบท</h2>
+  <p>ตอบทีละข้อ คำอธิบายจะแสดงทันทีหลังเลือก</p>
+  <div id="quiz"></div>
+  <div class="row"><span class="score" id="qscore"></span><button type="button" class="main" id="qreset">เริ่มใหม่</button></div>
+</section>
+
+<footer>ตัวเลขตั้งต้นมาจาก ch7_lab.R ของบทที่ 7 (R, lavaan, MLR และ FIML, seed 20261120, n = 320) เรื่องที่รอผู้เขียนตัดสิน: การให้ตัวทำนายถดถอยบนตัวควบคุม การเพิ่มประเภทใบอนุญาต (M2) และการใช้ Holm สำหรับ H1–H8 ยังไม่อยู่ในโครงร่างฉบับ 1.5 เป็นข้อเสนอของตำรา</footer>
+</main>
+
+<script>
+/* ===== data and pure logic ===== */
+const PATHS=['H1 RA','H2 CP','H3 CX','H4 TR','H5 OB','H6 CO','H7 MI','H8 NO'];
+const MODELS={
+  M0:{name:'M0 ไม่มีตัวควบคุม',B:[.016,.182,-.302,.125,.045,.079,.212,.195],fit:{chi:364.36,df:369,cfi:1.000,rmsea:.000,srmr:.037}},
+  M1a:{name:'M1a ตัวควบคุมชี้ไป AI อย่างเดียว',B:[.053,.174,-.321,.034,.055,.135,.215,.135],fit:{chi:529.54,df:485,cfi:.986,rmsea:.017,srmr:.048}},
+  M1:{name:'M1 แบบจำลองหลัก',B:[.052,.176,-.320,.035,.053,.138,.216,.133],fit:{chi:431.36,df:453,cfi:1.000,rmsea:.000,srmr:.035}},
+  M2:{name:'M2 = M1 + ประเภทใบอนุญาต',B:[.048,.181,-.324,.050,.055,.099,.218,.130],fit:{chi:452.50,df:474,cfi:1.000,rmsea:.000,srmr:.035}}
+};
+function compare(key){ // largest change against M1
+  const b=MODELS[key].B, r=MODELS.M1.B;
+  const d=b.map((x,i)=>({path:PATHS[i],diff:x-r[i],ratio:r[i]!==0?x/r[i]:NaN}));
+  const top=d.slice().sort((a,c)=>Math.abs(c.diff)-Math.abs(a.diff))[0];
+  return {d,top,passAll:MODELS[key].fit.cfi>=.90&&MODELS[key].fit.rmsea<=.08&&MODELS[key].fit.srmr<=.08};
+}
+const P0=[0.4885,0.04659,0.000001134,0.6263,0.5067,0.04996,0.004639,0.0594];
+function holm(p){ // returns adjusted p in original order and rank
+  const m=p.length, idx=p.map((v,i)=>i).sort((a,b)=>p[a]-p[b]); const adj=new Array(m), rank=new Array(m); let run=0;
+  idx.forEach((i,k)=>{run=Math.max(run,Math.min(1,(m-k)*p[i])); adj[i]=run; rank[i]=k+1;});
+  return {adj,rank};
+}
+function cmbRead(o){ // {harm,vif,lv}
+  const items=[];
+  items.push({k:'Harman',ok:o.harm<50,t:o.harm<50?`ปัจจัยแรกอธิบาย ${o.harm}% ต่ำกว่า 50% ไม่พบอคติรุนแรงระดับนี้ แต่ไม่ได้พิสูจน์ว่าไม่มีอคติ`:`ปัจจัยแรกอธิบาย ${o.harm}% ถึงหรือเกิน 50% เป็นสัญญาณเตือนที่ต้องรายงานและตรวจด้วยวิธีอื่น`});
+  items.push({k:'VIF',ok:o.vif<3.3,t:o.vif<3.3?`VIF สูงสุด ${o.vif} ต่ำกว่า 3.3 (Kock, 2015) เกณฑ์นี้มาจาก PLS-SEM ใช้เป็นสัญญาณประกอบ`:`VIF สูงสุด ${o.vif} ถึงหรือเกิน 3.3 อาจมีอคติหรือภาวะร่วมเส้นตรง`});
+  const adm=o.lv>0;
+  items.push({k:'ปัจจัยวิธี',ok:adm?null:false,t:adm?'คำตอบใช้ได้ จึงเทียบค่า B ก่อนและหลังมีปัจจัยวิธีได้ แต่ยังต้องอ่านอย่างระวัง':`ความแปรปรวนแฝงติดลบ (${o.lv}) คำตอบใช้ไม่ได้ ห้ามตีความค่า B จากแบบจำลองนี้`});
+  const summary=adm?(items[0].ok&&items[1].ok?'ไม่พบหลักฐานของอคติระดับรุนแรงจากทั้งสามวิธี':'มีอย่างน้อยหนึ่งวิธีที่เตือน ต้องรายงานและอภิปราย')
+    :(items[0].ok&&items[1].ok?'ไม่พบหลักฐานของอคติระดับรุนแรงจาก Harman และ VIF ส่วนปัจจัยวิธีให้คำตอบที่ใช้ไม่ได้ จึงไม่นำมาสรุป':'มีวิธีที่เตือนและปัจจัยวิธีใช้ไม่ได้ ต้องอภิปรายเป็นข้อจำกัดสำคัญ');
+  return {items,summary,admissible:adm};
+}
+const QUIZ=[
+ {lo:'LO1',stem:'พารามิเตอร์ใดอยู่ในแบบจำลองโครงสร้าง ไม่ใช่แบบจำลองการวัด',opts:['น้ำหนักของ CP2 บน CP','ความคลาดเคลื่อนของข้อ AI3','สัมประสิทธิ์จาก CX ไปยัง AI','ความแปรปรวนร่วมระหว่างความคลาดเคลื่อนของ TR1 กับ TR3'],a:2,why:'เส้นทางระหว่างตัวแปรแฝงคือส่วนโครงสร้าง น้ำหนักและความคลาดเคลื่อนของข้อคำถามอยู่ในแบบจำลองการวัด'},
+ {lo:'LO1',stem:'B ของ H3 เท่ากับ −.320 ข้อความใดถูก',opts:['CX ทำให้ความตั้งใจลดลง 32%','เมื่อ CX สูงขึ้นหนึ่งหน่วยบนมาตรตัวแฝง ความตั้งใจต่ำลงราว .32 หน่วย เมื่อตัวอื่นคงที่','ผู้สอบบัญชี 32% ไม่ตั้งใจใช้','CX อธิบายความแปรปรวนของ AI ได้ 32%'],a:1,why:'B คือการเปลี่ยนแปลงของ AI ต่อหนึ่งหน่วยของตัวทำนายเมื่อตัวอื่นคงที่ ไม่ใช่ร้อยละ และ CX สูงหมายถึงรับรู้ว่ายาก'},
+ {lo:'LO2',stem:'ทำไมไม่ควรควบคุมการศึกษามาตรฐานด้วยตนเอง (ข้อ 1.3.4)',opts:['เพราะวัดเป็นตัวแปรสองค่า','เพราะอาจเกิดหลังความตั้งใจ คนที่ตั้งใจใช้จึงไปศึกษา','เพราะไม่มีในแบบสอบถาม','เพราะทำให้ df ลดลง'],a:1,why:'ตัวควบคุมต้องเกิดก่อนและชี้ไปทั้งตัวทำนายและผล ตัวแปรที่เป็นผลของความตั้งใจจะทำให้เส้นทางที่สนใจเอน'},
+ {lo:'LO2',stem:'M1a ผ่านเกณฑ์ความกลมกลืนทุกตัว ข้อสรุปใดถูก',opts:['M1a ระบุถูก ใช้ได้','M1a ดีกว่า M1 เพราะมี df มากกว่า','ผ่านเกณฑ์ไม่ได้ยืนยันว่าแบบจำลองถูก M1a บังคับให้ตัวควบคุมไม่สัมพันธ์กับตัวทำนาย ซึ่งขัดกับ DAG','ควรตัดตัวควบคุมออกเพราะ SRMR สูงขึ้น'],a:2,why:'SRMR ที่สูงขึ้นจาก .035 เป็น .048 และ χ² ที่เกิน df เป็นร่องรอยของการระบุผิด แม้ทุกดัชนีจะผ่านเกณฑ์'},
+ {lo:'LO3',stem:'ในตารางที่ 7.4 H2 มี p = .047 แต่ p (Holm) = .280 หมายความว่าอะไร',opts:['H2 ได้รับการสนับสนุน','เมื่อคำนึงว่าทดสอบแปดสมมติฐานพร้อมกัน หลักฐานของ H2 ไม่พอที่ระดับ .05','Holm ผิดพลาด','ต้องเปลี่ยนไปใช้ WLSMV'],a:1,why:'Holm ควบคุมความผิดพลาดแบบที่หนึ่งของทั้งชุด H2 ผ่านก่อนปรับแต่ไม่ผ่านหลังปรับ ควรรายงานทั้งสองค่า'},
+ {lo:'LO3',stem:'FIML ให้ค่าประมาณที่ไม่เอนภายใต้ข้อสมมติใด',opts:['ข้อมูลสูญหายแบบสุ่มหลังคำนึงถึงตัวแปรที่สังเกตได้ (MAR)','ข้อมูลแจกแจงปกติทุกข้อ','ไม่มีข้อมูลสูญหาย','ข้อมูลสูญหายเพราะค่าของตัวเอง (MNAR)'],a:0,why:'FIML ใช้ข้อมูลทุกข้อที่ตอบไว้และถูกต้องภายใต้ MAR ซึ่งตรวจจากข้อมูลชุดเดียวไม่ได้'},
+ {lo:'LO4',stem:'แบบจำลองปัจจัยวิธีให้ความแปรปรวนแฝงของ CP = −.333 ควรทำอย่างไร',opts:['รายงานว่าหลังควบคุมอคติ H3 อ่อนลงเหลือ −.096','ถือว่าคำตอบใช้ไม่ได้ ไม่ตีความ และรายงานผลจาก Harman กับ VIF พร้อมข้อจำกัด','ตั้งความแปรปรวนเป็นศูนย์แล้วรายงานผล','ตัด CP ออกจากแบบจำลอง'],a:1,why:'คำตอบที่มีความแปรปรวนติดลบเป็น inadmissible ค่าทุกตัวในแบบจำลองนั้นเชื่อไม่ได้'},
+ {lo:'LO5',stem:'เหตุผลที่ตำราเสนอให้รายงาน M2 (เพิ่มประเภทใบอนุญาต) เป็นการตรวจความไว คืออะไร',opts:['TA มีความตั้งใจต่ำกว่าอย่างมีนัยสำคัญ','TA ตอบความตั้งใจแบบมีเงื่อนไข การรวมกับ CPA อาจทำให้ CO เอน ซึ่งเห็นได้จาก B ของ CO ที่เปลี่ยนจาก .138 เป็น .099','เพื่อเพิ่ม R²','เพราะโครงร่างกำหนดไว้แล้ว'],a:1,why:'ผลตรงของ TA ไม่มีนัยสำคัญ (p = .139) แต่เส้นทาง CO เปลี่ยน เหตุผลจึงมาจากความหมายของคำตอบ ไม่ใช่ p ของตัวควบคุม และยังไม่อยู่ในโครงร่าง'}];
+/* ===== UI ===== */
+if(typeof document!=='undefined'){
+  const $=id=>document.getElementById(id);
+  const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  let cur='M0';
+  $('seg').innerHTML=Object.keys(MODELS).map(k=>`<button type="button" data-k="${k}" aria-pressed="${k===cur}">${MODELS[k].name}</button>`).join('');
+  $('seg').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b)return; cur=b.dataset.k; [...$('seg').children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.k===cur)); lab1();});
+  function draw(){
+    const cv=$('cv'), g=cv.getContext('2d'), W=cv.width, H=cv.height, L=60, R=16, T=16, Bm=44;
+    g.clearRect(0,0,W,H); const lo=-.4, hi=.3, y=v=>T+(hi-v)/(hi-lo)*(H-T-Bm);
+    g.font='14px "Noto Sans Thai",sans-serif'; g.fillStyle=css('--muted'); g.strokeStyle=css('--line'); g.lineWidth=1;
+    for(let v=-.4;v<=.301;v+=.1){const yy=y(v); g.beginPath(); g.moveTo(L,yy); g.lineTo(W-R,yy); g.stroke(); g.textAlign='right'; g.fillText((Math.abs(v)<1e-9?0:v).toFixed(1),L-8,yy+5);}
+    g.strokeStyle=css('--muted'); g.beginPath(); g.moveTo(L,y(0)); g.lineTo(W-R,y(0)); g.stroke();
+    const n=PATHS.length, bw=(W-L-R)/n, b=MODELS[cur].B, r=MODELS.M1.B;
+    PATHS.forEach((p,i)=>{const x=L+i*bw+bw*.25, w=bw*.5;
+      g.fillStyle=css('--accent'); const y0=y(0), y1=y(b[i]); g.fillRect(x,Math.min(y0,y1),w,Math.abs(y1-y0));
+      g.strokeStyle=css('--gate'); g.lineWidth=3; g.beginPath(); g.moveTo(x-6,y(r[i])); g.lineTo(x+w+6,y(r[i])); g.stroke(); g.lineWidth=1;
+      g.fillStyle=css('--ink'); g.textAlign='center'; g.fillText(p,x+w/2,H-Bm+24);});
+  }
+  function lab1(){const m=MODELS[cur], r=compare(cur), f=m.fit;
+    $('s1').innerHTML=[['χ² / df',`${f.chi.toFixed(2)} / ${f.df}`],['CFI',f.cfi.toFixed(3)],['RMSEA',f.rmsea.toFixed(3)],['SRMR',f.srmr.toFixed(3)]].map(c=>`<div class="stat"><div class="k">${c[0]}</div><div class="v">${c[1]}</div></div>`).join('');
+    const msg={M0:`ไม่ควบคุมการอบรม: ${r.top.path} ต่างจาก M1 มากที่สุด (${r.top.diff>0?'+':''}${r.top.diff.toFixed(3)}) B ของ TR สูงกว่า M1 ราวสามเท่าครึ่ง เพราะการอบรมชี้ไปทั้ง TR และความตั้งใจ ทุกดัชนียังผ่านเกณฑ์`,
+      M1a:'ค่า B ใกล้ M1 แต่ SRMR สูงขึ้นเป็น .048 และ χ² เกิน df ราว 45 หน่วย เพราะแบบจำลองบังคับให้ตัวควบคุมไม่สัมพันธ์กับตัวทำนาย ทุกดัชนียังผ่านเกณฑ์ จึงต้องตัดสินตำแหน่งตัวควบคุมด้วย DAG',
+      M1:'แบบจำลองหลัก: ตัวทำนายถดถอยบนตัวควบคุมและมีความแปรปรวนร่วมส่วนเหลือ แท่งทับเส้นขีดทุกเส้นทาง',
+      M2:`เพิ่มประเภทใบอนุญาต: ${r.top.path} เปลี่ยนมากที่สุด (${r.top.diff>0?'+':''}${r.top.diff.toFixed(3)}) แม้ผลตรงของ TA ต่อความตั้งใจไม่มีนัยสำคัญ (p = .139)`}[cur];
+    $('m1').textContent=msg; draw();}
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+  lab1();
+  $('hbody').innerHTML=PATHS.map((p,i)=>`<tr><td>${p}</td><td><input id="p${i}" type="number" min="0" max="1" step="0.0001" value="${P0[i]}" aria-label="p ของ ${p}"></td><td id="rk${i}"></td><td id="ad${i}"></td><td id="b${i}"></td><td id="a${i}"></td></tr>`).join('');
+  const pill=(ok)=>ok?'<span class="pill ok">ผ่าน</span>':'<span class="pill no">ไม่ผ่าน</span>';
+  const f3=v=>v<.001?'< .001':v.toFixed(3).replace(/^0/,'');
+  function lab2(){const a=+$('alpha').value||.05, p=PATHS.map((x,i)=>Math.min(1,Math.max(0,+$('p'+i).value))), h=holm(p);
+    let lost=[],kept=[]; p.forEach((v,i)=>{$('rk'+i).textContent=h.rank[i]; $('ad'+i).textContent=f3(h.adj[i]); $('b'+i).innerHTML=pill(v<a); $('a'+i).innerHTML=pill(h.adj[i]<a); if(v<a&&h.adj[i]>=a)lost.push(PATHS[i]); if(h.adj[i]<a)kept.push(PATHS[i]);});
+    $('m2').textContent=`ที่ α = ${a} คงอยู่หลังปรับ: ${kept.length?kept.join(', '):'ไม่มี'}`+(lost.length?` · ผ่านก่อนปรับแต่ไม่ผ่านหลังปรับ: ${lost.join(', ')} ควรรายงานทั้ง p เดิมและ p ที่ปรับแล้ว`:'');}
+  $('hbody').addEventListener('input',lab2); $('alpha').addEventListener('input',lab2); lab2();
+  function lab3(){const r=cmbRead({harm:+$('harm').value,vif:+$('vif').value,lv:+$('lv').value});
+    $('c3').innerHTML=r.items.map(x=>`<li><span class="pill ${x.ok===null?'na':(x.ok?'ok':'no')}">${x.k}</span> ${x.t}</li>`).join('');
+    $('m3').textContent='ข้อความที่ควรเขียน: '+r.summary; $('m3').className='msg'+(r.admissible?'':' warn');}
+  ['harm','vif','lv'].forEach(id=>$(id).addEventListener('input',lab3)); lab3();
+  let answered={};
+  function drawQuiz(){answered={};
+    $('quiz').innerHTML=QUIZ.map((q,i)=>`<div class="q"><div class="lo">${q.lo}</div><div class="stem">${i+1}. ${q.stem}</div>`+q.opts.map((o,j)=>j).sort((x,y)=>((x*3+i)%4)-((y*3+i)%4)).map(j=>`<label class="opt"><input type="radio" name="q${i}" value="${j}"> ${q.opts[j]}</label>`).join('')+`<div class="fb" id="fb${i}"></div></div>`).join('');
+    QUIZ.forEach((q,i)=>document.querySelectorAll(`input[name=q${i}]`).forEach(el=>el.addEventListener('change',()=>{const ok=+el.value===q.a;answered[i]=ok;const fb=$('fb'+i);fb.className='fb show '+(ok?'ok':'no');fb.textContent=(ok?'ถูกต้อง. ':'ยังไม่ใช่. ')+q.why;score();})));
+    score();}
+  function score(){const k=Object.keys(answered).length,c=Object.values(answered).filter(Boolean).length;$('qscore').textContent=k?`ตอบแล้ว ${k}/${QUIZ.length} · ถูก ${c}`:`${QUIZ.length} ข้อ`;}
+  $('qreset').onclick=drawQuiz; drawQuiz();
+}
+if(typeof module!=='undefined') module.exports={MODELS,PATHS,compare,holm,P0,cmbRead,QUIZ};
+</script>
+</body>
+</html>

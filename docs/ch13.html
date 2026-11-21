@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แอปบทที่ 13 จริยธรรม GenAI และการสอบทานก่อนเผยแพร่</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f5f7; --paper:#ffffff; --ink:#15233a; --muted:#5a6678; --line:#d5dbe3;
+  --accent:#0d6466; --accent-soft:#e1efef; --gate:#a86a12; --gate-soft:#f7ecd9;
+  --ok:#2f7d32; --stop:#b3261e; --stop-soft:#f8e3e1;
+  --display:"Noto Serif Thai",Georgia,serif; --body:"Noto Sans Thai",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0f1620; --paper:#17212d; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3a4a;
+  --accent:#4fb8b4; --accent-soft:#163334; --gate:#e2a54a; --gate-soft:#3a2c14;
+  --ok:#74c27a; --stop:#f08a80; --stop-soft:#3c1d1b; color-scheme:dark;}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.65;font-size:16px}
+main{max-width:980px;margin:0 auto;padding:24px 16px 48px;display:grid;gap:24px}
+.brand{display:inline-flex;align-items:center;gap:12px;background:#ffffff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin-bottom:14px}
+.brand img{height:40px;width:auto;display:block}
+.brand .org{font-family:var(--display);font-weight:700;font-size:1.15rem;color:#15233a;border-left:2px solid #d5dbe3;padding-left:12px;line-height:1.2}
+header h1{font-family:var(--display);font-size:1.7rem;line-height:1.3;margin:0 0 6px;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:68ch}
+.note{font-size:.88rem;color:var(--muted);border-left:3px solid var(--gate);padding:4px 10px;background:var(--gate-soft);border-radius:0 6px 6px 0}
+section.lab{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px}
+section.lab h2{font-family:var(--display);font-size:1.25rem;margin:0 0 4px}
+.lab-tag{font-size:.8rem;color:var(--accent);font-weight:700;letter-spacing:.02em}
+.lab > p{margin:4px 0 14px;color:var(--muted);max-width:70ch}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:620px){.grid4{grid-template-columns:1fr 1fr}}
+.num label{display:block;font-size:.85rem;color:var(--muted)}
+.num input{width:100%;font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:10px}
+.stat{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.stat .k{font-size:.8rem;color:var(--muted)} .stat .v{font-size:1.2rem;font-weight:700;font-variant-numeric:tabular-nums}
+.stat.warn{border-color:var(--stop);background:var(--stop-soft)}
+.msg{font-size:.92rem;padding:8px 12px;border-radius:8px;background:var(--accent-soft);margin-top:10px}
+.msg.warn{background:var(--stop-soft)}
+canvas{width:100%;height:auto;display:block;margin-top:12px}
+label.opt{display:flex;gap:8px;align-items:flex-start;padding:3px 0;cursor:pointer}
+fieldset{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0}
+legend{font-weight:700;font-size:.92rem;padding:0 4px}
+button.main{font:inherit;font-weight:700;padding:8px 14px;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gate);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.score{font-weight:700;font-variant-numeric:tabular-nums}
+.q{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.q .stem{font-weight:500;margin-bottom:6px}
+.q .lo{font-size:.78rem;color:var(--gate);font-weight:700}
+.q .fb{margin-top:6px;font-size:.92rem;padding:6px 10px;border-radius:6px;display:none}
+.q .fb.show{display:block}
+.q .fb.ok{background:var(--accent-soft)} .q .fb.no{background:var(--stop-soft)}
+footer{font-size:.85rem;color:var(--muted)}
+select{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);max-width:100%}
+table.res{width:100%;border-collapse:collapse;font-size:.92rem;min-width:560px}
+table.res th,table.res td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.res th{font-size:.8rem;color:var(--muted)}
+.tbl{overflow-x:auto}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.seg button{font:inherit;font-size:.9rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.mark{font-weight:700}.mark.ok{color:var(--ok)}.mark.no{color:var(--stop)}
+</style>
+<style>@media (max-width:640px){body *{min-width:0}table{display:block;overflow-x:auto;max-width:100%}th,td{white-space:normal}select,input,canvas,img,svg{max-width:100%}[class*=grid],.row,.seg,.stats{grid-template-columns:1fr!important;flex-wrap:wrap}pre{overflow-x:auto;white-space:pre-wrap}}</style></head>
+<body><style>#gate{position:fixed;inset:0;background:#F2F7FB;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:Sarabun,'Noto Sans Thai',sans-serif}
+#gate .gb{background:#fff;border-top:4px solid #1F3864;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.08);padding:28px 26px;max-width:380px;width:88%;color:#222}
+#gate h2{color:#1F3864;font-size:19px;margin:0 0 6px}#gate p{font-size:14px;margin:0 0 14px;line-height:1.6}
+#gate .row{display:flex;gap:6px}#gate input[type=password],#gate input[type=text]{flex:1;font-size:16px;padding:9px 10px;border:1px solid #b8c4d4;border-radius:6px}
+#gate button{font-family:inherit;font-size:15px;border:0;border-radius:6px;padding:9px 14px;cursor:pointer}#gate .sh{background:#E3E9F1;color:#1F3864}#gate .go{background:#1F3864;color:#fff;width:100%;margin-top:12px}
+#gate label{font-size:13px;display:flex;gap:6px;align-items:center;margin-top:10px}#gate .err{color:#A93226;font-size:13px;min-height:18px;margin-top:8px}</style>
+<div id="gate"><div class="gb"><h2>แอปประจำตำรา</h2><p>สำหรับผู้อ่านตำรา<br><b>SEM และ GenAI ในการวิจัยทางบัญชีและการสอบบัญชี</b><br>ใส่รหัสเข้าแอปที่พิมพ์ไว้ในตำรา</p>
+<div class="row"><input id="gk" type="password" autocomplete="off" placeholder="รหัสเข้าแอป"><button class="sh" type="button" onclick="var i=document.getElementById('gk');i.type=i.type==='password'?'text':'password'">แสดง</button></div>
+<label><input id="gr" type="checkbox"> จำรหัสในเครื่องนี้</label><button class="go" type="button" id="gg">เปิดแอป</button><div class="err" id="ge"></div></div></div>
+<script>(function(){var H="467e451224101a2f5f9b367b93804929e3d8a0a9be77cb73f13736ca0c64e694",K="semgenai_gate";
+function ok(){var g=document.getElementById('gate');if(g)g.remove();}
+try{if(localStorage.getItem(K)===H||sessionStorage.getItem(K)===H){ok();return;}}catch(e){}
+async function chk(){var v=document.getElementById('gk').value.replace(/[\s\-]/g,'').toUpperCase();
+var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));var h=Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('');
+if(h===H){try{(document.getElementById('gr').checked?localStorage:sessionStorage).setItem(K,H)}catch(e){}ok();}else{document.getElementById('ge').textContent='รหัสไม่ถูกต้อง โปรดดูรหัสที่พิมพ์ไว้ในตำรา';}}
+document.getElementById('gg').onclick=chk;document.getElementById('gk').addEventListener('keydown',function(e){if(e.key==='Enter')chk();});})();</script><div style="font-family:Sarabun,sans-serif;font-size:13px;padding:8px 14px;background:#1F3864"><a href="index.html" style="color:#fff;text-decoration:none">← สารบัญแอปประจำตำรา</a></div>
+<main>
+<header>
+  <div class="brand"><img src="logo.png" alt="Dr VIT" width="154" height="40"><span class="org">Siam edu.</span></div>
+  <h1>แอปบทที่ 13 จริยธรรม GenAI และการสอบทานก่อนเผยแพร่</h1>
+  <p>ใช้คู่กับบทที่ 13 มีสามใบงาน: ตรวจข้ออ้างจากผล SEM ทีละส่วนพร้อมการปรับ Holm จัดชั้นข้อมูลก่อนส่งเข้า GenAI และตรวจว่าคำเปิดเผยครอบคลุมสิ่งที่ GenAI ทำจริง แล้วปิดด้วยแบบทดสอบ</p>
+  <p class="note" style="margin-top:10px">ตัวเลขทั้งหมดมาจากข้อมูลสังเคราะห์ใน ch7_lab.R ไม่ใช่ผลวิจัยจริง ห้ามนำคำตอบรายคน บทถอดความ ไฟล์เสียง หรือรหัสเชื่อมโยงจริงมาใส่ในแอปนี้หรือในเครื่องมือ GenAI</p>
+</header>
+
+<section class="lab" aria-labelledby="l1">
+  <div class="lab-tag">ใบงาน 1 · LO1</div>
+  <h2 id="l1">ตรวจข้ออ้างทีละส่วน</h2>
+  <p>ประโยคตั้งต้น: "ความเข้ากันได้ทำให้ผู้สอบบัญชีใช้ TSA for LCE เพิ่มขึ้น 16% และสนับสนุน H2" เลือกถ้อยคำที่ถูกในแต่ละส่วนตามตารางที่ 13.2 แล้วกดตรวจ ตารางล่างคำนวณค่า p หลังปรับ Holm ของ H1–H8 จากค่า p ดิบในตารางที่ 7.4 (การปรับ H1–H8 เป็นข้อเสนอของบทที่ 7 ยังไม่อยู่ในโครงร่าง)</p>
+  <div class="grid4" id="parts"></div>
+  <div class="row"><button type="button" class="main" id="c1">ตรวจ</button><span class="score" id="s1"></span></div>
+  <div class="msg" id="m1" hidden></div>
+  <div class="row"><div class="num" style="max-width:160px"><label for="alpha">ระดับนัยสำคัญ α</label><input id="alpha" type="number" min="0.001" max="0.2" step="0.005" value="0.05"></div></div>
+  <div class="tbl"><table class="res"><thead><tr><th>สมมติฐาน</th><th>ตัวแปร</th><th>p ดิบ</th><th>p หลังปรับ Holm</th><th>อ่านผลได้ว่า</th></tr></thead><tbody id="b1"></tbody></table></div>
+</section>
+
+<section class="lab" aria-labelledby="l2">
+  <div class="lab-tag">ใบงาน 2 · LO2</div>
+  <h2 id="l2">จัดชั้นข้อมูลก่อนใช้ GenAI</h2>
+  <p>เลือกชั้นให้แต่ละรายการตามตารางที่ 13.3 แอปจะบอกว่าส่งเข้า GenAI ได้หรือไม่และเพราะอะไร</p>
+  <div class="tbl"><table class="res"><thead><tr><th>รายการ</th><th>ชั้น</th><th>ผล</th></tr></thead><tbody id="b2"></tbody></table></div>
+  <div class="row"><button type="button" class="main" id="c2">ตรวจ</button><span class="score" id="s2"></span></div>
+</section>
+
+<section class="lab" aria-labelledby="l3">
+  <div class="lab-tag">ใบงาน 3 · LO3</div>
+  <h2 id="l3">คำเปิดเผยครอบคลุมหรือไม่</h2>
+  <p>ซ้าย: สิ่งที่ GenAI ทำจริงตามบันทึก (ตารางที่ 13.4) ขวา: สิ่งที่คำเปิดเผยระบุ แอปจะชี้ช่องว่างและร่างคำเปิดเผยตามรูปแบบใน 13.3</p>
+  <div class="grid4" style="grid-template-columns:1fr 1fr">
+    <fieldset id="did"><legend>GenAI ทำจริง</legend></fieldset>
+    <fieldset id="dis"><legend>คำเปิดเผยระบุ</legend></fieldset>
+  </div>
+  <fieldset style="margin-top:10px"><legend>ชั้นข้อมูลสูงสุดที่ป้อน</legend><div class="seg" role="group" aria-label="ชั้นข้อมูลที่ป้อน" id="tier"></div></fieldset>
+  <div class="msg" id="m3"></div>
+  <div class="msg" id="draft" style="background:transparent;border:1px dashed var(--line)"></div>
+</section>
+
+<section class="lab" aria-labelledby="l4">
+  <div class="lab-tag">แบบทดสอบ · LO1–LO5</div>
+  <h2 id="l4">แบบทดสอบท้ายบท</h2>
+  <p>ตอบทีละข้อ คำอธิบายจะแสดงทันทีหลังเลือก</p>
+  <div id="quiz"></div>
+  <div class="row"><span class="score" id="qscore"></span><button type="button" class="main" id="qreset">เริ่มใหม่</button></div>
+</section>
+
+<footer>ค่า p ดิบของ H1–H8 มาจาก ch7_lab.R แบบจำลอง M1 (ข้อมูลสังเคราะห์) และค่า B .176 [.003, .350], β .161 ของ H2 ตรงกับตารางที่ 7.4 ชั้นข้อมูลตรงกับตารางที่ 13.3 ถ้อยคำข้อจริยธรรมเรื่องการใช้ปัญญาประดิษฐ์ในประกาศ ก.พ.อ. ฉบับที่ 3 พ.ศ. 2568 และแบบ ก.พ.อ.03 ยังไม่ได้ตรวจตัวบท ผู้เขียนต้องตรวจก่อนใช้แอปนี้อ้างอิงเกณฑ์</footer>
+</main>
+
+<script>
+/* ===== pure logic ===== */
+const PARTS=[
+ {k:'verb',label:'ความสัมพันธ์',opts:['ทำให้','สัมพันธ์ทางบวกกับ'],a:1,why:'ข้อมูลตัดขวางจากแบบสอบถามรอบเดียวไม่รองรับคำเชิงสาเหตุ'},
+ {k:'dv',label:'ตัวแปรตาม',opts:['การใช้ TSA for LCE','ความตั้งใจใช้ (AI)'],a:1,why:'H1–H8 ทำนายความตั้งใจ การใช้จริงอยู่ใน H11 ซึ่งทดสอบเฉพาะ CPA'},
+ {k:'unit',label:'หน่วยของผล',opts:['เพิ่มขึ้น 16%','β = .161 (B = .176)'],a:1,why:'β มีหน่วยเป็นส่วนเบี่ยงเบนมาตรฐาน ส่วน B คือหนึ่งหน่วยของมาตร 7 ระดับ ไม่มีค่าใดเป็นร้อยละ'},
+ {k:'status',label:'สถานะ H2',opts:['สนับสนุน H2','ยังไม่สนับสนุนหลังปรับ Holm'],a:1,why:'p ดิบ .047 แต่ p หลังปรับ Holm .280 ตามการปรับ H1–H8 ทั้งชุดที่บทที่ 7 เสนอ (โครงร่างฉบับที่ 1.5 ใช้ Holm กับ H9–H10 เท่านั้น)'}];
+function auditParts(ans){return PARTS.map((p,i)=>ans[i]===p.a);}
+const HYP=[['H1','RA',0.4885],['H2','CP',0.04659],['H3','CX',1.134e-6],['H4','TR',0.6263],['H5','OB',0.5067],['H6','CO',0.04996],['H7','MI',0.004639],['H8','NO',0.0594]];
+const PRAW=['.4885','.04659','< .001','.6263','.5067','.04996','.004639','.0594'];
+function holm(ps){const m=ps.length,o=ps.map((p,i)=>[p,i]).sort((a,b)=>a[0]-b[0]),adj=new Array(m);let run=0;
+  o.forEach(([p,i],r)=>{run=Math.max(run,Math.min(1,(m-r)*p));adj[i]=run;});return adj;}
+const TIERS=['1 ข้อมูลสังเคราะห์','2 เอกสารที่เปิดเผยแล้ว','3 ข้อมูลจริงที่ไม่ระบุตัว','4 ข้อมูลจำกัดสิทธิ'];
+const ITEMS=[
+ {t:'ไฟล์ ch10_complete.csv ที่สร้างด้วยเมล็ดสุ่มในบทที่ 10',a:0,why:'ข้อมูลสังเคราะห์ ส่งได้ แต่ติดป้ายและตรวจผลก่อนอ้าง'},
+ {t:'ประกาศสภาวิชาชีพบัญชีที่ 32/2568',a:1,why:'เอกสารเปิดเผยแล้ว ส่งได้ตามเงื่อนไขลิขสิทธิ์ และต้องตรวจกับต้นฉบับ'},
+ {t:'ไฟล์คำตอบระยะที่ 1 ที่ไม่มีชื่อผู้ตอบ',a:2,why:'ช่วงประสบการณ์ ประเภทใบอนุญาต และขนาดสำนักงานรวมกันอาจชี้ตัวได้'},
+ {t:'บทถอดความสัมภาษณ์ที่ตัดชื่อแล้ว',a:3,why:'บทถอดความเป็นข้อมูลจำกัดสิทธิ ตัดชื่อแล้วก็ยังส่งไม่ได้'},
+ {t:'ตารางค่าเฉลี่ยรายกลุ่มที่มีกลุ่มย่อย 4 ราย จากข้อมูลจริง',a:2,why:'เป็นข้อมูลจริง และกลุ่มย่อยต่ำกว่า 5 รายขัดหัวข้อ 3.10.6 ที่ห้ามรายงานกลุ่มย่อยน้อยกว่า 5 ราย'},
+ {t:'แบบสอบถามฉบับว่างที่ยื่นคณะกรรมการ',a:1,why:'ไม่มีคำตอบของผู้ใด แต่ควรยืนยันว่าเผยแพร่ได้ตามเงื่อนไขของผู้วิจัยและสถาบัน'},
+ {t:'ไฟล์รหัสเชื่อมโยงที่ผู้ตอบสร้างเอง',a:3,why:'รหัสเชื่อมโยงผูกแบบสอบถามกับแบบติดตาม เป็นข้อมูลจำกัดสิทธิ'},
+ {t:'ข้อความแต่ง 24 ส่วนใน ch11_lab.R',a:0,why:'ข้อความแต่งเพื่อการสอน ส่งได้และต้องติดป้ายทุกครั้ง'}];
+function canSend(tier){return tier<=1;}
+function checkTiers(ans){return ITEMS.map((it,i)=>ans[i]===it.a);}
+const TASKS=['ปรับถ้อยคำ','ร่างเนื้อหา','เขียนโค้ด','สร้างข้อมูลสังเคราะห์','สร้างแอป'];
+function checkDisclosure(did,dis,tier){
+  const missing=TASKS.filter((_,i)=>did[i]&&!dis[i]), extra=TASKS.filter((_,i)=>!did[i]&&dis[i]);
+  if(tier>=2) return {status:'breach',missing,extra};
+  if(!did.some(Boolean)) return {status:'none',missing,extra};
+  return {status:missing.length?'gap':(extra.length?'over':'ok'),missing,extra};}
+function draftStatement(did){const t=TASKS.filter((_,i)=>did[i]);if(!t.length)return '';
+  return `"ผู้เขียนใช้ [เครื่องมือ รุ่น] ช่วย${t.join(' ')} ใน [ส่วน] โดยไม่ได้ป้อนข้อมูลผู้ตอบจริง ผู้เขียนตรวจตัวเลขด้วยการรันโค้ดซ้ำ ตรวจอ้างอิงกับแหล่งต้นทาง แก้ไขตามผลตรวจ และรับผิดชอบเนื้อหาทั้งหมด"`;}
+const QUIZ=[
+ {lo:'LO1',stem:'ผลของ H2 ในตารางที่ 7.4 คือ B .176 [.003, .350], β .161, p .047, p หลังปรับ Holm .280 ประโยคใดถูก',opts:['ความเข้ากันได้ทำให้ความตั้งใจเพิ่ม 16.1%','ความเข้ากันได้สัมพันธ์ทางบวกกับความตั้งใจ แต่หลังปรับ Holm ยังไม่สนับสนุน H2','H2 ได้รับการสนับสนุนเพราะ p < .05','ช่วงความเชื่อมั่นไม่คร่อมศูนย์ จึงสรุปเชิงสาเหตุได้'],a:1,why:'แยกทิศของความสัมพันธ์ออกจากสถานะของสมมติฐาน และไม่แปล β เป็นร้อยละ'},
+ {lo:'LO1',stem:'ทำไม H6 และ H8 จึงมี p หลังปรับ Holm .280 เท่ากับ H2 ทั้งที่ p ดิบต่างกัน',opts:['เพราะปัดเศษ','Holm บังคับให้ค่าที่ปรับแล้วไม่ลดลงตามลำดับ ค่าของ H6 และ H8 จึงถูกยกขึ้นเท่ากับค่าก่อนหน้า','เพราะใช้ Bonferroni','เพราะตัวแปรสัมพันธ์กัน'],a:1,why:'ค่าดิบคูณ 5 และ 4 ได้ .250 และ .238 ซึ่งต่ำกว่า .280 ของลำดับก่อนหน้า จึงยกขึ้นเป็น .280'},
+ {lo:'LO2',stem:'ไฟล์คำตอบระยะที่ 1 ที่ลบชื่อแล้วอยู่ชั้นใด และส่งเข้า GenAI ได้หรือไม่',opts:['ชั้น 1 ส่งได้','ชั้น 2 ส่งได้ถ้าตรวจต้นฉบับ','ชั้น 3 ส่งไม่ได้ เพราะลักษณะหลายตัวรวมกันอาจชี้ตัวได้','ชั้น 4 ส่งได้ถ้าเข้ารหัส'],a:2,why:'การไม่มีชื่อไม่เท่ากับไม่ระบุตัว โดยเฉพาะในกลุ่มวิชาชีพที่มีจำนวนจำกัด'},
+ {lo:'LO2',stem:'นักศึกษาใช้คุณสมบัติสรุปด้วย AI ใน NVivo กับบทถอดความจริง ข้อใดถูก',opts:['ไม่นับว่าใช้ GenAI เพราะเป็นโปรแกรมลงรหัส','นับว่าใช้ และผิดเงื่อนไขเพราะบทถอดความเป็นข้อมูลชั้น 4','ใช้ได้ถ้าเปิดเผยในรายงาน','ใช้ได้ถ้าตัดชื่อก่อน'],a:1,why:'คุณสมบัติ AI ที่ฝังในโปรแกรมก็ส่งข้อมูลออกไปประมวลผล บทที่ 11 เสนอให้ปิดเมื่อใช้ข้อมูลจริง'},
+ {lo:'LO3',stem:'GenAI ช่วยเขียนโค้ดและสร้างข้อมูลสังเคราะห์ แต่คำเปิดเผยเขียนว่า "ใช้ปรับถ้อยคำ" ปัญหาคืออะไร',opts:['ไม่มีปัญหา','คำเปิดเผยไม่ครอบคลุมหน้าที่ที่ GenAI ทำจริง','ควรระบุ GenAI เป็นผู้แต่งร่วม','ต้องแนบบทสนทนาทั้งหมด'],a:1,why:'COPE (2023) ให้เปิดเผยว่าใช้อย่างไร และเครื่องมือ AI เป็นผู้แต่งไม่ได้'},
+ {lo:'LO3',stem:'ถ้านักศึกษาพบว่าตนเคยส่งคำตอบรายคนจริงเข้า GenAI ควรทำอย่างไร',opts:['เขียนคำเปิดเผยให้ละเอียด','ลบประวัติแชตแล้วไม่ต้องทำอะไร','หยุดใช้ บันทึกข้อเท็จจริง และรายงานคณะกรรมการจริยธรรมตามขั้นตอนของสถาบัน','ใช้ผลนั้นต่อเพราะไม่มีชื่อ'],a:2,why:'การผิดเงื่อนไขโครงร่างแก้ด้วยคำเปิดเผยไม่ได้'},
+ {lo:'LO4',stem:'ทำไมบทที่ 13 จึงเสนอให้รวมข้อเสนอแก้ไขเครื่องมือจากหลายบทยื่นเป็นชุดเดียว',opts:['เพื่อประหยัดค่าธรรมเนียม','เพราะการแก้จุดหนึ่งกระทบจุดอื่น เช่น ตัวเลือกไม่แน่ใจใน AA0 กระทบคำถามเจาะในแนวสัมภาษณ์','เพราะคณะกรรมการรับเรื่องปีละครั้ง','เพราะแก้แล้วไม่ต้องรอการรับรอง'],a:1,why:'AA0 ตัวเลือกไม่แน่ใจอยู่ในโครงร่างฉบับที่ 1.5 แล้ว แต่แนวสัมภาษณ์ยังไม่ปรับตาม ทุกการเปลี่ยนแปลงต้องรอการรับรองก่อนใช้กับข้อมูลจริง'},
+ {lo:'LO5',stem:'ข้อใดเป็นหลักฐานระดับ A+ ที่ต้นฉบับตำราเตรียมได้เอง',opts:['การอ้างอิงจากต่างประเทศหลังพิมพ์','ข้อเสนอเชิงทฤษฎีที่ทดสอบได้ ชุดข้อมูลสังเคราะห์และโค้ดที่ผู้อื่นใช้ต่อได้','คะแนนตรวจภายในที่ผู้เขียนให้ตนเอง','จำนวนหน้าที่มากขึ้น'],a:1,why:'การยอมรับระดับนานาชาติเป็นหลักฐานหลังเผยแพร่ ต้นฉบับทำได้เพียงให้พร้อมถูกอ้างอิง'}];
+/* ===== UI ===== */
+if(typeof document!=='undefined'){
+  const $=id=>document.getElementById(id);
+  $('parts').style.gridTemplateColumns='repeat(auto-fit,minmax(200px,1fr))';
+  $('parts').innerHTML=PARTS.map((p,i)=>`<div class="num"><label for="p${i}">${p.label}</label><select id="p${i}" style="width:100%"><option value="">เลือก</option>${p.opts.map((o,j)=>`<option value="${j}">${o}</option>`).join('')}</select><div id="pr${i}" style="font-size:.85rem;margin-top:4px"></div></div>`).join('');
+  $('c1').onclick=()=>{const ans=PARTS.map((_,i)=>$('p'+i).value===''?null:+$('p'+i).value),ok=auditParts(ans);let n=0;
+    ok.forEach((v,i)=>{if(v)n++;$('pr'+i).innerHTML=ans[i]===null?'ยังไม่เลือก':`<span class="mark ${v?'ok':'no'}">${v?'ถูก':'ยังไม่ถูก'}</span> ${PARTS[i].why}`;});
+    $('s1').textContent=`ถูก ${n}/4`;$('m1').hidden=false;
+    $('m1').textContent=n===4?'ประโยคที่แก้แล้ว: ความเข้ากันได้สัมพันธ์ทางบวกกับความตั้งใจใช้ TSA for LCE (B = .176, 95% CI [.003, .350], β = .161, p = .047) แต่เมื่อปรับ Holm สำหรับ H1–H8 ตามที่บทที่ 7 เสนอ (p = .280) ผลยังไม่สนับสนุน H2 (ข้อมูลสังเคราะห์)':'แก้ส่วนที่ยังไม่ถูกแล้วตรวจอีกครั้ง';};
+  function lab1(){const a=+$('alpha').value||0.05,adj=holm(HYP.map(h=>h[2]));
+    const f=p=>p<0.001?'< .001':p.toFixed(3).replace(/^0/,'');
+    $('b1').innerHTML=HYP.map((h,i)=>`<tr><td>${h[0]}</td><td>${h[1]}</td><td>${PRAW[i]}</td><td>${f(adj[i])}</td><td>${adj[i]<a?'<span class="mark ok">สนับสนุนหลังปรับ</span>':(h[2]<a?'<span class="mark no">มีนัยสำคัญก่อนปรับเท่านั้น</span>':'ไม่มีนัยสำคัญ')}</td></tr>`).join('');}
+  $('alpha').addEventListener('input',lab1);lab1();
+  $('b2').innerHTML=ITEMS.map((it,i)=>`<tr><td>${it.t}</td><td><select id="t${i}" aria-label="ชั้นของรายการ ${i+1}"><option value="">เลือก</option>${TIERS.map((t,j)=>`<option value="${j}">${t}</option>`).join('')}</select></td><td id="tr${i}"></td></tr>`).join('');
+  $('c2').onclick=()=>{const ans=ITEMS.map((_,i)=>$('t'+i).value===''?null:+$('t'+i).value),ok=checkTiers(ans);let n=0;
+    ok.forEach((v,i)=>{if(v)n++;const it=ITEMS[i];$('tr'+i).innerHTML=ans[i]===null?'<small>ยังไม่เลือก</small>':`<span class="mark ${v?'ok':'no'}">${v?'ถูก':'ควรเป็นชั้น '+TIERS[it.a]}</span> · ${canSend(it.a)?'ส่งเข้า GenAI ได้':'<b>ส่งไม่ได้</b>'}<br><small>${it.why}</small>`;});
+    $('s2').textContent=`ถูก ${n}/${ITEMS.length}`;};
+  const init=[false,true,true,true,false];
+  $('did').insertAdjacentHTML('beforeend',TASKS.map((t,i)=>`<label class="opt"><input type="checkbox" id="d${i}" ${init[i]?'checked':''}> ${t}</label>`).join(''));
+  $('dis').insertAdjacentHTML('beforeend',TASKS.map((t,i)=>`<label class="opt"><input type="checkbox" id="e${i}" ${i===0?'checked':''}> ${t}</label>`).join(''));
+  let tier=0;$('tier').innerHTML=TIERS.map((t,j)=>`<button type="button" data-t="${j}" aria-pressed="${j===0}">${t}</button>`).join('');
+  function lab3(){const did=TASKS.map((_,i)=>$('d'+i).checked),dis=TASKS.map((_,i)=>$('e'+i).checked),r=checkDisclosure(did,dis,tier),m=$('m3');
+    m.className='msg'+(r.status==='ok'||r.status==='none'?'':' warn');
+    m.textContent={breach:'ป้อนข้อมูลจริงชั้น 3 หรือ 4 เข้า GenAI ผิดเงื่อนไขโครงร่าง ต้องหยุด บันทึกข้อเท็จจริง และรายงานคณะกรรมการ คำเปิดเผยแก้ปัญหานี้ไม่ได้',
+      none:'ไม่ได้ใช้ GenAI ไม่ต้องมีคำเปิดเผย แต่ตรวจคุณสมบัติ AI ที่ฝังในโปรแกรมด้วย',
+      gap:`คำเปิดเผยขาด: ${r.missing.join(', ')}`+(r.extra.length?` และระบุเกินที่ทำจริง: ${r.extra.join(', ')}`:''),over:`คำเปิดเผยระบุเกินที่ทำจริง: ${r.extra.join(', ')} ควรแก้ให้ตรงบันทึก`,ok:'คำเปิดเผยตรงกับบันทึก'}[r.status];
+    $('draft').textContent=r.status==='breach'?'':'ร่างคำเปิดเผย (ปรับตามการใช้จริง): '+draftStatement(did);}
+  document.querySelectorAll('#did input,#dis input').forEach(el=>el.addEventListener('change',lab3));
+  $('tier').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;tier=+b.dataset.t;[...$('tier').children].forEach(x=>x.setAttribute('aria-pressed',x===b));lab3();});
+  lab3();
+  let answered={};
+  function drawQuiz(){answered={};
+    $('quiz').innerHTML=QUIZ.map((q,i)=>`<div class="q"><div class="lo">${q.lo}</div><div class="stem">${i+1}. ${q.stem}</div>`+q.opts.map((o,j)=>j).sort((x,y)=>((x*3+i)%4)-((y*3+i)%4)).map(j=>`<label class="opt"><input type="radio" name="q${i}" value="${j}"> ${q.opts[j]}</label>`).join('')+`<div class="fb" id="fb${i}"></div></div>`).join('');
+    QUIZ.forEach((q,i)=>document.querySelectorAll(`input[name=q${i}]`).forEach(el=>el.addEventListener('change',()=>{const ok=+el.value===q.a;answered[i]=ok;const fb=$('fb'+i);fb.className='fb show '+(ok?'ok':'no');fb.textContent=(ok?'ถูกต้อง. ':'ยังไม่ใช่. ')+q.why;score();})));
+    score();}
+  function score(){const k=Object.keys(answered).length,c=Object.values(answered).filter(Boolean).length;$('qscore').textContent=k?`ตอบแล้ว ${k}/${QUIZ.length} · ถูก ${c}`:`${QUIZ.length} ข้อ`;}
+  $('qreset').onclick=drawQuiz; drawQuiz();
+}
+if(typeof module!=='undefined') module.exports={PARTS,auditParts,HYP,holm,ITEMS,checkTiers,canSend,TASKS,checkDisclosure,draftStatement,QUIZ};
+</script>
+</body>
+</html>

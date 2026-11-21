@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แอปบทที่ 6 ความเชื่อมั่นและความตรง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f5f7; --paper:#ffffff; --ink:#15233a; --muted:#5a6678; --line:#d5dbe3;
+  --accent:#0d6466; --accent-soft:#e1efef; --gate:#a86a12; --gate-soft:#f7ecd9;
+  --ok:#2f7d32; --stop:#b3261e; --stop-soft:#f8e3e1;
+  --display:"Noto Serif Thai",Georgia,serif; --body:"Noto Sans Thai",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0f1620; --paper:#17212d; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3a4a;
+  --accent:#4fb8b4; --accent-soft:#163334; --gate:#e2a54a; --gate-soft:#3a2c14;
+  --ok:#74c27a; --stop:#f08a80; --stop-soft:#3c1d1b; color-scheme:dark;}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.65;font-size:16px}
+main{max-width:980px;margin:0 auto;padding:24px 16px 48px;display:grid;gap:24px}
+.brand{display:inline-flex;align-items:center;gap:12px;background:#ffffff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin-bottom:14px}
+.brand img{height:40px;width:auto;display:block}
+.brand .org{font-family:var(--display);font-weight:700;font-size:1.15rem;color:#15233a;border-left:2px solid #d5dbe3;padding-left:12px;line-height:1.2}
+header h1{font-family:var(--display);font-size:1.7rem;line-height:1.3;margin:0 0 6px;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:68ch}
+.note{font-size:.88rem;color:var(--muted);border-left:3px solid var(--gate);padding:4px 10px;background:var(--gate-soft);border-radius:0 6px 6px 0}
+section.lab{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px}
+section.lab h2{font-family:var(--display);font-size:1.25rem;margin:0 0 4px}
+.lab-tag{font-size:.8rem;color:var(--accent);font-weight:700;letter-spacing:.02em}
+.lab > p{margin:4px 0 14px;color:var(--muted);max-width:70ch}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:620px){.grid4{grid-template-columns:1fr 1fr}}
+.num label{display:block;font-size:.85rem;color:var(--muted)}
+.num input{width:100%;font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:10px}
+.stat{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.stat .k{font-size:.8rem;color:var(--muted)} .stat .v{font-size:1.2rem;font-weight:700;font-variant-numeric:tabular-nums}
+.stat.warn{border-color:var(--stop);background:var(--stop-soft)}
+.msg{font-size:.92rem;padding:8px 12px;border-radius:8px;background:var(--accent-soft);margin-top:10px}
+.msg.warn{background:var(--stop-soft)}
+canvas{width:100%;height:auto;display:block;margin-top:12px}
+label.opt{display:flex;gap:8px;align-items:flex-start;padding:3px 0;cursor:pointer}
+fieldset{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0}
+legend{font-weight:700;font-size:.92rem;padding:0 4px}
+button.main{font:inherit;font-weight:700;padding:8px 14px;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gate);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.score{font-weight:700;font-variant-numeric:tabular-nums}
+.q{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.q .stem{font-weight:500;margin-bottom:6px}
+.q .lo{font-size:.78rem;color:var(--gate);font-weight:700}
+.q .fb{margin-top:6px;font-size:.92rem;padding:6px 10px;border-radius:6px;display:none}
+.q .fb.show{display:block}
+.q .fb.ok{background:var(--accent-soft)} .q .fb.no{background:var(--stop-soft)}
+footer{font-size:.85rem;color:var(--muted)}
+select{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);max-width:100%}
+table.res{width:100%;border-collapse:collapse;font-size:.92rem;min-width:560px}
+table.res th,table.res td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.res th{font-size:.8rem;color:var(--muted)}
+.tbl{overflow-x:auto}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.seg button{font:inherit;font-size:.9rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.mark{font-weight:700}.mark.ok{color:var(--ok)}.mark.no{color:var(--stop)}
+</style>
+<style>@media (max-width:640px){body *{min-width:0}table{display:block;overflow-x:auto;max-width:100%}th,td{white-space:normal}select,input,canvas,img,svg{max-width:100%}[class*=grid],.row,.seg,.stats{grid-template-columns:1fr!important;flex-wrap:wrap}pre{overflow-x:auto;white-space:pre-wrap}}</style></head>
+<body><style>#gate{position:fixed;inset:0;background:#F2F7FB;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:Sarabun,'Noto Sans Thai',sans-serif}
+#gate .gb{background:#fff;border-top:4px solid #1F3864;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.08);padding:28px 26px;max-width:380px;width:88%;color:#222}
+#gate h2{color:#1F3864;font-size:19px;margin:0 0 6px}#gate p{font-size:14px;margin:0 0 14px;line-height:1.6}
+#gate .row{display:flex;gap:6px}#gate input[type=password],#gate input[type=text]{flex:1;font-size:16px;padding:9px 10px;border:1px solid #b8c4d4;border-radius:6px}
+#gate button{font-family:inherit;font-size:15px;border:0;border-radius:6px;padding:9px 14px;cursor:pointer}#gate .sh{background:#E3E9F1;color:#1F3864}#gate .go{background:#1F3864;color:#fff;width:100%;margin-top:12px}
+#gate label{font-size:13px;display:flex;gap:6px;align-items:center;margin-top:10px}#gate .err{color:#A93226;font-size:13px;min-height:18px;margin-top:8px}</style>
+<div id="gate"><div class="gb"><h2>แอปประจำตำรา</h2><p>สำหรับผู้อ่านตำรา<br><b>SEM และ GenAI ในการวิจัยทางบัญชีและการสอบบัญชี</b><br>ใส่รหัสเข้าแอปที่พิมพ์ไว้ในตำรา</p>
+<div class="row"><input id="gk" type="password" autocomplete="off" placeholder="รหัสเข้าแอป"><button class="sh" type="button" onclick="var i=document.getElementById('gk');i.type=i.type==='password'?'text':'password'">แสดง</button></div>
+<label><input id="gr" type="checkbox"> จำรหัสในเครื่องนี้</label><button class="go" type="button" id="gg">เปิดแอป</button><div class="err" id="ge"></div></div></div>
+<script>(function(){var H="467e451224101a2f5f9b367b93804929e3d8a0a9be77cb73f13736ca0c64e694",K="semgenai_gate";
+function ok(){var g=document.getElementById('gate');if(g)g.remove();}
+try{if(localStorage.getItem(K)===H||sessionStorage.getItem(K)===H){ok();return;}}catch(e){}
+async function chk(){var v=document.getElementById('gk').value.replace(/[\s\-]/g,'').toUpperCase();
+var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));var h=Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('');
+if(h===H){try{(document.getElementById('gr').checked?localStorage:sessionStorage).setItem(K,H)}catch(e){}ok();}else{document.getElementById('ge').textContent='รหัสไม่ถูกต้อง โปรดดูรหัสที่พิมพ์ไว้ในตำรา';}}
+document.getElementById('gg').onclick=chk;document.getElementById('gk').addEventListener('keydown',function(e){if(e.key==='Enter')chk();});})();</script><div style="font-family:Sarabun,sans-serif;font-size:13px;padding:8px 14px;background:#1F3864"><a href="index.html" style="color:#fff;text-decoration:none">← สารบัญแอปประจำตำรา</a></div>
+<main>
+<header>
+  <div class="brand"><img src="logo.png" alt="Dr VIT" width="154" height="40"><span class="org">Siam edu.</span></div>
+  <h1>แอปบทที่ 6 ความเชื่อมั่นและความตรงของแบบวัด</h1>
+  <p>ใช้คู่กับบทที่ 6 มีสามใบงาน: คำนวณ CR และ AVE จากน้ำหนักมาตรฐานและดูผลเมื่อตัดข้อ อ่านเมทริกซ์ HTMT คู่กับเกณฑ์ Fornell–Larcker และดูว่า α จากการนำร่องขนาดต่าง ๆ กระจายกว้างเพียงใด แล้วปิดด้วยแบบทดสอบ</p>
+  <p class="note" style="margin-top:10px">ตัวเลขทั้งหมดมาจาก ch6_lab.R บนชุดข้อมูลสังเคราะห์ของเล่ม (n = 320) ไม่ใช่ผลวิจัยหรือผลนำร่องจริง ห้ามนำข้อมูลผู้ตอบจริงมาใส่ในแอปนี้หรือในเครื่องมือ GenAI</p>
+</header>
+
+<section class="lab" aria-labelledby="l1">
+  <div class="lab-tag">ใบงาน 1 · LO1 · LO2</div>
+  <h2 id="l1">CR และ AVE จากน้ำหนักมาตรฐาน</h2>
+  <p>เลือกปัจจัยเพื่อโหลดน้ำหนักมาตรฐานจาก CFA บทที่ 5 หรือพิมพ์น้ำหนักเอง ติ๊กออกเพื่อดูผลเมื่อตัดข้อ เกณฑ์ตามโครงร่าง: CR ≥ .70, น้ำหนัก ≥ .50, AVE ≥ .50</p>
+  <div class="row"><div class="num" style="min-width:160px"><label for="fac">ปัจจัย</label><select id="fac" style="width:100%"></select></div></div>
+  <div class="grid4" id="ld" style="margin-top:10px"></div>
+  <div class="stats" id="st1"></div>
+  <div class="msg" id="m1"></div>
+</section>
+
+<section class="lab" aria-labelledby="l2">
+  <div class="lab-tag">ใบงาน 2 · LO3</div>
+  <h2 id="l2">เมทริกซ์ HTMT และ Fornell–Larcker</h2>
+  <p>สามเหลี่ยมบนคือ HTMT สามเหลี่ยมล่างคือสหสัมพันธ์ปัจจัย และแนวทแยงคือรากที่สองของ AVE เลือกเกณฑ์ HTMT แล้วดูว่าช่องใดถูกเน้น คลิกช่องใดก็ได้เพื่ออ่านผล</p>
+  <div class="seg" role="group" aria-label="เกณฑ์ HTMT" id="thr"></div>
+  <div class="tbl"><table class="res" id="mx" style="min-width:620px;text-align:center"></table></div>
+  <div class="msg" id="m2">คลิกช่องในตารางเพื่ออ่านผลของคู่นั้น</div>
+</section>
+
+<section class="lab" aria-labelledby="l3">
+  <div class="lab-tag">ใบงาน 3 · LO4</div>
+  <h2 id="l3">α จากการนำร่องแม่นแค่ไหน</h2>
+  <p>ผลจากการสุ่มกลุ่มนำร่องแบบใส่คืนจากชุดกลาง 1,000 รอบ (ตารางที่ 6.4 และ ch6_pilot_alpha.csv) เลือกปัจจัยและขนาดนำร่อง แถบสีแสดงช่วงเปอร์เซ็นไทล์ 5 ถึง 95 เส้นประคือเกณฑ์ .70</p>
+  <div class="row"><div class="num" style="min-width:140px"><label for="pf">ปัจจัย</label><select id="pf" style="width:100%"></select></div>
+    <div class="seg" role="group" aria-label="ขนาดนำร่อง" id="pn" style="margin:0"></div></div>
+  <canvas id="cv" width="900" height="300" aria-label="แผนภาพช่วงของ alpha จากการนำร่อง"></canvas>
+  <div class="msg" id="m3"></div>
+</section>
+
+<section class="lab" aria-labelledby="l4">
+  <div class="lab-tag">แบบทดสอบ · LO1–LO5</div>
+  <h2 id="l4">แบบทดสอบท้ายบท</h2>
+  <p>ตอบทีละข้อ คำอธิบายจะแสดงทันทีหลังเลือก</p>
+  <div id="quiz"></div>
+  <div class="row"><span class="score" id="qscore"></span><button type="button" class="main" id="qreset">เริ่มใหม่</button></div>
+</section>
+
+<footer>น้ำหนักมาตรฐาน สหสัมพันธ์ปัจจัย HTMT (สูตรค่าเฉลี่ยเลขคณิตตาม Henseler และคณะ 2015, semTools 0.5.6 htmt2 = FALSE) และผลการจำลองการนำร่องมาจาก ch6_lab.R (R 4.3.3, lavaan 0.6.17) แบบจำลองเดียวกับบทที่ 5 (χ² = 364.36, df = 369) ข้อเสนอให้รายงาน α พร้อมช่วงความเชื่อมั่นและรอ CFA ก่อนตัดข้อเป็นข้อเสนอของตำรา ไม่ใช่แผนในโครงร่าง ค่า CR และ AVE ในใบงาน 1 คำนวณจากน้ำหนักที่ปัดสามตำแหน่ง จึงอาจต่างจากตารางที่ 6.2 ในหลักที่สาม</footer>
+</main>
+
+<script>
+/* ===== pure logic ===== */
+const FAC=['RA','CP','CX','TR','OB','CO','MI','NO','AI'];
+const LD={RA:[.751,.744,.736,.689],CP:[.717,.701,.708],CX:[.729,.764,.803],TR:[.803,.702,.635],OB:[.780,.734,.645],CO:[.738,.714,.736],MI:[.740,.738,.729],NO:[.769,.767,.640,.695],AI:[.772,.700,.700,.677]};
+function crAve(l){const s=l.reduce((a,b)=>a+b,0),e=l.reduce((a,b)=>a+(1-b*b),0);return {cr:s*s/(s*s+e),ave:l.reduce((a,b)=>a+b*b,0)/l.length,min:Math.min(...l),n:l.length};}
+const PHI=[[1,.473,-.205,.281,.387,.200,.318,.287,.338],[.473,1,-.199,.405,.374,.232,.360,.324,.449],[-.205,-.199,1,-.088,-.128,-.218,-.198,-.170,-.423],[.281,.405,-.088,1,.374,.263,.261,.277,.369],
+ [.387,.374,-.128,.374,1,.183,.364,.222,.326],[.200,.232,-.218,.263,.183,1,.293,.319,.340],[.318,.360,-.198,.261,.364,.293,1,.219,.429],[.287,.324,-.170,.277,.222,.319,.219,1,.409],[.338,.449,-.423,.369,.326,.340,.429,.409,1]];
+const HT=[[1,.488,.201,.281,.388,.185,.326,.293,.331],[.488,1,.199,.395,.387,.231,.356,.327,.443],[.201,.199,1,.085,.118,.211,.190,.181,.425],[.281,.395,.085,1,.399,.246,.227,.266,.348],
+ [.388,.387,.118,.399,1,.193,.364,.241,.310],[.185,.231,.211,.246,.193,1,.291,.311,.343],[.326,.356,.190,.227,.364,.291,1,.207,.393],[.293,.327,.181,.266,.241,.311,.207,1,.407],[.331,.443,.425,.348,.310,.343,.393,.407,1]];
+const AVE={RA:.533,CP:.502,CX:.586,TR:.514,OB:.521,CO:.532,MI:.541,NO:.518,AI:.509};
+const HTCI={'RA-CP':[.379,.602],'CP-AI':[.308,.568],'CX-AI':[.308,.532]};
+function flPass(i,j){const r=Math.abs(PHI[i][j]);return r<Math.sqrt(AVE[FAC[i]])&&r<Math.sqrt(AVE[FAC[j]]);}
+const PIL={};[['30','RA',.821,.693,.816,.888,.059],['30','CP',.747,.56,.74,.845,.311],['30','CX',.812,.669,.806,.882,.096],['30','TR',.766,.567,.76,.86,.27],['30','OB',.746,.545,.743,.854,.327],['30','CO',.779,.606,.775,.868,.214],['30','MI',.778,.585,.771,.868,.217],['30','NO',.808,.633,.803,.892,.145],['30','AI',.812,.679,.811,.882,.068],
+ ['40','RA',.821,.716,.819,.881,.034],['40','CP',.747,.589,.744,.835,.278],['40','CX',.812,.696,.806,.877,.055],['40','TR',.766,.607,.764,.852,.209],['40','OB',.746,.551,.741,.844,.302],['40','CO',.779,.651,.775,.854,.158],['40','MI',.778,.63,.778,.856,.16],['40','NO',.808,.663,.803,.881,.103],['40','AI',.812,.699,.81,.875,.052],
+ ['50','RA',.821,.723,.817,.877,.026],['50','CP',.747,.607,.747,.834,.244],['50','CX',.812,.711,.811,.873,.04],['50','TR',.766,.636,.768,.847,.181],['50','OB',.746,.6,.742,.831,.275],['50','CO',.779,.657,.779,.851,.131],['50','MI',.778,.647,.777,.852,.135],['50','NO',.808,.691,.808,.875,.066],['50','AI',.812,.721,.811,.867,.027]]
+ .forEach(r=>{PIL[r[0]+r[1]]={full:r[2],p05:r[3],med:r[4],p95:r[5],below:r[6]};});
+const QUIZ=[
+ {lo:'LO1',stem:'เมื่อใด α จึงเท่ากับความเชื่อมั่นจริง',opts:['เมื่อมีข้อคำถามมากกว่าสามข้อ','เมื่อทุกข้อมีน้ำหนักเท่ากันและความคลาดเคลื่อนไม่สัมพันธ์กัน','เมื่อ α ≥ .70','เมื่อใช้มาตร 7 ระดับ'],a:1,why:'เมื่อน้ำหนักต่างกัน α มักต่ำกว่าความเชื่อมั่นจริง แต่ถ้าความคลาดเคลื่อนสัมพันธ์กันทางบวก α อาจสูงเกินจริง'},
+ {lo:'LO1',stem:'ในตารางที่ 6.2 OB มี α (.746) ต่ำกว่า ω (.766) มากที่สุด ส่วน TR มีช่วงน้ำหนักกว้างกว่าแต่ α สูงกว่า ω ข้อสรุปใดเหมาะที่สุด',opts:['น้ำหนักไม่เท่ากันอธิบายความต่างได้ทั้งหมด','ความต่างระดับนี้มาจากตัวอย่างและค่าขาดเป็นหลัก เพราะ α ใช้เฉพาะรายที่ตอบครบ ส่วน ω มาจากแบบจำลองที่ใช้ FIML','TR คำนวณผิด','ควรรายงานเฉพาะ ω'],a:1,why:'ทฤษฎีที่ว่า α ต่ำกว่า ω เมื่อน้ำหนักไม่เท่ากันใช้เมื่อคำนวณจากรายชุดเดียวกัน TR (.635–.803) กว้างกว่า OB (.645–.780) แต่ α สูงกว่า ω และ CX, CO, AI ก็เช่นกัน ความต่างเล็กน้อยในตารางจึงมาจากตัวอย่างและค่าขาดเป็นหลัก'},
+ {lo:'LO2',stem:'น้ำหนักมาตรฐาน .80, .70 และ .60 ให้ AVE เท่าใด',opts:['.700','.497','.745','.500'],a:1,why:'(.64 + .49 + .36)/3 = .497 ต่ำกว่า .50 เล็กน้อยทั้งที่ CR = .745 ผ่าน'},
+ {lo:'LO3',stem:'ทำไม Henseler และคณะ (2015) จึงเสนอ HTMT แทน Fornell–Larcker',opts:['เพราะคำนวณง่ายกว่า','เพราะการจำลองพบว่า Fornell–Larcker มักตรวจไม่พบปัญหาความตรงเชิงจำแนกที่มีอยู่จริง','เพราะ HTMT ไม่ต้องใช้ข้อมูล','เพราะ Fornell–Larcker ใช้ได้เฉพาะ PLS'],a:1,why:'โครงร่างจึงใช้ทั้งสองเกณฑ์คู่กัน'},
+ {lo:'LO3',stem:'HTMT ของ RA–CP = .488 [95% CI .379, .602] ข้อสรุปใดถูก',opts:['RA กับ CP เป็นตัวแปรเดียวกัน','ขอบบนของช่วงต่ำกว่า .85 จึงมีหลักฐานว่าแยกกันได้ในข้อมูลชุดนี้','ต้องรวมสองปัจจัย','HTMT ใช้ไม่ได้เมื่อปัจจัยสัมพันธ์กัน'],a:1,why:'การดูขอบบนของช่วงความเชื่อมั่นเข้มกว่าการดูค่าจุดเดียว'},
+ {lo:'LO4',stem:'OB มี α ในชุดกลาง .746 การนำร่อง 40 รายให้ α ต่ำกว่า .70 ราวกี่เปอร์เซ็นต์ของรอบ',opts:['ราว 3%','ราว 30%','ราว 70%','0%'],a:1,why:'30.2% ของรอบ ค่า .68 จากการนำร่องครั้งเดียวจึงไม่ใช่หลักฐานพอให้ตัดข้อ'},
+ {lo:'LO4',stem:'การเพิ่มขนาดนำร่องจาก 40 เป็น 50 รายลดโอกาสที่ OB ไม่ผ่านจาก 30.2% เหลือเท่าใด',opts:['ราว 5%','ราว 27.5%','0%','ราว 15%'],a:1,why:'เพิ่มคนเพียงสิบคนลดความไม่แน่นอนได้น้อย เกณฑ์ตัดสินจากค่าเดียวจึงยังเสี่ยง'},
+ {lo:'LO5',stem:'ข้อใดเป็นการป้องกันอคติจากวิธีการวัดร่วมเชิงกระบวนการที่โครงร่างทำแล้ว',opts:['Harman single-factor test','แยกส่วนตัวแปรอิสระกับตัวแปรตามและย้ำการไม่ระบุตัวตน','เพิ่มปัจจัยวิธีการวัดในแบบจำลอง','ใช้ GenAI ตรวจคำตอบ'],a:1,why:'Harman และแบบจำลองปัจจัยวิธีการวัดเป็นการตรวจเชิงสถิติในบทที่ 7 ส่วนการเพิ่มคำชี้แจงใหม่ต้องผ่านการแก้ไขโครงร่าง'}];
+/* ===== UI ===== */
+if(typeof document!=='undefined'){
+  const $=id=>document.getElementById(id), f3=x=>(x<0?'−':'')+Math.abs(x).toFixed(3).replace(/^0/,'');
+  const st=(lab,v,w)=>`<div class="stat ${w?'warn':''}"><div class="k">${lab}</div><div class="v">${v}</div></div>`;
+  const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  $('fac').innerHTML=FAC.map(f=>`<option ${f==='OB'?'selected':''}>${f}</option>`).join('');
+  function draw1(){const f=$('fac').value;
+    $('ld').innerHTML=LD[f].map((v,i)=>`<div class="num"><label for="w${i}"><input type="checkbox" id="k${i}" checked> ${f}${i+1}</label><input id="w${i}" type="number" min="0" max="0.99" step="0.01" value="${v}"></div>`).join('');
+    $('ld').querySelectorAll('input').forEach(el=>el.addEventListener('input',calc1));calc1();}
+  function calc1(){const f=$('fac').value,l=LD[f].map((_,i)=>$('k'+i).checked?+$("w"+i).value:null).filter(x=>x!==null);
+    if(l.length<1){$('st1').innerHTML='';$('m1').textContent='เลือกอย่างน้อยหนึ่งข้อ';return;}
+    const r=crAve(l);$('st1').innerHTML=st('จำนวนข้อ',r.n,r.n<3)+st('CR',f3(r.cr),r.cr<.70)+st('AVE',f3(r.ave),r.ave<.50)+st('√AVE',f3(Math.sqrt(r.ave)))+st('น้ำหนักต่ำสุด',f3(r.min),r.min<.50);
+    $('m1').className='msg'+(r.n<3||r.cr<.70||r.ave<.50?' warn':'');
+    $('m1').textContent=r.n<3?(r.n===2?'เหลือสองข้อ: ปัจจัยระบุเอกลักษณ์ได้เพราะอาศัยสหสัมพันธ์กับปัจจัยอื่นเท่านั้น และอาจแคบกว่านิยามในบทที่ 3':'เหลือข้อเดียว: คำนวณความเชื่อมั่นจากข้อมูลชุดนี้ไม่ได้'):(r.cr>=.70&&r.ave>=.50?'ผ่านเกณฑ์ CR และ AVE ในโครงร่าง รายงานค่าจริง ไม่ใช่เพียงคำว่าผ่าน':'ยังไม่ผ่านอย่างน้อยหนึ่งเกณฑ์ ตรวจเนื้อหาข้อคำถามก่อนตัดสินตัดข้อ');}
+  $('fac').addEventListener('change',draw1);draw1();
+  let thr=.85;$('thr').innerHTML=[.85,.90].map(t=>`<button type="button" data-t="${t}" aria-pressed="${t===.85}">HTMT < ${t.toFixed(2).replace(/^0/,'')}</button>`).join('');
+  function draw2(){let h='<thead><tr><th></th>'+FAC.map(f=>`<th>${f}</th>`).join('')+'</tr></thead><tbody>';
+    FAC.forEach((fi,i)=>{h+=`<tr><th>${fi}</th>`;FAC.forEach((fj,j)=>{let v,cls='';
+      if(i===j){v=f3(Math.sqrt(AVE[fi]));cls='font-weight:700';}else if(j>i){v=f3(HT[i][j]);if(HT[i][j]>=thr)cls='background:var(--stop-soft)';else if(HT[i][j]>=.40)cls='background:var(--gate-soft)';}
+      else{v=f3(PHI[i][j]);if(!flPass(i,j))cls='background:var(--stop-soft)';}
+      h+=`<td data-i="${i}" data-j="${j}" style="cursor:pointer;${cls}">${v}</td>`;});h+='</tr>';});
+    $('mx').innerHTML=h+'</tbody>';}
+  $('thr').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;thr=+b.dataset.t;[...$('thr').children].forEach(x=>x.setAttribute('aria-pressed',x===b));draw2();});
+  $('mx').addEventListener('click',e=>{const c=e.target.closest('td');if(!c)return;let i=+c.dataset.i,j=+c.dataset.j;
+    if(i===j){$('m2').textContent=`√AVE ของ ${FAC[i]} = ${f3(Math.sqrt(AVE[FAC[i]]))} (AVE ${f3(AVE[FAC[i]])})`;return;}
+    if(i>j)[i,j]=[j,i];const key=FAC[i]+'-'+FAC[j],ci=HTCI[key];
+    $('m2').textContent=`${key}: สหสัมพันธ์ปัจจัย ${f3(PHI[i][j])} · √AVE ต่ำกว่าของคู่ ${f3(Math.min(Math.sqrt(AVE[FAC[i]]),Math.sqrt(AVE[FAC[j]])))} · Fornell–Larcker ${flPass(i,j)?'ผ่าน':'ไม่ผ่าน'} · HTMT ${f3(HT[i][j])}${ci?` [95% CI ${f3(ci[0])}, ${f3(ci[1])}]`:''} ${HT[i][j]<thr?'ต่ำกว่า':'ไม่ต่ำกว่า'}เกณฑ์ ${thr.toFixed(2).replace(/^0/,'')}`+(key==='OB-MI'?' · คู่ที่โครงร่างระบุว่าอาจซ้อนกัน':'');});
+  draw2();
+  $('pf').innerHTML=FAC.map(f=>`<option ${f==='OB'?'selected':''}>${f}</option>`).join('');
+  let pn='40';$('pn').innerHTML=['30','40','50'].map(n=>`<button type="button" data-n="${n}" aria-pressed="${n==='40'}">n = ${n}</button>`).join('');
+  function draw3(){const cv=$('cv'),g=cv.getContext('2d'),W=cv.width,H=cv.height,x0=60,x1=W-20,lo=.5,hi=.95,X=v=>x0+(v-lo)/(hi-lo)*(x1-x0);
+    g.clearRect(0,0,W,H);g.font='14px "Noto Sans Thai",sans-serif';g.fillStyle=css('--muted');g.strokeStyle=css('--line');
+    for(let v=.5;v<=.951;v+=.05){g.beginPath();g.moveTo(X(v),30);g.lineTo(X(v),H-40);g.stroke();g.fillText(v.toFixed(2).replace(/^0/,''),X(v)-12,H-20);}
+    g.setLineDash([6,4]);g.strokeStyle=css('--stop');g.lineWidth=2;g.beginPath();g.moveTo(X(.70),20);g.lineTo(X(.70),H-40);g.stroke();g.setLineDash([]);g.lineWidth=1;
+    const f=$('pf').value;['30','40','50'].forEach((n,k)=>{const r=PIL[n+f],y=60+k*70;g.fillStyle=n===pn?css('--accent'):css('--line');g.fillRect(X(r.p05),y,X(r.p95)-X(r.p05),26);
+      g.fillStyle=css('--ink');g.fillRect(X(r.med)-1.5,y-4,3,34);g.fillText('n = '+n,4,y+18);});
+    g.fillStyle=css('--gate');g.beginPath();g.arc(X(PIL['40'+f].full),40,6,0,7);g.fill();g.fillStyle=css('--muted');g.fillText('α ชุดกลาง',X(PIL['40'+f].full)+10,45);
+    const r=PIL[pn+f];$('m3').className='msg'+(r.below>.10?' warn':'');
+    $('m3').textContent=`${f} n = ${pn}: α ชุดกลาง ${f3(r.full)} · เปอร์เซ็นไทล์ 5–95 = ${f3(r.p05)}–${f3(r.p95)} · มัธยฐาน ${f3(r.med)} · ต่ำกว่า .70 ใน ${(r.below*100).toFixed(1)}% ของรอบ`;}
+  $('pf').addEventListener('change',draw3);
+  $('pn').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;pn=b.dataset.n;[...$('pn').children].forEach(x=>x.setAttribute('aria-pressed',x===b));draw3();});
+  draw3();if(window.matchMedia)window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw3);
+  let answered={};
+  function drawQuiz(){answered={};
+    $('quiz').innerHTML=QUIZ.map((q,i)=>`<div class="q"><div class="lo">${q.lo}</div><div class="stem">${i+1}. ${q.stem}</div>`+q.opts.map((o,j)=>j).sort((x,y)=>((x*3+i)%4)-((y*3+i)%4)).map(j=>`<label class="opt"><input type="radio" name="q${i}" value="${j}"> ${q.opts[j]}</label>`).join('')+`<div class="fb" id="fb${i}"></div></div>`).join('');
+    QUIZ.forEach((q,i)=>document.querySelectorAll(`input[name=q${i}]`).forEach(el=>el.addEventListener('change',()=>{const ok=+el.value===q.a;answered[i]=ok;const fb=$('fb'+i);fb.className='fb show '+(ok?'ok':'no');fb.textContent=(ok?'ถูกต้อง. ':'ยังไม่ใช่. ')+q.why;score();})));
+    score();}
+  function score(){const k=Object.keys(answered).length,c=Object.values(answered).filter(Boolean).length;$('qscore').textContent=k?`ตอบแล้ว ${k}/${QUIZ.length} · ถูก ${c}`:`${QUIZ.length} ข้อ`;}
+  $('qreset').onclick=drawQuiz; drawQuiz();
+}
+if(typeof module!=='undefined') module.exports={FAC,LD,crAve,PHI,HT,AVE,flPass,PIL,QUIZ};
+</script>
+</body>
+</html>

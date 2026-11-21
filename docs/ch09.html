@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แอปบทที่ 9 จากความตั้งใจสู่การใช้จริง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: one column workbook; three labs stacked, each a bordered "ใบงาน" with controls left, result right */
+:root{
+  --bg:#f3f5f7; --paper:#ffffff; --ink:#15233a; --muted:#5a6678; --line:#d5dbe3;
+  --accent:#0d6466; --accent-soft:#e1efef; --gate:#a86a12; --gate-soft:#f7ecd9;
+  --ok:#2f7d32; --stop:#b3261e; --stop-soft:#f8e3e1;
+  --display:"Noto Serif Thai",Georgia,serif; --body:"Noto Sans Thai",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1620; --paper:#17212d; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3a4a;
+  --accent:#4fb8b4; --accent-soft:#163334; --gate:#e2a54a; --gate-soft:#3a2c14;
+  --ok:#74c27a; --stop:#f08a80; --stop-soft:#3c1d1b; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0f1620; --paper:#17212d; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3a4a;
+  --accent:#4fb8b4; --accent-soft:#163334; --gate:#e2a54a; --gate-soft:#3a2c14;
+  --ok:#74c27a; --stop:#f08a80; --stop-soft:#3c1d1b; color-scheme:dark;}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.65;font-size:16px}
+main{max-width:980px;margin:0 auto;padding:24px 16px 48px;display:grid;gap:24px}
+.brand{display:inline-flex;align-items:center;background:#ffffff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin-bottom:14px}
+.brand{gap:12px}
+.brand img{height:40px;width:auto;display:block}
+.brand .org{font-family:var(--display);font-weight:700;font-size:1.15rem;color:#15233a;border-left:2px solid #d5dbe3;padding-left:12px;line-height:1.2}
+header h1{font-family:var(--display);font-size:1.7rem;line-height:1.3;margin:0 0 6px;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:68ch}
+.note{font-size:.88rem;color:var(--muted);border-left:3px solid var(--gate);padding:4px 10px;background:var(--gate-soft);border-radius:0 6px 6px 0}
+section.lab{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px}
+section.lab h2{font-family:var(--display);font-size:1.25rem;margin:0 0 4px}
+.lab-tag{font-size:.8rem;color:var(--accent);font-weight:700;letter-spacing:.02em}
+.lab > p{margin:4px 0 14px;color:var(--muted);max-width:70ch}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:20px}
+@media (max-width:720px){.cols{grid-template-columns:1fr}}
+fieldset{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0 0 12px}
+legend{font-weight:700;font-size:.92rem;padding:0 4px}
+label.opt{display:flex;gap:8px;align-items:flex-start;padding:3px 0;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.val{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent)}
+.chain{display:grid;gap:8px}
+.gate{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;padding:10px 12px;border-radius:8px;border:1px solid var(--line)}
+.gate .dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;background:var(--muted)}
+.gate.pass{border-color:var(--ok)} .gate.pass .dot{background:var(--ok)}
+.gate.stop{border-color:var(--stop);background:var(--stop-soft)} .gate.stop .dot{background:var(--stop)}
+.gate.skip{opacity:.45}
+.gate b{display:block}
+.gate small{color:var(--muted)}
+.codes{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.codes table{width:100%;border-collapse:collapse;font-size:.9rem}
+.codes td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.codes td:first-child{font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--accent)}
+.persona{margin-top:10px;font-size:.92rem;background:var(--accent-soft);padding:8px 12px;border-radius:8px}
+.tbl{overflow-x:auto}
+table.match{width:100%;border-collapse:collapse;font-size:.92rem;min-width:620px}
+table.match th,table.match td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.match th{font-size:.82rem;color:var(--muted);font-weight:700}
+select{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);max-width:100%}
+.mark{font-weight:700;white-space:nowrap}
+.mark.ok{color:var(--ok)} .mark.no{color:var(--stop)}
+button{font:inherit;font-weight:700;padding:8px 14px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--accent)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--gate);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.score{font-weight:700;font-variant-numeric:tabular-nums}
+.q{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.q .stem{font-weight:500;margin-bottom:6px}
+.q .lo{font-size:.78rem;color:var(--gate);font-weight:700}
+.q .fb{margin-top:6px;font-size:.92rem;padding:6px 10px;border-radius:6px;display:none}
+.q .fb.show{display:block}
+.q .fb.ok{background:var(--accent-soft)} .q .fb.no{background:var(--stop-soft)}
+footer{font-size:.85rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style>
+.grid3{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:620px){.grid3{grid-template-columns:1fr 1fr}}
+.num label{display:block;font-size:.85rem;color:var(--muted)}
+.num input{width:100%;font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);font-variant-numeric:tabular-nums}
+table.res{width:100%;border-collapse:collapse;font-size:.92rem;font-variant-numeric:tabular-nums;min-width:560px}
+table.res th,table.res td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right}
+table.res th:first-child,table.res td:first-child{text-align:left}
+table.res th{font-size:.8rem;color:var(--muted)}
+table.res input{width:5.2em;text-align:right;font:inherit;padding:3px 5px;border:1px solid var(--line);border-radius:5px;background:var(--paper);color:var(--ink)}
+.pill{display:inline-block;padding:1px 9px;border-radius:999px;font-size:.82rem;font-weight:700}
+.pill.ok{background:var(--accent-soft);color:var(--ok)} .pill.no{background:var(--stop-soft);color:var(--stop)} .pill.na{background:var(--gate-soft);color:var(--gate)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:6px}
+.stat{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.stat.warn{border-color:var(--stop);background:var(--stop-soft)}
+.stat .k{font-size:.8rem;color:var(--muted)} .stat .v{font-size:1.25rem;font-weight:700;font-variant-numeric:tabular-nums}
+.msg{font-size:.92rem;padding:8px 12px;border-radius:8px;background:var(--accent-soft);margin-top:10px}
+</style>
+<style>@media (max-width:640px){body *{min-width:0}table{display:block;overflow-x:auto;max-width:100%}th,td{white-space:normal}select,input,canvas,img,svg{max-width:100%}[class*=grid],.row,.seg,.stats{grid-template-columns:1fr!important;flex-wrap:wrap}pre{overflow-x:auto;white-space:pre-wrap}}</style></head>
+<body><style>#gate{position:fixed;inset:0;background:#F2F7FB;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:Sarabun,'Noto Sans Thai',sans-serif}
+#gate .gb{background:#fff;border-top:4px solid #1F3864;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.08);padding:28px 26px;max-width:380px;width:88%;color:#222}
+#gate h2{color:#1F3864;font-size:19px;margin:0 0 6px}#gate p{font-size:14px;margin:0 0 14px;line-height:1.6}
+#gate .row{display:flex;gap:6px}#gate input[type=password],#gate input[type=text]{flex:1;font-size:16px;padding:9px 10px;border:1px solid #b8c4d4;border-radius:6px}
+#gate button{font-family:inherit;font-size:15px;border:0;border-radius:6px;padding:9px 14px;cursor:pointer}#gate .sh{background:#E3E9F1;color:#1F3864}#gate .go{background:#1F3864;color:#fff;width:100%;margin-top:12px}
+#gate label{font-size:13px;display:flex;gap:6px;align-items:center;margin-top:10px}#gate .err{color:#A93226;font-size:13px;min-height:18px;margin-top:8px}</style>
+<div id="gate"><div class="gb"><h2>แอปประจำตำรา</h2><p>สำหรับผู้อ่านตำรา<br><b>SEM และ GenAI ในการวิจัยทางบัญชีและการสอบบัญชี</b><br>ใส่รหัสเข้าแอปที่พิมพ์ไว้ในตำรา</p>
+<div class="row"><input id="gk" type="password" autocomplete="off" placeholder="รหัสเข้าแอป"><button class="sh" type="button" onclick="var i=document.getElementById('gk');i.type=i.type==='password'?'text':'password'">แสดง</button></div>
+<label><input id="gr" type="checkbox"> จำรหัสในเครื่องนี้</label><button class="go" type="button" id="gg">เปิดแอป</button><div class="err" id="ge"></div></div></div>
+<script>(function(){var H="467e451224101a2f5f9b367b93804929e3d8a0a9be77cb73f13736ca0c64e694",K="semgenai_gate";
+function ok(){var g=document.getElementById('gate');if(g)g.remove();}
+try{if(localStorage.getItem(K)===H||sessionStorage.getItem(K)===H){ok();return;}}catch(e){}
+async function chk(){var v=document.getElementById('gk').value.replace(/[\s\-]/g,'').toUpperCase();
+var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));var h=Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('');
+if(h===H){try{(document.getElementById('gr').checked?localStorage:sessionStorage).setItem(K,H)}catch(e){}ok();}else{document.getElementById('ge').textContent='รหัสไม่ถูกต้อง โปรดดูรหัสที่พิมพ์ไว้ในตำรา';}}
+document.getElementById('gg').onclick=chk;document.getElementById('gk').addEventListener('keydown',function(e){if(e.key==='Enter')chk();});})();</script><div style="font-family:Sarabun,sans-serif;font-size:13px;padding:8px 14px;background:#1F3864"><a href="index.html" style="color:#fff;text-decoration:none">← สารบัญแอปประจำตำรา</a></div>
+<main>
+<header>
+  <div class="brand"><img src="logo.png" alt="Dr VIT" width="154" height="40"><span class="org">Siam edu.</span></div>
+  <h1>แอปบทที่ 9 การวิจัยสองระยะ: จากความตั้งใจสู่การใช้จริง</h1>
+  <p>ใช้คู่กับบทที่ 9 มีสามใบงาน: เลือกตัวหารและตรวจ EPV แปลง odds ratio เป็นความน่าจะเป็น และดูว่าการถ่วงน้ำหนักแก้อัตราการใช้ที่เอนเพราะผู้ตั้งใจสูงตอบมากกว่าได้อย่างไร แล้วปิดด้วยแบบทดสอบ</p>
+  <p class="note" style="margin-top:10px">ค่าตั้งต้นของใบงาน 1 และ 2 มาจากข้อมูลสังเคราะห์ในบทที่ 9 ใบงาน 3 เป็นตัวอย่างสมมติเพื่อการสอน ห้ามนำข้อมูลผู้ตอบจริงมาใส่ในแอปนี้หรือในเครื่องมือ GenAI</p>
+</header>
+
+<section class="lab" aria-labelledby="l1">
+  <div class="lab-tag">ใบงาน 1 · LO2</div>
+  <h2 id="l1">ผังติดตาม ตัวหาร และ EPV</h2>
+  <p>ค่าตั้งต้นตรงกับตารางที่ 9.4 เปลี่ยนจำนวนแต่ละขั้นแล้วดูว่าอัตราการใช้เปลี่ยนตามตัวหารอย่างไร</p>
+  <div class="grid3">
+    <div class="num"><label for="nInv">CPA ที่ได้รับเชิญ</label><input id="nInv" type="number" min="1" value="160"></div>
+    <div class="num"><label for="nLink">เชื่อมข้อมูลได้</label><input id="nLink" type="number" min="0" value="101"></div>
+    <div class="num"><label for="nOpp">AA0 = มี</label><input id="nOpp" type="number" min="0" value="65"></div>
+    <div class="num"><label for="nUse">AA1 = ใช้</label><input id="nUse" type="number" min="0" value="33"></div>
+  </div>
+  <div class="grid3" style="margin-top:8px"><div class="num"><label for="nUns">AA0 = ไม่แน่ใจ</label><input id="nUns" type="number" min="0" value="20"></div><div class="num"><label for="kPred">จำนวนตัวทำนายในโมเดล H11</label><input id="kPred" type="number" min="1" max="10" value="3"></div></div>
+  <div class="stats" id="s1"></div>
+  <div class="msg" id="m1"></div>
+</section>
+
+<section class="lab" aria-labelledby="l2">
+  <div class="lab-tag">ใบงาน 2 · LO3</div>
+  <h2 id="l2">จาก odds ratio สู่ความน่าจะเป็น</h2>
+  <p>ค่าตั้งต้นตรงกับหัวข้อ 9.5.2: OR = 4.738 ต่อหนึ่งคะแนนความตั้งใจ และความน่าจะเป็น .218 ที่ค่าเฉลี่ยความตั้งใจ 4</p>
+  <div class="grid3">
+    <div class="num"><label for="orv">OR ต่อ 1 คะแนน</label><input id="orv" type="number" step="0.01" min="0.01" value="4.738"></div>
+    <div class="num"><label for="p0">ความน่าจะเป็นที่ค่าฐาน</label><input id="p0" type="number" step="0.001" min="0.001" max="0.999" value="0.218"></div>
+    <div class="num"><label for="a0">ค่าเฉลี่ยความตั้งใจที่ค่าฐาน</label><input id="a0" type="number" step="0.25" min="1" max="7" value="4"></div>
+  </div>
+  <div class="tbl" style="margin-top:10px"><table class="res"><thead><tr><th>ค่าเฉลี่ยความตั้งใจ</th><th>odds</th><th>ความน่าจะเป็น</th><th>เปลี่ยนจากแถวก่อน (จุดร้อยละ)</th></tr></thead><tbody id="ptab"></tbody></table></div>
+  <div class="msg" id="m2"></div>
+</section>
+
+<section class="lab" aria-labelledby="l3">
+  <div class="lab-tag">ใบงาน 3 · LO4</div>
+  <h2 id="l3">ทำไมต้องถ่วงน้ำหนัก (ตัวอย่างสมมติ)</h2>
+  <p>สมมติ CPA ที่มีโอกาสใช้ทุกคนแบ่งเป็นสองชั้นตามความตั้งใจ ผู้ตั้งใจสูงตอบแบบติดตามมากกว่า ปรับจำนวนแล้วเทียบอัตราที่สังเกตกับอัตราที่ถ่วงน้ำหนัก w = จำนวนในชั้น ÷ ผู้ตอบในชั้น</p>
+  <div class="tbl"><table class="res"><thead><tr><th>ชั้น</th><th>จำนวนในชั้น</th><th>ตอบ</th><th>ใช้ (ในผู้ตอบ)</th><th>น้ำหนัก w</th><th>อัตราใช้ในชั้น</th></tr></thead><tbody id="wbody"></tbody></table></div>
+  <div class="stats" id="s3"></div>
+  <div class="msg" id="m3"></div>
+</section>
+
+<section class="lab" aria-labelledby="l4">
+  <div class="lab-tag">ใบงาน 4 · LO1–LO5</div>
+  <h2 id="l4">แบบทดสอบท้ายบท</h2>
+  <p>ตอบทีละข้อ คำอธิบายจะแสดงทันทีหลังเลือก</p>
+  <div id="quiz"></div>
+  <div class="row"><span class="score" id="qscore"></span><button type="button" class="ghost" id="qreset">เริ่มใหม่</button></div>
+</section>
+
+<footer>ตัวเลขตั้งต้นของใบงาน 1–2 มาจากสคริปต์ ch9_lab.R ในบทที่ 9 (R 4.3.3, brglm2 0.9.2, seed 20261117) AA0 มีตัวเลือก "ไม่แน่ใจ" ตาม REC ฉบับที่ 1.5 (ตัดสิน 17 พ.ย. 2569) เรื่องที่รอผู้เขียนตัดสิน: จะเพิ่ม CPA ในระยะที่ 1 หรือปรับเป้าหมายเชื่อมข้อมูล 100 ราย</footer>
+</main>
+
+<script>
+/* ===== logic (pure) ===== */
+function flowRates(f){ // {inv,link,opp,use,k}
+  const errs=[]; if(f.opp+f.uns>f.link) errs.push('AA0 = มี รวมกับไม่แน่ใจ มากกว่าผู้เชื่อมได้'); if(f.link>f.inv) errs.push('ผู้เชื่อมได้มากกว่าผู้ได้รับเชิญ'); if(f.opp>f.link) errs.push('AA0 = มี มากกว่าผู้เชื่อมได้'); if(f.use>f.opp) errs.push('ผู้ใช้มากกว่าผู้มีโอกาส');
+  const u=f.inv-f.link;
+  return {errs, rLink:f.link/f.inv, rOpp:f.use/f.opp, rLinked:f.use/f.link, rInv:f.use/f.inv, epv:Math.min(f.use,f.opp-f.use)/f.k,
+    lo:f.use/(f.opp+u), hi:(f.use+u)/(f.opp+u), u, rSens:f.use/(f.opp+f.uns), epvSens:Math.min(f.use,f.opp+f.uns-f.use)/f.k};
+}
+function probPath(or,p0,a0){ const b=Math.log(or), l0=Math.log(p0/(1-p0)); const rows=[];
+  for(let a=Math.max(1,a0-1);a<=Math.min(7,a0+2);a+=1){const l=l0+b*(a-a0); const p=1/(1+Math.exp(-l)); rows.push({a,odds:Math.exp(l),p});} return rows;}
+function ipwToy(s){ // s:[{N,resp,use}]
+  let obsU=0,obsR=0,wU=0,wN=0; const rows=s.map(r=>{const w=r.N/r.resp; obsU+=r.use; obsR+=r.resp; wU+=w*r.use; wN+=w*r.resp; return {w,rate:r.use/r.resp};});
+  return {rows, naive:obsU/obsR, weighted:wU/wN, truthIfMAR:wU/wN};
+}
+const STRATA=[{name:'ตั้งใจต่ำ',N:80,resp:36,use:9},{name:'ตั้งใจสูง',N:80,resp:64,use:32}];
+const QUIZ=[
+ {lo:'LO1',stem:'ทำไม TA จึงไม่อยู่ในแบบติดตามผล',opts:['เพราะ TA ตอบแบบสอบถามน้อย','เพราะ TA ใช้ TSA for LCE ไม่ได้ตามระเบียบ การใช้จึงเป็นศูนย์เชิงโครงสร้าง','เพราะ TA ไม่ยินยอม','เพราะ TA มีลูกค้าน้อย'],a:1,why:'ผลลัพธ์ที่เป็นศูนย์ตามระเบียบไม่ให้ข้อมูลว่าความตั้งใจสัมพันธ์กับการเลือกใช้หรือไม่ TA จึงอยู่ใน H9–H10 และ H12 ไม่อยู่ใน H11'},
+ {lo:'LO1',stem:'Sheeran และ Webb (2016) ชี้ว่าช่องว่างความตั้งใจกับพฤติกรรมส่วนใหญ่มาจากกลุ่มใด',opts:['ผู้ที่ไม่ตั้งใจแต่ทำ','ผู้ที่ตั้งใจแต่ไม่ทำ (inclined abstainers)','ผู้ที่ไม่ตอบแบบสอบถาม','ผู้ที่ตอบไม่ตรงความจริง'],a:1,why:'ในงานนี้คือ CPA ที่ตั้งใจสูงและมีงานเข้าเงื่อนไขแต่เลือกไม่ใช้ ซึ่ง AA4 และการสัมภาษณ์ช่วยอธิบาย'},
+ {lo:'LO2',stem:'กิตติตอบ AA0 ว่า "ไม่แน่ใจ" ตามโครงร่างฉบับที่ 1.5 ข้อมูลของเขาถูกใช้อย่างไร',opts:['นับเป็นผู้ใช้ใน H11','ไม่อยู่ในการวิเคราะห์หลักของ H11 แต่รายงานสัดส่วนตามระดับความตั้งใจ ตอบ AA0a และนับเป็นผู้มีโอกาสที่ไม่ใช้ในการวิเคราะห์ความไว','ตัดออกจากการวิจัยทั้งหมด','นับเป็นผู้ไม่มีโอกาสโดยไม่รายงานแยก'],a:1,why:'ตัวเลือกนี้ทำให้ความไม่แน่นอนของปฏิทรรศน์ปรากฏเป็นข้อมูล ในข้อมูลสังเคราะห์ การนับผู้ไม่แน่ใจ 20 รายลด OR จาก 4.74 เหลือ 3.16 จึงต้องรายงานทั้งสองแบบ'},
+ {lo:'LO2',stem:'AA2 และ AA3 ในแบบติดตามจริงเก็บข้อมูลแบบใด',opts:['ตัวเลขจำนวนงานจริง','ช่วงจำนวนงานและช่วงร้อยละ','ข้อความอิสระ','ไม่ได้เก็บ'],a:1,why:'เพราะเป็นช่วง จึงรายงานเป็นการแจกแจงความถี่ และไม่คำนวณสัดส่วนงานที่แม่นยำจาก AA2 ÷ จำนวนงาน'},
+ {lo:'LO3',stem:'OR = 2 และความน่าจะเป็นฐาน .50 ความน่าจะเป็นใหม่เท่ากับเท่าใด',opts:['1.00','.667','.75','.60'],a:1,why:'odds ฐาน = 1 เพิ่มเป็น 2 จึงได้ p = 2 ÷ 3 = .667 OR ไม่ใช่อัตราส่วนความน่าจะเป็น'},
+ {lo:'LO3',stem:'เมื่อใดควรใช้วิธี Firth แทน ML ปกติในการทดสอบ H11',opts:['ทุกครั้ง','เมื่อเหตุการณ์มีน้อยหรือเกิดการแยกสมบูรณ์ จนค่าประมาณ ML โตผิดปกติหรือไม่สิ้นสุด','เมื่อ p มากกว่า .05','เมื่อใช้ JASP'],a:1,why:'Firth เพิ่มพจน์ปรับอคติใน likelihood ทำให้ประมาณค่าได้และลดอคติในตัวอย่างเล็ก ควรรายงานคู่กับ ML'},
+ {lo:'LO4',stem:'ในห้องปฏิบัติการ อัตราการใช้ที่สังเกต 50.8% สูงกว่าค่าในข้อมูลเต็ม 40.0% เพราะอะไร',opts:['ข้อมูลผิด','ผู้ตั้งใจสูงตอบแบบติดตามมากกว่า ผู้ตอบจึงเอนไปทางผู้ใช้','ใช้ Firth','ตัวอย่างเล็ก'],a:1,why:'IPW ใช้ตัวแปรระยะที่ 1 ให้น้ำหนักผู้ที่มีโอกาสตอบต่ำ จึงดึงอัตรากลับมาที่ 38.0% ภายใต้ข้อสมมติ missing at random'},
+ {lo:'LO5',stem:'ข้อใดเป็นข้อสรุป H11 ที่ถูกต้อง',opts:['ความตั้งใจทำให้ CPA ทั้งประเทศใช้มาตรฐานมากขึ้น 4.7 เท่า','ในกลุ่ม CPA ที่ตอบแบบติดตามและเห็นว่ามีงานเข้าเงื่อนไข ความตั้งใจสูงสัมพันธ์กับ odds ของการรายงานว่าใช้ที่สูงขึ้น','ผู้สอบบัญชีไทยครึ่งหนึ่งใช้มาตรฐานแล้ว','TA จะใช้มาตรฐานถ้าได้รับอนุญาต'],a:1,why:'ข้อสรุปต้องระบุกลุ่มที่วิเคราะห์ ใช้คำว่าสัมพันธ์ ไม่ใช่ทำให้ และไม่ขยายไปยังผู้สอบบัญชีทั้งหมด'}];
+/* ===== UI ===== */
+if(typeof document!=='undefined'){
+  const $=id=>document.getElementById(id);
+  const pc=v=>isFinite(v)?(100*v).toFixed(1)+'%':'–';
+  const f3=v=>isFinite(v)?v.toFixed(3).replace(/^0\./,'.'):'–';
+  function lab1(){const f={inv:+$('nInv').value,link:+$('nLink').value,opp:+$('nOpp').value,use:+$('nUse').value,uns:+$('nUns').value,k:Math.max(1,+$('kPred').value)};
+    const r=flowRates(f);
+    $('s1').innerHTML=[['อัตราเชื่อมได้',pc(r.rLink)],['ใช้ ÷ ผู้มีโอกาส',pc(r.rOpp)],['ใช้ ÷ ผู้เชื่อมได้',pc(r.rLinked)],['ใช้ ÷ ผู้ได้รับเชิญ',pc(r.rInv)],['นับผู้ไม่แน่ใจเป็นผู้มีโอกาส',pc(r.rSens)],['EPV',isFinite(r.epv)?r.epv.toFixed(1):'–']]
+      .map(c=>`<div class="stat${c[0]==='EPV'&&r.epv<10?' warn':''}"><div class="k">${c[0]}</div><div class="v">${c[1]}</div></div>`).join('');
+    $('m1').textContent=r.errs.length?('ตรวจตัวเลข: '+r.errs.join(' · ')):`ตัวหารของ H11 คือผู้มีโอกาส ${f.opp} ราย อัตราจึงเป็น ${pc(r.rOpp)} ผู้เชื่อมไม่ได้ ${r.u} ราย ทำให้ขอบเขตตามฉากทัศน์อยู่ระหว่าง ${pc(r.lo)} ถึง ${pc(r.hi)} `+`ถ้านับผู้ไม่แน่ใจ ${f.uns} รายเป็นผู้มีโอกาสที่ไม่ใช้ อัตราจะเป็น ${pc(r.rSens)} (การวิเคราะห์ความไว) `+(r.epv<10?`EPV ${r.epv.toFixed(1)} ต่ำกว่า 10 ควรลดตัวทำนายหรือใช้ Firth`:`EPV ${r.epv.toFixed(1)} ผ่านเกณฑ์ 10`);}
+  ['nInv','nLink','nOpp','nUse','nUns','kPred'].forEach(id=>$(id).addEventListener('input',lab1)); lab1();
+  function lab2(){const or=+$('orv').value,p0=+$('p0').value,a0=+$('a0').value; const rows=probPath(or,p0,a0); let prev=null;
+    $('ptab').innerHTML=rows.map(r=>{const d=prev===null?'—':((r.p-prev)*100>=0?'+':'−')+Math.abs((r.p-prev)*100).toFixed(1); prev=r.p; return `<tr><td>${r.a}${r.a===a0?' (ฐาน)':''}</td><td>${r.odds.toFixed(3)}</td><td>${f3(r.p)}</td><td>${d}</td></tr>`;}).join('');
+    $('m2').textContent=`OR คงที่ทุกแถว แต่ความน่าจะเป็นเพิ่มไม่เท่ากัน จึงต้องรายงานความน่าจะเป็นที่ค่าฐานที่ระบุคู่กับ OR เสมอ`;}
+  ['orv','p0','a0'].forEach(id=>$(id).addEventListener('input',lab2)); lab2();
+  $('wbody').innerHTML=STRATA.map((r,i)=>`<tr><td>${r.name}</td><td><input id="N${i}" type="number" min="1" value="${r.N}" aria-label="จำนวน ${r.name}"></td><td><input id="R${i}" type="number" min="1" value="${r.resp}" aria-label="ตอบ ${r.name}"></td><td><input id="U${i}" type="number" min="0" value="${r.use}" aria-label="ใช้ ${r.name}"></td><td id="W${i}"></td><td id="T${i}"></td></tr>`).join('');
+  function lab3(){const s=STRATA.map((r,i)=>({N:+$('N'+i).value,resp:Math.max(1,+$('R'+i).value),use:+$('U'+i).value})); const o=ipwToy(s);
+    o.rows.forEach((r,i)=>{$('W'+i).textContent=r.w.toFixed(2);$('T'+i).textContent=pc(r.rate);});
+    $('s3').innerHTML=`<div class="stat"><div class="k">อัตราที่สังเกต</div><div class="v">${pc(o.naive)}</div></div><div class="stat"><div class="k">อัตราถ่วงน้ำหนัก</div><div class="v">${pc(o.weighted)}</div></div>`;
+    $('m3').textContent=`ผู้ตั้งใจสูงมีสัดส่วนในผู้ตอบมากกว่าในประชากร อัตราที่สังเกตจึง${o.naive>o.weighted?'สูง':'ต่ำ'}กว่าอัตราถ่วงน้ำหนัก การถ่วงน้ำหนักแก้ได้เมื่อการตอบขึ้นกับชั้นความตั้งใจเท่านั้น ถ้าการตอบขึ้นกับการใช้เองด้วย น้ำหนักแก้ไม่ได้`;}
+  $('wbody').addEventListener('input',lab3); lab3();
+  let answered={};
+  function drawQuiz(){answered={};
+    $('quiz').innerHTML=QUIZ.map((q,i)=>`<div class="q"><div class="lo">${q.lo}</div><div class="stem">${i+1}. ${q.stem}</div>`+q.opts.map((o,j)=>j).sort((x,y)=>((x*3+i)%4)-((y*3+i)%4)).map(j=>`<label class="opt"><input type="radio" name="q${i}" value="${j}"> ${q.opts[j]}</label>`).join('')+`<div class="fb" id="fb${i}"></div></div>`).join('');
+    QUIZ.forEach((q,i)=>document.querySelectorAll(`input[name=q${i}]`).forEach(el=>el.addEventListener('change',()=>{const ok=+el.value===q.a;answered[i]=ok;const fb=$('fb'+i);fb.className='fb show '+(ok?'ok':'no');fb.textContent=(ok?'ถูกต้อง. ':'ยังไม่ใช่. ')+q.why;score();})));
+    score();}
+  function score(){const k=Object.keys(answered).length,c=Object.values(answered).filter(Boolean).length;$('qscore').textContent=k?`ตอบแล้ว ${k}/${QUIZ.length} · ถูก ${c}`:`${QUIZ.length} ข้อ`;}
+  $('qreset').onclick=drawQuiz; drawQuiz();
+}
+if(typeof module!=='undefined') module.exports={flowRates,probPath,ipwToy,STRATA,QUIZ};
+</script>
+</body>
+</html>

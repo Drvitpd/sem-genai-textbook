@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แอปบทที่ 11 การสัมภาษณ์เชิงสัจนิยมและรูปแบบ CMO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f5f7; --paper:#ffffff; --ink:#15233a; --muted:#5a6678; --line:#d5dbe3;
+  --accent:#0d6466; --accent-soft:#e1efef; --gate:#a86a12; --gate-soft:#f7ecd9;
+  --ok:#2f7d32; --stop:#b3261e; --stop-soft:#f8e3e1;
+  --display:"Noto Serif Thai",Georgia,serif; --body:"Noto Sans Thai",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0f1620; --paper:#17212d; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3a4a;
+  --accent:#4fb8b4; --accent-soft:#163334; --gate:#e2a54a; --gate-soft:#3a2c14;
+  --ok:#74c27a; --stop:#f08a80; --stop-soft:#3c1d1b; color-scheme:dark;}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.65;font-size:16px}
+main{max-width:980px;margin:0 auto;padding:24px 16px 48px;display:grid;gap:24px}
+.brand{display:inline-flex;align-items:center;gap:12px;background:#ffffff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin-bottom:14px}
+.brand img{height:40px;width:auto;display:block}
+.brand .org{font-family:var(--display);font-weight:700;font-size:1.15rem;color:#15233a;border-left:2px solid #d5dbe3;padding-left:12px;line-height:1.2}
+header h1{font-family:var(--display);font-size:1.7rem;line-height:1.3;margin:0 0 6px;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:68ch}
+.note{font-size:.88rem;color:var(--muted);border-left:3px solid var(--gate);padding:4px 10px;background:var(--gate-soft);border-radius:0 6px 6px 0}
+section.lab{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px}
+section.lab h2{font-family:var(--display);font-size:1.25rem;margin:0 0 4px}
+.lab-tag{font-size:.8rem;color:var(--accent);font-weight:700;letter-spacing:.02em}
+.lab > p{margin:4px 0 14px;color:var(--muted);max-width:70ch}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:620px){.grid4{grid-template-columns:1fr 1fr}}
+.num label{display:block;font-size:.85rem;color:var(--muted)}
+.num input{width:100%;font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:10px}
+.stat{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.stat .k{font-size:.8rem;color:var(--muted)} .stat .v{font-size:1.2rem;font-weight:700;font-variant-numeric:tabular-nums}
+.stat.warn{border-color:var(--stop);background:var(--stop-soft)}
+.msg{font-size:.92rem;padding:8px 12px;border-radius:8px;background:var(--accent-soft);margin-top:10px}
+.msg.warn{background:var(--stop-soft)}
+canvas{width:100%;height:auto;display:block;margin-top:12px}
+label.opt{display:flex;gap:8px;align-items:flex-start;padding:3px 0;cursor:pointer}
+fieldset{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0}
+legend{font-weight:700;font-size:.92rem;padding:0 4px}
+button.main{font:inherit;font-weight:700;padding:8px 14px;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gate);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.score{font-weight:700;font-variant-numeric:tabular-nums}
+.q{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.q .stem{font-weight:500;margin-bottom:6px}
+.q .lo{font-size:.78rem;color:var(--gate);font-weight:700}
+.q .fb{margin-top:6px;font-size:.92rem;padding:6px 10px;border-radius:6px;display:none}
+.q .fb.show{display:block}
+.q .fb.ok{background:var(--accent-soft)} .q .fb.no{background:var(--stop-soft)}
+footer{font-size:.85rem;color:var(--muted)}
+select{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);max-width:100%}
+table.res{width:100%;border-collapse:collapse;font-size:.92rem;min-width:560px}
+table.res th,table.res td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.res th{font-size:.8rem;color:var(--muted)}
+.tbl{overflow-x:auto}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.seg button{font:inherit;font-size:.9rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.mark{font-weight:700}.mark.ok{color:var(--ok)}.mark.no{color:var(--stop)}
+</style>
+<style>@media (max-width:640px){body *{min-width:0}table{display:block;overflow-x:auto;max-width:100%}th,td{white-space:normal}select,input,canvas,img,svg{max-width:100%}[class*=grid],.row,.seg,.stats{grid-template-columns:1fr!important;flex-wrap:wrap}pre{overflow-x:auto;white-space:pre-wrap}}</style></head>
+<body><style>#gate{position:fixed;inset:0;background:#F2F7FB;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:Sarabun,'Noto Sans Thai',sans-serif}
+#gate .gb{background:#fff;border-top:4px solid #1F3864;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.08);padding:28px 26px;max-width:380px;width:88%;color:#222}
+#gate h2{color:#1F3864;font-size:19px;margin:0 0 6px}#gate p{font-size:14px;margin:0 0 14px;line-height:1.6}
+#gate .row{display:flex;gap:6px}#gate input[type=password],#gate input[type=text]{flex:1;font-size:16px;padding:9px 10px;border:1px solid #b8c4d4;border-radius:6px}
+#gate button{font-family:inherit;font-size:15px;border:0;border-radius:6px;padding:9px 14px;cursor:pointer}#gate .sh{background:#E3E9F1;color:#1F3864}#gate .go{background:#1F3864;color:#fff;width:100%;margin-top:12px}
+#gate label{font-size:13px;display:flex;gap:6px;align-items:center;margin-top:10px}#gate .err{color:#A93226;font-size:13px;min-height:18px;margin-top:8px}</style>
+<div id="gate"><div class="gb"><h2>แอปประจำตำรา</h2><p>สำหรับผู้อ่านตำรา<br><b>SEM และ GenAI ในการวิจัยทางบัญชีและการสอบบัญชี</b><br>ใส่รหัสเข้าแอปที่พิมพ์ไว้ในตำรา</p>
+<div class="row"><input id="gk" type="password" autocomplete="off" placeholder="รหัสเข้าแอป"><button class="sh" type="button" onclick="var i=document.getElementById('gk');i.type=i.type==='password'?'text':'password'">แสดง</button></div>
+<label><input id="gr" type="checkbox"> จำรหัสในเครื่องนี้</label><button class="go" type="button" id="gg">เปิดแอป</button><div class="err" id="ge"></div></div></div>
+<script>(function(){var H="467e451224101a2f5f9b367b93804929e3d8a0a9be77cb73f13736ca0c64e694",K="semgenai_gate";
+function ok(){var g=document.getElementById('gate');if(g)g.remove();}
+try{if(localStorage.getItem(K)===H||sessionStorage.getItem(K)===H){ok();return;}}catch(e){}
+async function chk(){var v=document.getElementById('gk').value.replace(/[\s\-]/g,'').toUpperCase();
+var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));var h=Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('');
+if(h===H){try{(document.getElementById('gr').checked?localStorage:sessionStorage).setItem(K,H)}catch(e){}ok();}else{document.getElementById('ge').textContent='รหัสไม่ถูกต้อง โปรดดูรหัสที่พิมพ์ไว้ในตำรา';}}
+document.getElementById('gg').onclick=chk;document.getElementById('gk').addEventListener('keydown',function(e){if(e.key==='Enter')chk();});})();</script><div style="font-family:Sarabun,sans-serif;font-size:13px;padding:8px 14px;background:#1F3864"><a href="index.html" style="color:#fff;text-decoration:none">← สารบัญแอปประจำตำรา</a></div>
+<main>
+<header>
+  <div class="brand"><img src="logo.png" alt="Dr VIT" width="154" height="40"><span class="org">Siam edu.</span></div>
+  <h1>แอปบทที่ 11 การสัมภาษณ์เชิงสัจนิยมและการวิเคราะห์สู่รูปแบบ CMO</h1>
+  <p>ใช้คู่กับบทที่ 11 มีสามใบงาน: จัดสิ่งที่ผู้ให้สัมภาษณ์เล่าเข้ากล่อง CMO แยกคำถามเจาะลึกที่ชี้คำตอบออกจากคำถามแบบสัจนิยม และทดสอบข้อเสนอกับกรณีสวนทาง แล้วปิดด้วยแบบทดสอบ</p>
+  <p class="note" style="margin-top:10px">คำเล่าทุกคำในแอปเป็นข้อความแต่งเพื่อการสอน ตรงกับ ch11_lab.R ไม่ใช่คำสัมภาษณ์จริง ห้ามนำบทถอดความหรือไฟล์เสียงจริงมาใส่ในแอปนี้หรือในเครื่องมือ GenAI</p>
+</header>
+
+<section class="lab" aria-labelledby="l1">
+  <div class="lab-tag">ใบงาน 1 · LO1</div>
+  <h2 id="l1">จัดเข้ากล่อง C, M หรือ O</h2>
+  <p>เลือกกล่องให้แต่ละข้อ ตามสูตร M(ทรัพยากร) + C → M(การให้เหตุผล) = O ในภาพที่ 11.1 แล้วกดตรวจ</p>
+  <div class="tbl"><table class="res"><thead><tr><th>สิ่งที่พบในการสัมภาษณ์</th><th>กล่อง</th><th>ผล</th></tr></thead><tbody id="b1"></tbody></table></div>
+  <div class="row"><button type="button" class="main" id="c1">ตรวจ</button><span class="score" id="s1"></span></div>
+  <div class="msg" id="m1" hidden></div>
+</section>
+
+<section class="lab" aria-labelledby="l2">
+  <div class="lab-tag">ใบงาน 2 · LO2</div>
+  <h2 id="l2">คำถามเจาะลึกแบบใด</h2>
+  <p>สถานการณ์: กิตติตอบว่า "ไม่แน่ใจว่าลูกค้าเข้าเงื่อนไข" เลือกว่าแต่ละคำถามเป็นคำถามชี้คำตอบ คำถามกว้างที่ไม่ผูกเหตุการณ์ หรือคำถามแบบสัจนิยม (ตารางที่ 11.4)</p>
+  <div id="b2"></div>
+  <div class="row"><span class="score" id="s2"></span></div>
+</section>
+
+<section class="lab" aria-labelledby="l3">
+  <div class="lab-tag">ใบงาน 3 · LO3</div>
+  <h2 id="l3">นับหลักฐานและทดสอบข้อเสนอ ป1</h2>
+  <p>ส่วนบน: เทียบการนับส่วนข้อความกับการนับราย ข้อมูลจาก ch11_lab.R (24 ส่วน 7 ราย) ส่วนล่าง: เลือกฉบับของ ป1 แล้วดูว่ากรณีใดสอดคล้องหรือสวนทาง</p>
+  <div class="seg" role="group" aria-label="วิธีนับ" id="mode"><button type="button" data-m="segments" aria-pressed="true">นับส่วนข้อความ</button><button type="button" data-m="cases" aria-pressed="false">นับราย</button></div>
+  <canvas id="cv" width="900" height="300" role="img" aria-label="จำนวนหลักฐานของแต่ละรหัสกลไก"></canvas>
+  <div class="seg" role="group" aria-label="ฉบับข้อเสนอ" id="pv" style="margin-top:14px"><button type="button" data-v="0" aria-pressed="true">ป1 ฉบับแรก</button><button type="button" data-v="1" aria-pressed="false">ป1 ฉบับปรับ (มีแม่แบบ)</button></div>
+  <div class="tbl"><table class="res"><thead><tr><th>ราย</th><th>เข้าเงื่อนไขของข้อเสนอ</th><th>ข้อเสนอทำนาย</th><th>ผลจริง</th><th>สถานะ</th></tr></thead><tbody id="b3"></tbody></table></div>
+  <div class="msg" id="m3"></div>
+</section>
+
+<section class="lab" aria-labelledby="l4">
+  <div class="lab-tag">แบบทดสอบ · LO1–LO5</div>
+  <h2 id="l4">แบบทดสอบท้ายบท</h2>
+  <p>ตอบทีละข้อ คำอธิบายจะแสดงทันทีหลังเลือก</p>
+  <div id="quiz"></div>
+  <div class="row"><span class="score" id="qscore"></span><button type="button" class="main" id="qreset">เริ่มใหม่</button></div>
+</section>
+
+<footer>ข้อมูลตั้งต้นมาจาก ch11_lab.R (ข้อความแต่ง 24 ส่วน 7 ราย รหัสผู้ให้สัมภาษณ์ตรงกับบทที่ 12) ข้อเสนอแก้แนวสัมภาษณ์ในบทเป็นข้อเสนอของตำราที่ต้องผ่านการแก้ไขโครงร่างต่อคณะกรรมการจริยธรรม การเลือกระหว่างการวิเคราะห์แก่นเรื่องเชิงสะท้อนคิดกับแบบใช้สมุดรหัสยังรอผู้เขียนตัดสิน</footer>
+</main>
+
+<script>
+/* ===== pure logic ===== */
+const BOX={C:'บริบท (C)',MR:'กลไก: ทรัพยากร',MZ:'กลไก: การให้เหตุผล',O:'ผลลัพธ์ (O)'};
+const ITEMS=[
+ {t:'FAQ ของสภาวิชาชีพบัญชีเรื่อง TSA for LCE',a:'MR',why:'เป็นสิ่งที่นโยบายนำเข้ามาให้ทุกคนเหมือนกัน'},
+ {t:'ผู้ให้สัมภาษณ์เป็นผู้สอบบัญชีภาษีอากร (TA)',a:'C',why:'ประเภทใบอนุญาตเป็นเงื่อนไขภายนอกที่กำหนดด่านสิทธิ'},
+ {t:'"กลัวผู้ตรวจคุณภาพงานถามว่าทำไมไม่ใช้ฉบับเต็ม"',a:'MZ',why:'เป็นการให้เหตุผลของผู้สอบบัญชีต่อทรัพยากรในบริบทของตน'},
+ {t:'ตอบแบบติดตามว่าไม่แน่ใจว่าลูกค้าเข้าเงื่อนไข',a:'O',why:'เป็นผลลัพธ์ชนิดที่สามของงานวิจัยนี้ นอกจากใช้และไม่ใช้'},
+ {t:'การอบรม TSA for LCE ที่สำนักงานจัด',a:'MR',why:'ทรัพยากรที่นำเข้ามา ผลขึ้นกับว่าผู้รับให้เหตุผลอย่างไร'},
+ {t:'มีลูกค้าที่เข้าเงื่อนไขสองราย',a:'C',why:'โอกาสที่เป็นข้อเท็จจริงภายนอกอยู่ในบริบท'},
+ {t:'"ใช้เกณฑ์ของตัวเอง ถ้ารายได้เกินระดับหนึ่งก็ไม่ใช้"',a:'MZ',why:'การตีความโอกาสของผู้สอบบัญชีอยู่ในกล่องการให้เหตุผล'},
+ {t:'ใช้ TSA for LCE กับงานหนึ่งงานในรอบติดตาม',a:'O',why:'การใช้จริงที่รายงานใน AA1 คือผลลัพธ์'}];
+function checkBoxes(ans){return ITEMS.map((it,i)=>ans[i]===it.a);}
+const PROBES=[
+ {t:'"ที่ไม่ใช้เพราะไม่มีเกณฑ์เชิงปริมาณใช่ไหมครับ"',a:0,why:'ใส่เหตุผลไว้ในคำถาม ผู้ตอบมักรับเพราะฟังดูดี'},
+ {t:'"คิดอย่างไรกับการไม่มีเกณฑ์"',a:1,why:'ได้ความเห็นทั่วไป ไม่ผูกกับลูกค้ารายใดหรือการตัดสินใจครั้งใด'},
+ {t:'"บางคนบอกว่าตัดสินไม่ได้เพราะไม่มีตัวเลข บางคนบอกว่าดูจากลักษณะธุรกรรมได้ กรณีลูกค้าที่ท่านไม่แน่ใจ ใกล้แบบไหน หรือต่างจากทั้งสองแบบอย่างไร"',a:2,why:'วางทฤษฎีสองทางให้เทียบ ผูกกับกรณีจริง และเปิดทางให้ปฏิเสธทั้งสอง'},
+ {t:'"ผู้ตรวจคุณภาพงานคงเข้มงวดมากเลยใช่ไหม"',a:0,why:'ชี้ทั้งกลไกและทิศของคำตอบ'},
+ {t:'"ช่วยเล่าลูกค้ารายล่าสุดที่ท่านลังเล ตั้งแต่รับงานจนตัดสินใจเลือกมาตรฐาน"',a:2,why:'ยึดเหตุการณ์จริงก่อน แล้วค่อยนำทฤษฎีเข้ามาตรวจ ตามขั้นเก็บทฤษฎีของ Manzano (2016)'},
+ {t:'"โดยทั่วไปมาตรฐานนี้ดีไหม"',a:1,why:'กว้างและประเมินค่า ไม่ได้หลักฐานเรื่องกลไก'}];
+const PTYPES=['ชี้คำตอบ','กว้าง ไม่ผูกเหตุการณ์','แบบสัจนิยม'];
+const SEG={ClearEligible:[3,3],NoThreshold:[2,2],NoEntitlement:[2,2],TimeSaving:[4,4],LowInterest:[2,2],NoInvestment:[2,2],PersonalRule:[2,2],ReviewerFear:[4,2],SafeFull:[2,2],NoTemplate:[1,1]};
+const MCODES=['TimeSaving','ReviewerFear','LowInterest','NoInvestment','PersonalRule','SafeFull','NoTemplate'];
+const CASES=[
+ {id:'I02',lic:'CPA',clear:true,time:true,template:true,O:'ใช้'},
+ {id:'I04',lic:'CPA',clear:true,time:false,template:true,O:'ไม่ใช้'},
+ {id:'I05',lic:'CPA',clear:true,time:true,template:false,O:'ไม่ใช้'},
+ {id:'I07',lic:'CPA',clear:false,time:false,template:true,O:'ไม่แน่ใจ'},
+ {id:'I09',lic:'CPA',clear:false,time:true,template:true,O:'ไม่แน่ใจ'},
+ {id:'I14',lic:'TA',clear:false,time:true,template:null,O:'ตั้งใจแบบมีเงื่อนไข'},
+ {id:'I16',lic:'TA',clear:false,time:false,template:null,O:'ตั้งใจแบบมีเงื่อนไข'}];
+// I02 ไม่ได้พูดถึงแม่แบบ ถือว่าไม่มีหลักฐานว่าขาดแม่แบบ (template=true หมายถึงไม่พบอุปสรรคด้านแม่แบบ)
+function testP1(v){ // v=0 ฉบับแรก, v=1 ฉบับปรับ
+  return CASES.map(c=>{const inScope=c.clear&&c.time&&(v===0||c.template===true);
+    const status=!inScope?'นอกขอบเขต':(c.O==='ใช้'?'สอดคล้อง':'สวนทาง');
+    return {...c,inScope,pred:inScope?'ใช้':'–',status};});
+}
+const QUIZ=[
+ {lo:'LO1',stem:'ข้อใดแยกกลไกตามแนวคิดของ Dalkin และคณะ (2015) ได้ถูกต้อง',opts:['กลไกคือบริบทที่ทำให้เกิดผล','กลไกแยกเป็นทรัพยากรที่นโยบายนำเข้ามา กับการให้เหตุผลของผู้รับ','กลไกคือคะแนน CAP–MOT–OPP','กลไกเป็นสวิตช์ที่เปิดหรือปิด'],a:1,why:'Dalkin และคณะเสนอ M(Resources) + C → M(Reasoning) = O และเน้นว่ากลไกทำงานเป็นระดับต่อเนื่อง'},
+ {lo:'LO1',stem:'ทำไมโครงร่างจึงเรียก CAP1–CAP3, MOT1–MOT3 และ OPP1–OPP3b ว่า "โปรไฟล์" และห้ามเรียกว่า CMO',opts:['เพราะเป็นข้อคำถามใหม่','เพราะ O ในโปรไฟล์คือโอกาส ส่วน O ใน CMO คือผลลัพธ์ และคะแนนชุดนี้ใช้คัดผู้ให้สัมภาษณ์เท่านั้น','เพราะไม่ผ่าน IOC','เพราะใช้ทดสอบ H1–H8'],a:1,why:'การเรียกชื่อเดียวกันทำให้สับสนระหว่างโอกาสกับผลลัพธ์'},
+ {lo:'LO2',stem:'ข้อเสนอให้ย้ายการบอกคะแนนความตั้งใจจากส่วนที่ 0.3 ไปส่วนที่ 5 มีเหตุผลอะไร',opts:['เพื่อลดเวลา','เพื่อไม่ให้ผู้ตอบปรับเรื่องเล่าให้สอดคล้องกับตัวเลขก่อนเล่าเหตุการณ์','เพราะคะแนนเป็นความลับ','เพราะ TA ไม่มีคะแนน'],a:1,why:'ให้ผู้ตอบเล่าเหตุการณ์ด้วยถ้อยคำของตนก่อน แล้วจึงใช้คะแนนในส่วนที่ว่าด้วยช่องว่างความตั้งใจ'},
+ {lo:'LO2',stem:'คำถาม 5.1 "ได้ใช้ TSA for LCE กับลูกค้าจริงหรือไม่" มีปัญหาอะไรเมื่อถาม TA',opts:['ยาวเกินไป','TA อยู่นอกด่านสิทธิ คำถามที่ตอบได้คือเงื่อนไขเชิงสมมติ','TA ไม่มีลูกค้า','ไม่มีปัญหา'],a:1,why:'TA ตอบความตั้งใจแบบมีเงื่อนไข การถามเรื่องการใช้จริงจึงไม่ได้หลักฐานเรื่องกลไก'},
+ {lo:'LO3',stem:'ReviewerFear พบ 4 ส่วนข้อความจาก 2 ราย ส่วน TimeSaving พบ 4 ส่วนจาก 4 ราย ข้อสรุปใดถูก',opts:['สองรหัสสำคัญเท่ากัน','TimeSaving มีหลักฐานกว้างกว่า แต่ความสำคัญของแก่นเรื่องไม่ได้ขึ้นกับจำนวนทั้งสองแบบ','ReviewerFear สำคัญกว่าเพราะพูดซ้ำ','ควรรายงานจำนวนส่วนข้อความเป็นผลหลัก'],a:1,why:'นับรายบอกความกว้างของหลักฐาน และการวิเคราะห์เชิงสะท้อนคิดไม่ตัดสินความสำคัญจากความถี่'},
+ {lo:'LO3',stem:'คำถามเจาะลึกเรื่อง "เลือกฉบับเต็มเพื่อความปลอดภัย" ถาม I09 แล้วไม่พบ ส่วน I02 ไม่ได้ถูกถาม ควรบันทึกช่องของ I02 อย่างไร',opts:['ไม่พบ','ไม่ได้ถาม','ไม่ใช้ฉบับเต็ม','ลบออกจากเมทริกซ์'],a:1,why:'การไม่ได้ถามไม่ใช่หลักฐานว่าไม่มี เมทริกซ์ต้องแยกสามค่า: พบ ถามแล้วไม่พบ และไม่ได้ถาม'},
+ {lo:'LO4',stem:'การเขียนว่า "สัมภาษณ์จนข้อมูลอิ่มตัว" คู่กับการวิเคราะห์แก่นเรื่องเชิงสะท้อนคิดมีปัญหาอะไร',opts:['ไม่มีปัญหา','Braun และ Clarke ชี้ว่าแนวคิดอิ่มตัวแบบไม่มีรหัสใหม่ไม่สอดคล้องกับการที่ความหมายเกิดจากการตีความของผู้วิจัย','เพราะต้องสัมภาษณ์ 30 ราย','เพราะ NVivo วัดการอิ่มตัวไม่ได้'],a:1,why:'ทางเลือกที่สอดคล้องกว่าคือพลังของข้อมูล (Malterud et al., 2016) พร้อมบันทึกเหตุผลการหยุด'},
+ {lo:'LO5',stem:'ข้อใดเป็นการใช้ GenAI ที่สอดคล้องกับหลักของบทนี้',opts:['อัปโหลดบทถอดความที่ลบชื่อแล้วให้ GenAI สร้างแก่นเรื่อง','ใช้บริการถอดเสียงบนคลาวด์โดยไม่แจ้งคณะกรรมการ','ให้ GenAI ตรวจว่าคำถามเจาะลึกที่ร่างไว้ชี้คำตอบหรือไม่ โดยไม่ใส่ข้อมูลจริง','เปิดคุณสมบัติ AI ของ NVivo กับไฟล์จริง'],a:2,why:'GenAI ช่วยงานที่ไม่แตะข้อมูลจริงได้ การให้ GenAI สร้างแก่นเรื่องยังขัดกับหลักที่ผู้วิจัยรับผิดชอบการตีความ'}];
+/* ===== UI ===== */
+if(typeof document!=='undefined'){
+  const $=id=>document.getElementById(id);
+  const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  $('b1').innerHTML=ITEMS.map((it,i)=>`<tr><td>${it.t}</td><td><select id="x${i}" aria-label="กล่องของข้อ ${i+1}"><option value="">เลือก</option>${Object.entries(BOX).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></td><td id="r${i}"></td></tr>`).join('');
+  $('c1').onclick=()=>{const ans=ITEMS.map((_,i)=>$('x'+i).value), ok=checkBoxes(ans); let n=0;
+    ok.forEach((v,i)=>{if(v)n++; $('r'+i).innerHTML=ans[i]?`<span class="mark ${v?'ok':'no'}">${v?'ถูก':'ควรเป็น '+BOX[ITEMS[i].a]}</span><br><small>${ITEMS[i].why}</small>`:'<small>ยังไม่เลือก</small>';});
+    $('s1').textContent=`ถูก ${n}/${ITEMS.length}`; $('m1').hidden=false; $('m1').textContent='ข้อที่มักสับสนคือโอกาส ข้อเท็จจริงว่ามีลูกค้าเข้าเงื่อนไขอยู่ในบริบท ส่วนการตีความว่าตนมีโอกาสหรือไม่อยู่ในการให้เหตุผล';};
+  let p2={};
+  $('b2').innerHTML=PROBES.map((p,i)=>`<div class="q"><div class="stem">${i+1}. ${p.t}</div>`+PTYPES.map((o,j)=>`<label class="opt"><input type="radio" name="p${i}" value="${j}"> ${o}</label>`).join('')+`<div class="fb" id="pf${i}"></div></div>`).join('');
+  PROBES.forEach((p,i)=>document.querySelectorAll(`input[name=p${i}]`).forEach(el=>el.addEventListener('change',()=>{const ok=+el.value===p.a;p2[i]=ok;const f=$('pf'+i);f.className='fb show '+(ok?'ok':'no');f.textContent=(ok?'ตรงกับเฉลย. ':`เฉลยคือ "${PTYPES[p.a]}". `)+p.why;const k=Object.keys(p2).length,c=Object.values(p2).filter(Boolean).length;$('s2').textContent=`ตอบแล้ว ${k}/${PROBES.length} · ถูก ${c}`;})));
+  let mode='segments', pv=0;
+  function draw(){const cv=$('cv'),g=cv.getContext('2d'),W=cv.width,H=cv.height,L=150,R=30,T=10,B=30;g.clearRect(0,0,W,H);
+    const idx=mode==='segments'?0:1, mx=4, rh=(H-T-B)/MCODES.length, x=v=>L+v/mx*(W-L-R);
+    g.font='15px "Noto Sans Thai",sans-serif';g.strokeStyle=css('--line');g.fillStyle=css('--muted');g.textAlign='center';
+    for(let v=0;v<=mx;v++){g.beginPath();g.moveTo(x(v),T);g.lineTo(x(v),H-B);g.stroke();g.fillText(v,x(v),H-B+20);}
+    MCODES.forEach((k,i)=>{const y=T+rh*i+rh*.2,h=rh*.6,v=SEG[k][idx];g.fillStyle=css('--ink');g.textAlign='right';g.fillText(k,L-10,y+h*.75);
+      g.fillStyle=k==='ReviewerFear'?css('--gate'):css('--accent');g.fillRect(x(0),y,x(v)-x(0),h);});}
+  function lab3(){draw();const r=testP1(pv);
+    $('b3').innerHTML=r.map(c=>`<tr><td>${c.id} ${c.lic}</td><td>${c.inScope?'ใช่':'ไม่'}</td><td>${c.pred}</td><td>${c.O}</td><td><span class="mark ${c.status==='สวนทาง'?'no':(c.status==='สอดคล้อง'?'ok':'')}">${c.status}</span></td></tr>`).join('');
+    const bad=r.filter(c=>c.status==='สวนทาง').map(c=>c.id);
+    $('m3').textContent=(mode==='segments'?'นับส่วนข้อความ: ReviewerFear (สีอำพัน) เท่ากับ TimeSaving แต่สามในสี่ส่วนมาจาก I07 คนเดียว ':'นับราย: ReviewerFear เหลือ 2 ราย ส่วน TimeSaving 4 ราย ')+'· '+(bad.length?`ป1 ฉบับนี้มีกรณีสวนทาง ${bad.join(', ')} ต้องหากลไกที่ขวางไว้แล้วปรับข้อเสนอ`:`ป1 ฉบับนี้ไม่มีกรณีสวนทางในข้อมูลชุดนี้ แต่มีหลักฐานสนับสนุนเพียง ${r.filter(c=>c.status==='สอดคล้อง').length} ราย ต้องหากรณีเพิ่มก่อนยืนยัน I04 อยู่นอกขอบเขตเพราะไม่ได้พูดถึงการประหยัดเวลา จึงเป็นรูปแบบ CMO อีกแบบ`);}
+  $('mode').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.m;[...$('mode').children].forEach(x=>x.setAttribute('aria-pressed',x===b));lab3();});
+  $('pv').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;pv=+b.dataset.v;[...$('pv').children].forEach(x=>x.setAttribute('aria-pressed',x===b));lab3();});
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw); lab3();
+  let answered={};
+  function drawQuiz(){answered={};
+    $('quiz').innerHTML=QUIZ.map((q,i)=>`<div class="q"><div class="lo">${q.lo}</div><div class="stem">${i+1}. ${q.stem}</div>`+q.opts.map((o,j)=>j).sort((x,y)=>((x*3+i)%4)-((y*3+i)%4)).map(j=>`<label class="opt"><input type="radio" name="q${i}" value="${j}"> ${q.opts[j]}</label>`).join('')+`<div class="fb" id="fb${i}"></div></div>`).join('');
+    QUIZ.forEach((q,i)=>document.querySelectorAll(`input[name=q${i}]`).forEach(el=>el.addEventListener('change',()=>{const ok=+el.value===q.a;answered[i]=ok;const fb=$('fb'+i);fb.className='fb show '+(ok?'ok':'no');fb.textContent=(ok?'ถูกต้อง. ':'ยังไม่ใช่. ')+q.why;score();})));
+    score();}
+  function score(){const k=Object.keys(answered).length,c=Object.values(answered).filter(Boolean).length;$('qscore').textContent=k?`ตอบแล้ว ${k}/${QUIZ.length} · ถูก ${c}`:`${QUIZ.length} ข้อ`;}
+  $('qreset').onclick=drawQuiz; drawQuiz();
+}
+if(typeof module!=='undefined') module.exports={ITEMS,checkBoxes,PROBES,SEG,CASES,testP1,QUIZ};
+</script>
+</body>
+</html>

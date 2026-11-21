@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แอปบทที่ 2 ความสัมพันธ์ระหว่างตัวแปร</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: one-column lab book; each lab = controls + live numbers + chart drawn on canvas */
+:root{
+  --bg:#f3f5f7; --paper:#ffffff; --ink:#15233a; --muted:#5a6678; --line:#d5dbe3; --grid:#e7ebf0;
+  --accent:#0d6466; --accent-soft:#e1efef; --gate:#a86a12; --gate-soft:#f7ecd9;
+  --ok:#2f7d32; --stop:#b3261e; --stop-soft:#f8e3e1; --pt2:#7a4fb0;
+  --display:"Noto Serif Thai",Georgia,serif; --body:"Noto Sans Thai",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1620; --paper:#17212d; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3a4a; --grid:#223040;
+  --accent:#4fb8b4; --accent-soft:#163334; --gate:#e2a54a; --gate-soft:#3a2c14;
+  --ok:#74c27a; --stop:#f08a80; --stop-soft:#3c1d1b; --pt2:#b694e6; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0f1620; --paper:#17212d; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3a4a; --grid:#223040;
+  --accent:#4fb8b4; --accent-soft:#163334; --gate:#e2a54a; --gate-soft:#3a2c14;
+  --ok:#74c27a; --stop:#f08a80; --stop-soft:#3c1d1b; --pt2:#b694e6; color-scheme:dark;}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.65;font-size:16px}
+main{max-width:980px;margin:0 auto;padding:24px 16px 48px;display:grid;gap:24px}
+.brand{display:inline-flex;align-items:center;background:#ffffff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin-bottom:14px}
+.brand{gap:12px}
+.brand img{height:40px;width:auto;display:block}
+.brand .org{font-family:var(--display);font-weight:700;font-size:1.15rem;color:#15233a;border-left:2px solid #d5dbe3;padding-left:12px;line-height:1.2}
+header h1{font-family:var(--display);font-size:1.7rem;line-height:1.3;margin:0 0 6px;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:68ch}
+.note{font-size:.88rem;color:var(--muted);border-left:3px solid var(--gate);padding:4px 10px;background:var(--gate-soft);border-radius:0 6px 6px 0;margin:10px 0 0}
+section.lab{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px}
+section.lab h2{font-family:var(--display);font-size:1.25rem;margin:0 0 4px}
+.lab-tag{font-size:.8rem;color:var(--accent);font-weight:700}
+.lab > p{margin:4px 0 14px;color:var(--muted);max-width:70ch}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:20px;align-items:start}
+@media (max-width:720px){.cols{grid-template-columns:1fr}}
+.ctrl{display:grid;gap:10px}
+.slider label{display:flex;justify-content:space-between;font-size:.92rem;font-weight:500}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.val{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:4px}
+.stat{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.stat .k{font-size:.8rem;color:var(--muted)}
+.stat .v{font-size:1.3rem;font-weight:700;font-variant-numeric:tabular-nums}
+.stat.warn{border-color:var(--stop);background:var(--stop-soft)}
+.msg{font-size:.92rem;padding:8px 12px;border-radius:8px;background:var(--accent-soft);margin-top:10px}
+.msg.bad{background:var(--stop-soft)}
+canvas{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:8px;background:var(--paper);touch-action:manipulation}
+.cap{font-size:.82rem;color:var(--muted);margin-top:4px}
+.bar{display:grid;grid-template-columns:120px 1fr 52px;gap:8px;align-items:center;font-size:.9rem;margin:6px 0}
+.bar .track{height:14px;background:var(--grid);border-radius:7px;position:relative;overflow:hidden}
+.bar .fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:7px}
+.bar .fill.alt{background:var(--gate)}
+.bar span:last-child{font-variant-numeric:tabular-nums;font-weight:700;text-align:right}
+button{font:inherit;font-weight:700;padding:7px 12px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--accent)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gate);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:.85rem;padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);font-weight:500}
+.chip[aria-pressed="false"]{text-decoration:line-through;color:var(--muted);background:var(--grid)}
+.q{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.q .stem{font-weight:500;margin-bottom:6px}
+.q .lo{font-size:.78rem;color:var(--gate);font-weight:700}
+label.opt{display:flex;gap:8px;align-items:flex-start;padding:3px 0;cursor:pointer}
+.q .fb{margin-top:6px;font-size:.92rem;padding:6px 10px;border-radius:6px;display:none}
+.q .fb.show{display:block}
+.q .fb.ok{background:var(--accent-soft)} .q .fb.no{background:var(--stop-soft)}
+.score{font-weight:700;font-variant-numeric:tabular-nums}
+footer{font-size:.85rem;color:var(--muted)}
+</style>
+<style>@media (max-width:640px){body *{min-width:0}table{display:block;overflow-x:auto;max-width:100%}th,td{white-space:normal}select,input,canvas,img,svg{max-width:100%}[class*=grid],.row,.seg,.stats{grid-template-columns:1fr!important;flex-wrap:wrap}pre{overflow-x:auto;white-space:pre-wrap}}</style></head>
+<body><style>#gate{position:fixed;inset:0;background:#F2F7FB;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:Sarabun,'Noto Sans Thai',sans-serif}
+#gate .gb{background:#fff;border-top:4px solid #1F3864;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.08);padding:28px 26px;max-width:380px;width:88%;color:#222}
+#gate h2{color:#1F3864;font-size:19px;margin:0 0 6px}#gate p{font-size:14px;margin:0 0 14px;line-height:1.6}
+#gate .row{display:flex;gap:6px}#gate input[type=password],#gate input[type=text]{flex:1;font-size:16px;padding:9px 10px;border:1px solid #b8c4d4;border-radius:6px}
+#gate button{font-family:inherit;font-size:15px;border:0;border-radius:6px;padding:9px 14px;cursor:pointer}#gate .sh{background:#E3E9F1;color:#1F3864}#gate .go{background:#1F3864;color:#fff;width:100%;margin-top:12px}
+#gate label{font-size:13px;display:flex;gap:6px;align-items:center;margin-top:10px}#gate .err{color:#A93226;font-size:13px;min-height:18px;margin-top:8px}</style>
+<div id="gate"><div class="gb"><h2>แอปประจำตำรา</h2><p>สำหรับผู้อ่านตำรา<br><b>SEM และ GenAI ในการวิจัยทางบัญชีและการสอบบัญชี</b><br>ใส่รหัสเข้าแอปที่พิมพ์ไว้ในตำรา</p>
+<div class="row"><input id="gk" type="password" autocomplete="off" placeholder="รหัสเข้าแอป"><button class="sh" type="button" onclick="var i=document.getElementById('gk');i.type=i.type==='password'?'text':'password'">แสดง</button></div>
+<label><input id="gr" type="checkbox"> จำรหัสในเครื่องนี้</label><button class="go" type="button" id="gg">เปิดแอป</button><div class="err" id="ge"></div></div></div>
+<script>(function(){var H="467e451224101a2f5f9b367b93804929e3d8a0a9be77cb73f13736ca0c64e694",K="semgenai_gate";
+function ok(){var g=document.getElementById('gate');if(g)g.remove();}
+try{if(localStorage.getItem(K)===H||sessionStorage.getItem(K)===H){ok();return;}}catch(e){}
+async function chk(){var v=document.getElementById('gk').value.replace(/[\s\-]/g,'').toUpperCase();
+var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));var h=Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('');
+if(h===H){try{(document.getElementById('gr').checked?localStorage:sessionStorage).setItem(K,H)}catch(e){}ok();}else{document.getElementById('ge').textContent='รหัสไม่ถูกต้อง โปรดดูรหัสที่พิมพ์ไว้ในตำรา';}}
+document.getElementById('gg').onclick=chk;document.getElementById('gk').addEventListener('keydown',function(e){if(e.key==='Enter')chk();});})();</script><div style="font-family:Sarabun,sans-serif;font-size:13px;padding:8px 14px;background:#1F3864"><a href="index.html" style="color:#fff;text-decoration:none">← สารบัญแอปประจำตำรา</a></div>
+<main>
+<header>
+  <div class="brand"><img src="logo.png" alt="Dr VIT" width="154" height="40"><span class="org">Siam edu.</span></div>
+  <h1>แอปบทที่ 2 ความสัมพันธ์ระหว่างตัวแปร</h1>
+  <p>ใช้คู่กับบทที่ 2 มีห้าใบงาน: สหสัมพันธ์จากข้อมูลแปดราย การถดถอยสองตัวทำนาย ตัวแปรกวน CAP2 ตัวแปรผลร่วม AA1 และแบบทดสอบ ค่าตั้งต้นของทุกใบงานตรงกับตัวอย่างในบท</p>
+  <p class="note">ข้อมูลทั้งหมดในแอปเป็นข้อมูลจำลองเพื่อการสอน ห้ามนำข้อมูลผู้ตอบจริงมาใส่ในแอปนี้หรือในเครื่องมือ GenAI</p>
+</header>
+
+<section class="lab" aria-labelledby="l1">
+  <div class="lab-tag">ใบงาน 1 · LO1</div>
+  <h2 id="l1">สหสัมพันธ์ RA กับความตั้งใจ (ตารางที่ 2.1)</h2>
+  <p>กดชื่อผู้ตอบเพื่อตัดออกหรือใส่กลับ แล้วดูว่า r เปลี่ยนเท่าใด ลองตัด A7 ซึ่งมี RA สูงแต่ความตั้งใจต่ำ</p>
+  <div class="cols">
+    <div>
+      <div class="chips" id="chips" role="group" aria-label="เลือกผู้ตอบ"></div>
+      <div class="stats" style="margin-top:12px">
+        <div class="stat"><div class="k">n</div><div class="v" id="s_n"></div></div>
+        <div class="stat"><div class="k">s<sub>xy</sub></div><div class="v" id="s_cov"></div></div>
+        <div class="stat"><div class="k">r</div><div class="v" id="s_r"></div></div>
+      </div>
+      <div class="msg" id="s_msg"></div>
+    </div>
+    <div><canvas id="sc" width="560" height="380" aria-label="แผนภาพกระจาย RA กับความตั้งใจ"></canvas>
+    <div class="cap">แกนนอน RA แกนตั้งความตั้งใจ (AI) มาตร 1–7 เส้นทึบคือเส้นถดถอยของจุดที่เลือก</div></div>
+  </div>
+</section>
+
+<section class="lab" aria-labelledby="l2">
+  <div class="lab-tag">ใบงาน 2 · LO2</div>
+  <h2 id="l2">r กับ β: ถดถอยสองตัวทำนาย (ตารางที่ 2.2)</h2>
+  <p>X₁ = RA, X₂ = CP, Y = ความตั้งใจ ทุกตัวเป็นคะแนนมาตรฐาน เลื่อนค่าสหสัมพันธ์แล้วดู β, R², สหสัมพันธ์บางส่วน และ VIF</p>
+  <div class="cols">
+    <div class="ctrl">
+      <div class="slider"><label for="r12">r(RA, CP) <span class="val" id="r12v"></span></label><input type="range" id="r12" min="-0.95" max="0.95" step="0.05" value="0.70"></div>
+      <div class="slider"><label for="r1y">r(RA, AI) <span class="val" id="r1yv"></span></label><input type="range" id="r1y" min="-0.95" max="0.95" step="0.05" value="0.50"></div>
+      <div class="slider"><label for="r2y">r(CP, AI) <span class="val" id="r2yv"></span></label><input type="range" id="r2y" min="-0.95" max="0.95" step="0.05" value="0.60"></div>
+      <div class="row"><button type="button" class="ghost" id="regreset">กลับค่าในบท (.70 / .50 / .60)</button></div>
+    </div>
+    <div>
+      <div class="stats" id="regstats"></div>
+      <div class="msg" id="regmsg"></div>
+    </div>
+  </div>
+</section>
+
+<section class="lab" aria-labelledby="l3">
+  <div class="lab-tag">ใบงาน 3 · LO3, LO5</div>
+  <h2 id="l3">ตัวแปรกวน CAP2 ความพร้อมของสำนักงาน</h2>
+  <p>r(RA, AI) คงที่ที่ .50 ตามตัวอย่างหัวข้อ 2.5.1 เลื่อนความแรงที่ CAP2 สัมพันธ์กับ RA และกับ AI แล้วดูว่า β ของ RA เหลือเท่าใดเมื่อใส่ CAP2 ในสมการ</p>
+  <div class="cols">
+    <div class="ctrl">
+      <div class="slider"><label for="ca">r(CAP2, RA) <span class="val" id="cav"></span></label><input type="range" id="ca" min="0" max="0.9" step="0.05" value="0.40"></div>
+      <div class="slider"><label for="cb">r(CAP2, AI) <span class="val" id="cbv"></span></label><input type="range" id="cb" min="0" max="0.9" step="0.05" value="0.45"></div>
+    </div>
+    <div>
+      <div id="cbars"></div>
+      <div class="msg" id="cmsg"></div>
+    </div>
+  </div>
+</section>
+
+<section class="lab" aria-labelledby="l4">
+  <div class="lab-tag">ใบงาน 4 · LO3</div>
+  <h2 id="l4">ตัวแปรผลร่วม: อย่าวิเคราะห์เฉพาะผู้ที่ใช้แล้ว</h2>
+  <p>จำลอง CPA 1,200 ราย ความตั้งใจ (AI) กับโอกาสจากลูกค้า (OPP1) ไม่สัมพันธ์กันในประชากร การใช้จริง (AA1) เกิดเมื่อ AI + OPP1 + ความคลาดเคลื่อนสูงกว่าเกณฑ์ เลื่อนเกณฑ์แล้วเทียบ r ในทุกคนกับ r ในผู้ที่ใช้แล้ว</p>
+  <div class="cols">
+    <div class="ctrl">
+      <div class="slider"><label for="thr">เกณฑ์การใช้ (ยิ่งสูง ผู้ใช้ยิ่งน้อย) <span class="val" id="thrv"></span></label><input type="range" id="thr" min="-1" max="2.5" step="0.1" value="1.0"></div>
+      <div class="stats">
+        <div class="stat"><div class="k">r ทุกคน</div><div class="v" id="c_all"></div></div>
+        <div class="stat" id="c_selbox"><div class="k">r เฉพาะผู้ใช้</div><div class="v" id="c_sel"></div></div>
+        <div class="stat"><div class="k">ผู้ใช้</div><div class="v" id="c_n"></div></div>
+      </div>
+      <div class="row"><button type="button" class="ghost" id="reseed">สุ่มชุดใหม่</button></div>
+      <div class="msg" id="c_msg"></div>
+    </div>
+    <div><canvas id="cc" width="560" height="380" aria-label="แผนภาพกระจาย AI กับ OPP1"></canvas>
+    <div class="cap">จุดสีเข้มคือผู้ใช้ (AA1 = 1) จุดจางคือผู้ไม่ใช้ แกนเป็นคะแนนมาตรฐาน</div></div>
+  </div>
+</section>
+
+<section class="lab" aria-labelledby="l5">
+  <div class="lab-tag">ใบงาน 5 · LO1–LO5</div>
+  <h2 id="l5">แบบทดสอบท้ายบท</h2>
+  <p>คำอธิบายแสดงทันทีหลังเลือกคำตอบ</p>
+  <div id="quiz"></div>
+  <div class="row"><span class="score" id="qscore"></span><button type="button" class="ghost" id="qreset">เริ่มใหม่</button></div>
+</section>
+
+<footer>ตัวเลขตั้งต้นตรงกับบทที่ 2: s<sub>xy</sub> = .605, r = .50, β₁ = .157, β₂ = .490, R² = .373, ตัวอย่าง CAP2 β = .381 และ .298, R² = .324 ข้อเสนอแบบจำลองความไว (เพิ่ม CAP2, OPP2 และตัดการอบรม) ยังรอผู้วิจัยตัดสิน</footer>
+</main>
+
+<script>
+/* ===== logic (pure) ===== */
+const DATA = [['A1',2.42824,3.01261],['A2',2.87732,4.31639],['A3',3.32639,3.11539],['A4',3.77546,2.93333],
+  ['A5',4.22454,4.91103],['A6',4.67361,5.26488],['A7',5.12268,3.00969],['A8',5.57176,5.43667]];
+function pearson(xs, ys){
+  const n = xs.length; if(n < 3) return {n, cov:NaN, r:NaN, b:NaN, a:NaN};
+  const mx = xs.reduce((a,b)=>a+b)/n, my = ys.reduce((a,b)=>a+b)/n;
+  let sxy=0, sxx=0, syy=0;
+  for(let i=0;i<n;i++){const dx=xs[i]-mx, dy=ys[i]-my; sxy+=dx*dy; sxx+=dx*dx; syy+=dy*dy;}
+  return {n, cov:sxy/(n-1), r:sxy/Math.sqrt(sxx*syy), b:sxy/sxx, a:my-(sxy/sxx)*mx};
+}
+function twoPred(r12, r1y, r2y){
+  const det = 1 - r12*r12 - r1y*r1y - r2y*r2y + 2*r12*r1y*r2y;
+  const d = 1 - r12*r12;
+  const b1 = (r1y - r12*r2y)/d, b2 = (r2y - r12*r1y)/d;
+  const R2 = b1*r1y + b2*r2y;
+  const pr1 = (r1y - r12*r2y)/Math.sqrt(d*(1-r2y*r2y));
+  return {pd: det > 1e-9 && d > 1e-9, det, b1, b2, R2, pr1, vif: 1/d};
+}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+function simulate(seed, n){
+  const rnd = mulberry32(seed);
+  const norm = ()=>{let u=0,v=0;while(u===0)u=rnd();while(v===0)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+  const out=[]; for(let i=0;i<n;i++){out.push({ai:norm(), opp:norm(), e:norm()*0.5});} return out;
+}
+function collider(pop, thr){
+  const all = pearson(pop.map(p=>p.ai), pop.map(p=>p.opp));
+  const used = pop.filter(p=>p.ai+p.opp+p.e > thr);
+  const sel = pearson(used.map(p=>p.ai), used.map(p=>p.opp));
+  return {all:all.r, sel:sel.r, nUsed:used.length};
+}
+const QUIZ = [
+  {lo:'LO1',stem:'ถ้าคูณคะแนน RA ของทุกคนด้วย 10 ค่า sxy และ r จะเป็นอย่างไร',
+   opts:['ทั้งสองค่าเพิ่ม 10 เท่า','sxy เพิ่ม 10 เท่า แต่ r เท่าเดิม','sxy เท่าเดิม แต่ r เพิ่ม 10 เท่า','ทั้งสองค่าเท่าเดิม'],
+   a:1,why:'sxy มีหน่วยตามตัวแปร จึงขยายตาม ส่วน r หารด้วย sx ซึ่งขยาย 10 เท่าเช่นกัน หน่วยจึงตัดกันหมด'},
+  {lo:'LO2',stem:'β₁ = .157 ขณะที่ r(RA, AI) = .50 ข้อใดอธิบายส่วนต่างได้ถูกต้อง',
+   opts:['RA ไม่มีความสำคัญ','RA กับ CP สัมพันธ์กัน .70 เมื่อคง CP ไว้ ส่วนที่ RA อธิบายเพิ่มจึงเหลือน้อยลง','ข้อมูลมีความคลาดเคลื่อน','β ต้องน้อยกว่า r เสมอ'],
+   a:1,why:'β ตอบคำถามว่าเมื่อคง CP ไว้ RA ต่างกันหนึ่งส่วนเบี่ยงเบนมาตรฐานสัมพันธ์กับความตั้งใจที่พยากรณ์ต่างกันเท่าใด β อาจมากกว่า r ได้ เช่น ในกรณีตัวแปรกด (suppressor)'},
+  {lo:'LO2',stem:'GenAI สรุปว่า "RA เพิ่มการใช้จริง 15.7%" จุดผิดข้อใดไม่ได้อยู่ในข้อความนี้',
+   opts:['.157 เป็นสัมประสิทธิ์มาตรฐาน ไม่ใช่ร้อยละ','ผลลัพธ์คือความตั้งใจ ไม่ใช่การใช้จริง','คำว่า "เพิ่ม" สื่อเหตุและผลเกินกว่าข้อมูลสำรวจรองรับ','β ต้องรายงานเป็นทศนิยมสองตำแหน่งเท่านั้น'],
+   a:3,why:'สามข้อแรกคือจุดผิดในบท ส่วนจำนวนทศนิยมเป็นเรื่องรูปแบบการรายงาน ไม่ทำให้ความหมายผิด'},
+  {lo:'LO3',stem:'การอบรมทำให้ CX ลดลง แล้ว CX ส่งผลต่อความตั้งใจ ถ้าต้องการผลรวมของการอบรมต่อความตั้งใจ ควรใส่ CX ในสมการหรือไม่',
+   opts:['ควร เพื่อควบคุม','ไม่ควร เพราะ CX เป็นตัวแปรส่งผ่าน การควบคุมจะตัดส่วนผลทางอ้อมออก','ควร เพราะ CX เป็นตัวแปรผลร่วม','ไม่สำคัญ ผลเท่ากัน'],
+   a:1,why:'ผลทางอ้อมในตัวอย่างคือ (−.40) × (−.30) = +.12 ถ้าใส่ CX ส่วนนี้จะหายจากสัมประสิทธิ์ของการอบรม'},
+  {lo:'LO3',stem:'ในใบงาน 4 ทำไม r เฉพาะผู้ใช้จึงติดลบ ทั้งที่ AI กับ OPP1 ไม่สัมพันธ์กันในประชากร',
+   opts:['เพราะตัวอย่างเล็ก','เพราะผู้ใช้ที่ตั้งใจต่ำต้องมีโอกาสสูงจึงผ่านเกณฑ์ การเลือกตามตัวแปรผลร่วมจึงสร้างความสัมพันธ์เทียม','เพราะ AI ส่งผลต่อ OPP1','เพราะข้อมูลไม่ปกติ'],
+   a:1,why:'AA1 มีลูกศรเข้าจากทั้ง AI และ OPP1 การเลือกเฉพาะ AA1 = 1 จึงเปิดทางเทียม H11 จึงใช้ CPA ทุกคนที่มีงานเข้าเงื่อนไข ทั้งผู้ใช้และไม่ใช้'},
+  {lo:'LO3',stem:'ถ้าคาดว่า RA สัมพันธ์กับความตั้งใจแรงกว่าในสำนักงานที่มีทรัพยากรพร้อม CAP2 มีบทบาทใดและต้องวิเคราะห์อย่างไร',
+   opts:['ตัวแปรกวน ใส่เป็นตัวแปรควบคุม','ตัวแปรกำกับ ใส่พจน์ปฏิสัมพันธ์ RA × CAP2','ตัวแปรผลร่วม ห้ามใส่','ตัวแปรส่งผ่าน ใช้ผลทางอ้อม'],
+   a:1,why:'ตัวแปรเดียวกันเป็นตัวแปรกวนในคำถามหนึ่ง และเป็นตัวแปรกำกับในอีกคำถามหนึ่งได้ บทบาทขึ้นกับคำถามและโครงสร้างที่สมมติ'},
+  {lo:'LO4',stem:'ในแบบจำลองตัวแปรแฝง RA1 = ν₁ + λ₁RA + ε₁ ค่า λ₁ คืออะไร',
+   opts:['สัมประสิทธิ์เส้นทาง H1','น้ำหนักองค์ประกอบของข้อ RA1','ความคลาดเคลื่อนของข้อ RA1','ค่าเฉลี่ยของ RA1'],
+   a:1,why:'λ₁ เป็นส่วนของแบบจำลองการวัด ส่วน H1 เป็นเส้นทางในแบบจำลองโครงสร้างจาก RA ไปความตั้งใจ'},
+  {lo:'LO5',stem:'การอบรมอยู่ในตัวแปรควบคุมของโครงร่าง แต่ถ้าผู้ที่ตั้งใจสูงเลือกไปอบรมเอง ควรทำอย่างไร',
+   opts:['คงไว้โดยไม่ต้องรายงาน','กำหนดก่อนเก็บข้อมูลให้มีแบบจำลองความไวที่ตัดการอบรมออก แล้วรายงานว่า β ของ H1–H8 เปลี่ยนเท่าใด','ตัดออกหลังเห็นผลถ้าผลไม่มีนัยสำคัญ','เปลี่ยนเป็นตัวแปรตาม'],
+   a:1,why:'ถ้าการอบรมเป็นผลของความตั้งใจ การควบคุมเป็น bad control การตัดสินหลังเห็นผลทำให้การทดสอบยืนยันกลายเป็นการสำรวจ'}
+];
+/* ===== UI ===== */
+if(typeof document !== 'undefined'){
+  const $ = id=>document.getElementById(id);
+  const css = n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const f3 = v=>isFinite(v)? (v<0?'−':'')+Math.abs(v).toFixed(3).replace(/^0\./,'.') : '–';
+  const f2 = v=>isFinite(v)? (v<0?'−':'')+Math.abs(v).toFixed(2).replace(/^0\./,'.') : '–';
+
+  function frame(cv, xr, yr, xl, yl, ticks){
+    const ctx=cv.getContext('2d'), W=cv.width, H=cv.height, L=48, R=14, T=12, B=40;
+    ctx.clearRect(0,0,W,H);
+    const X=v=>L+(v-xr[0])/(xr[1]-xr[0])*(W-L-R), Y=v=>H-B-(v-yr[0])/(yr[1]-yr[0])*(H-T-B);
+    ctx.font='12px "Noto Sans Thai",sans-serif'; ctx.lineWidth=1;
+    ticks.x.forEach(t=>{ctx.strokeStyle=css('--grid');ctx.beginPath();ctx.moveTo(X(t),T);ctx.lineTo(X(t),H-B);ctx.stroke();
+      ctx.fillStyle=css('--muted');ctx.textAlign='center';ctx.fillText(t,X(t),H-B+16);});
+    ticks.y.forEach(t=>{ctx.strokeStyle=css('--grid');ctx.beginPath();ctx.moveTo(L,Y(t));ctx.lineTo(W-R,Y(t));ctx.stroke();
+      ctx.fillStyle=css('--muted');ctx.textAlign='right';ctx.fillText(t,L-6,Y(t)+4);});
+    ctx.fillStyle=css('--ink');ctx.textAlign='center';ctx.fillText(xl,(L+W-R)/2,H-6);
+    ctx.save();ctx.translate(14,(T+H-B)/2);ctx.rotate(-Math.PI/2);ctx.fillText(yl,0,0);ctx.restore();
+    return {ctx,X,Y,L,R,T,B,W,H};
+  }
+
+  /* Lab 1 */
+  const on = DATA.map(()=>true);
+  $('chips').innerHTML = DATA.map((d,i)=>`<button type="button" class="chip" aria-pressed="true" data-i="${i}">${d[0]}</button>`).join('');
+  $('chips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const i=+b.dataset.i;on[i]=!on[i];b.setAttribute('aria-pressed',on[i]);lab1();});
+  function lab1(){
+    const sel=DATA.filter((d,i)=>on[i]); const p=pearson(sel.map(d=>d[1]),sel.map(d=>d[2]));
+    $('s_n').textContent=p.n; $('s_cov').textContent=f3(p.cov); $('s_r').textContent=f2(p.r);
+    const all=on.every(Boolean), onlyA7=!on[6]&&on.filter(Boolean).length===7;
+    $('s_msg').className='msg'+(p.n<3?' bad':'');
+    $('s_msg').textContent = p.n<3 ? 'ต้องมีอย่างน้อย 3 ราย' : all ? 'ครบแปดราย: sxy = .605 และ r = .50 ตามหัวข้อ 2.2' :
+      onlyA7 ? `ตัด A7 แล้ว r เป็น ${f2(p.r)} จุดเดียวเปลี่ยน r ได้มากเมื่อ n เล็ก ในงานจริงให้บันทึกเหตุผลก่อนตัด และรายงานผลทั้งสองแบบ` :
+      `r ของ ${p.n} รายที่เลือกเท่ากับ ${f2(p.r)}`;
+    const g=frame($('sc'),[2,6],[2,6],'RA','ความตั้งใจ (AI)',{x:[2,3,4,5,6],y:[2,3,4,5,6]});
+    if(p.n>=3){g.ctx.strokeStyle=css('--accent');g.ctx.lineWidth=2;g.ctx.beginPath();g.ctx.moveTo(g.X(2),g.Y(p.a+p.b*2));g.ctx.lineTo(g.X(6),g.Y(p.a+p.b*6));g.ctx.stroke();}
+    DATA.forEach((d,i)=>{const c=g.ctx;c.beginPath();c.arc(g.X(d[1]),g.Y(d[2]),7,0,7);
+      if(on[i]){c.fillStyle=css('--accent');c.fill();}else{c.strokeStyle=css('--muted');c.lineWidth=1.5;c.stroke();}
+      c.fillStyle=css('--ink');c.textAlign='left';c.font='12px "Noto Sans Thai",sans-serif';c.fillText(d[0],g.X(d[1])+10,g.Y(d[2])-6);});
+  }
+
+  /* Lab 2 */
+  function lab2(){
+    const r12=+$('r12').value, r1y=+$('r1y').value, r2y=+$('r2y').value;
+    $('r12v').textContent=f2(r12); $('r1yv').textContent=f2(r1y); $('r2yv').textContent=f2(r2y);
+    const t=twoPred(r12,r1y,r2y);
+    const cells = t.pd ? [['β₁ (RA)',f3(t.b1)],['β₂ (CP)',f3(t.b2)],['R²',f3(t.R2)],['r บางส่วน RA',f3(t.pr1)],['VIF',t.vif.toFixed(2)]]
+      : [['β₁ (RA)','–'],['β₂ (CP)','–'],['R²','–'],['r บางส่วน RA','–'],['VIF',t.vif.toFixed(2)]];
+    $('regstats').innerHTML = cells.map(c=>`<div class="stat${!t.pd||(c[0]==='VIF'&&t.vif>=5)?' warn':''}"><div class="k">${c[0]}</div><div class="v">${c[1]}</div></div>`).join('');
+    const m=$('regmsg');
+    if(!t.pd){m.className='msg bad';m.textContent=`ชุดสหสัมพันธ์นี้เกิดขึ้นจริงไม่ได้ (ดีเทอร์มิแนนต์ ${f3(t.det)} ≤ 0) เช่น ถ้า RA และ CP สัมพันธ์กับ AI แรงในทิศเดียวกัน RA กับ CP จะสัมพันธ์กันต่ำมากไม่ได้ ลองปรับค่าใหม่`;return;}
+    m.className='msg';
+    let s=`r(RA, AI) = ${f2(r1y)} แต่เมื่อคง CP ไว้ β₁ = ${f3(t.b1)}`;
+    if(Math.sign(t.b1)!==Math.sign(r1y)&&Math.abs(t.b1)>.01) s+=' เครื่องหมายกลับทิศจาก r เพราะ RA กับ CP สัมพันธ์กันแรง อย่าอ่าน β เป็นผลของ RA โดยลำพัง';
+    else if(Math.abs(t.b1)>Math.abs(r1y)+.005) s+=' มากกว่า r แสดงลักษณะตัวแปรกด (suppressor)';
+    else if(Math.abs(t.b1)<Math.abs(r1y)-.005) s+=' ลดลงจาก r เพราะส่วนหนึ่งของความสัมพันธ์ซ้อนกับ CP';
+    if(t.vif>=5) s+=` · VIF ${t.vif.toFixed(2)} สูง ค่าประมาณจะไม่เสถียร`;
+    m.textContent=s;
+  }
+  ['r12','r1y','r2y'].forEach(id=>$(id).addEventListener('input',lab2));
+  $('regreset').onclick=()=>{$('r12').value=.70;$('r1y').value=.50;$('r2y').value=.60;lab2();};
+
+  /* Lab 3 */
+  function lab3(){
+    const a=+$('ca').value, b=+$('cb').value; $('cav').textContent=f2(a); $('cbv').textContent=f2(b);
+    const t=twoPred(a,.50,b); // X1 = RA, X2 = CAP2 : r12 = r(CAP2,RA), r1y = r(RA,AI), r2y = r(CAP2,AI)
+    if(!t.pd){$('cbars').innerHTML='';$('cmsg').className='msg bad';$('cmsg').textContent='ชุดสหสัมพันธ์นี้เกิดขึ้นจริงไม่ได้ ลองลดค่าใดค่าหนึ่ง';return;}
+    const bar=(lab,v,alt)=>`<div class="bar"><span>${lab}</span><div class="track"><div class="fill${alt?' alt':''}" style="width:${Math.max(0,Math.min(1,Math.abs(v)))*100}%"></div></div><span>${f3(v)}</span></div>`;
+    $('cbars').innerHTML = bar('r(RA, AI)',.50)+bar('β RA เมื่อปรับ CAP2',t.b1)+bar('β CAP2',t.b2,true)+bar('R²',t.R2,true);
+    const drop=.50-t.b1;
+    $('cmsg').className='msg';
+    $('cmsg').textContent = (Math.abs(a-.40)<.001&&Math.abs(b-.45)<.001 ? 'ค่าในบท: ' : '') +
+      `β ของ RA ${drop>=0?'ลดลง':'เพิ่มขึ้น'} ${f3(Math.abs(drop))} จาก .50 ` +
+      (drop>0.005 ? 'ส่วนที่หายไปคือความสัมพันธ์ที่ผ่านความพร้อมของสำนักงานตามโครงสร้างที่สมมติ CAP2 เป็นข้อคำถามเดี่ยว การปรับจึงขจัดอคติได้ไม่หมด' :
+       'เมื่อ CAP2 แทบไม่สัมพันธ์กับตัวใดตัวหนึ่ง การปรับแทบไม่เปลี่ยน β ของ RA');
+  }
+  ['ca','cb'].forEach(id=>$(id).addEventListener('input',lab3));
+
+  /* Lab 4 */
+  let seed=20261111, pop=simulate(seed,1200);
+  function lab4(){
+    const thr=+$('thr').value; $('thrv').textContent=f2(thr);
+    const c=collider(pop,thr);
+    $('c_all').textContent=f2(c.all); $('c_sel').textContent=f2(c.sel); $('c_n').textContent=c.nUsed.toLocaleString('th-TH');
+    $('c_selbox').className='stat'+(c.sel<-.1?' warn':'');
+    $('c_msg').className='msg';
+    $('c_msg').textContent = c.nUsed<10 ? 'ผู้ใช้น้อยเกินไปสำหรับการคำนวณ ลองลดเกณฑ์' :
+      `ในทุกคน r ≈ ${f2(c.all)} แต่ในผู้ใช้ ${c.nUsed} ราย r = ${f2(c.sel)} ความสัมพันธ์เชิงลบนี้เกิดจากการเลือกตาม AA1 ล้วน ๆ ยิ่งเกณฑ์สูง ผู้ใช้ยิ่งถูกคัดเข้ม ความสัมพันธ์เทียมยิ่งแรง`;
+    const g=frame($('cc'),[-3.5,3.5],[-3.5,3.5],'ความตั้งใจ AI (z)','โอกาส OPP1 (z)',{x:[-3,-2,-1,0,1,2,3],y:[-3,-2,-1,0,1,2,3]});
+    const c2=g.ctx; const acc=css('--accent'), mut=css('--muted');
+    pop.forEach(p=>{const u=p.ai+p.opp+p.e>thr; c2.globalAlpha=u?.85:.22; c2.fillStyle=u?acc:mut;
+      c2.beginPath(); c2.arc(g.X(Math.max(-3.5,Math.min(3.5,p.ai))),g.Y(Math.max(-3.5,Math.min(3.5,p.opp))),u?2.6:2,0,7); c2.fill();});
+    c2.globalAlpha=1;
+  }
+  $('thr').addEventListener('input',lab4);
+  $('reseed').onclick=()=>{seed=(seed*16807)%2147483647; pop=simulate(seed,1200); lab4();};
+
+  /* Quiz */
+  let answered={};
+  function drawQuiz(){
+    answered={};
+    $('quiz').innerHTML=QUIZ.map((q,i)=>`<div class="q"><div class="lo">${q.lo}</div><div class="stem">${i+1}. ${q.stem}</div>`+
+      q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}"> ${o}</label>`).join('')+`<div class="fb" id="fb${i}"></div></div>`).join('');
+    QUIZ.forEach((q,i)=>document.querySelectorAll(`input[name=q${i}]`).forEach(el=>el.addEventListener('change',()=>{
+      const ok=+el.value===q.a; answered[i]=ok; const fb=$('fb'+i); fb.className='fb show '+(ok?'ok':'no');
+      fb.textContent=(ok?'ถูกต้อง. ':'ยังไม่ใช่. ')+q.why; score();})));
+    score();
+  }
+  function score(){const k=Object.keys(answered).length,c=Object.values(answered).filter(Boolean).length;
+    $('qscore').textContent=k?`ตอบแล้ว ${k}/${QUIZ.length} · ถูก ${c}`:`${QUIZ.length} ข้อ`;}
+  $('qreset').onclick=drawQuiz;
+
+  function all(){lab1();lab2();lab3();lab4();}
+  all(); drawQuiz();
+  try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',all);}catch(e){}
+  new MutationObserver(all).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+}
+if(typeof module!=='undefined') module.exports={DATA,pearson,twoPred,simulate,collider,QUIZ};
+</script>
+</body>
+</html>

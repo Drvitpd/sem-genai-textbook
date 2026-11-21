@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แอปบทที่ 1 แบบจำลองการยอมรับแบบมีด่าน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: one column workbook; three labs stacked, each a bordered "ใบงาน" with controls left, result right */
+:root{
+  --bg:#f3f5f7; --paper:#ffffff; --ink:#15233a; --muted:#5a6678; --line:#d5dbe3;
+  --accent:#0d6466; --accent-soft:#e1efef; --gate:#a86a12; --gate-soft:#f7ecd9;
+  --ok:#2f7d32; --stop:#b3261e; --stop-soft:#f8e3e1;
+  --display:"Noto Serif Thai",Georgia,serif; --body:"Noto Sans Thai",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1620; --paper:#17212d; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3a4a;
+  --accent:#4fb8b4; --accent-soft:#163334; --gate:#e2a54a; --gate-soft:#3a2c14;
+  --ok:#74c27a; --stop:#f08a80; --stop-soft:#3c1d1b; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0f1620; --paper:#17212d; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3a4a;
+  --accent:#4fb8b4; --accent-soft:#163334; --gate:#e2a54a; --gate-soft:#3a2c14;
+  --ok:#74c27a; --stop:#f08a80; --stop-soft:#3c1d1b; color-scheme:dark;}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.65;font-size:16px}
+main{max-width:980px;margin:0 auto;padding:24px 16px 48px;display:grid;gap:24px}
+.brand{display:inline-flex;align-items:center;background:#ffffff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin-bottom:14px}
+.brand{gap:12px}
+.brand img{height:40px;width:auto;display:block}
+.brand .org{font-family:var(--display);font-weight:700;font-size:1.15rem;color:#15233a;border-left:2px solid #d5dbe3;padding-left:12px;line-height:1.2}
+header h1{font-family:var(--display);font-size:1.7rem;line-height:1.3;margin:0 0 6px;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:68ch}
+.note{font-size:.88rem;color:var(--muted);border-left:3px solid var(--gate);padding:4px 10px;background:var(--gate-soft);border-radius:0 6px 6px 0}
+section.lab{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px}
+section.lab h2{font-family:var(--display);font-size:1.25rem;margin:0 0 4px}
+.lab-tag{font-size:.8rem;color:var(--accent);font-weight:700;letter-spacing:.02em}
+.lab > p{margin:4px 0 14px;color:var(--muted);max-width:70ch}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:20px}
+@media (max-width:720px){.cols{grid-template-columns:1fr}}
+fieldset{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0 0 12px}
+legend{font-weight:700;font-size:.92rem;padding:0 4px}
+label.opt{display:flex;gap:8px;align-items:flex-start;padding:3px 0;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.val{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent)}
+.chain{display:grid;gap:8px}
+.gate{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;padding:10px 12px;border-radius:8px;border:1px solid var(--line)}
+.gate .dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;background:var(--muted)}
+.gate.pass{border-color:var(--ok)} .gate.pass .dot{background:var(--ok)}
+.gate.stop{border-color:var(--stop);background:var(--stop-soft)} .gate.stop .dot{background:var(--stop)}
+.gate.skip{opacity:.45}
+.gate b{display:block}
+.gate small{color:var(--muted)}
+.codes{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.codes table{width:100%;border-collapse:collapse;font-size:.9rem}
+.codes td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.codes td:first-child{font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--accent)}
+.persona{margin-top:10px;font-size:.92rem;background:var(--accent-soft);padding:8px 12px;border-radius:8px}
+.tbl{overflow-x:auto}
+table.match{width:100%;border-collapse:collapse;font-size:.92rem;min-width:620px}
+table.match th,table.match td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.match th{font-size:.82rem;color:var(--muted);font-weight:700}
+select{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);max-width:100%}
+.mark{font-weight:700;white-space:nowrap}
+.mark.ok{color:var(--ok)} .mark.no{color:var(--stop)}
+button{font:inherit;font-weight:700;padding:8px 14px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--accent)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--gate);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.score{font-weight:700;font-variant-numeric:tabular-nums}
+.q{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.q .stem{font-weight:500;margin-bottom:6px}
+.q .lo{font-size:.78rem;color:var(--gate);font-weight:700}
+.q .fb{margin-top:6px;font-size:.92rem;padding:6px 10px;border-radius:6px;display:none}
+.q .fb.show{display:block}
+.q .fb.ok{background:var(--accent-soft)} .q .fb.no{background:var(--stop-soft)}
+footer{font-size:.85rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style>@media (max-width:640px){body *{min-width:0}table{display:block;overflow-x:auto;max-width:100%}th,td{white-space:normal}select,input,canvas,img,svg{max-width:100%}[class*=grid],.row,.seg,.stats{grid-template-columns:1fr!important;flex-wrap:wrap}pre{overflow-x:auto;white-space:pre-wrap}}</style></head>
+<body><style>#gate{position:fixed;inset:0;background:#F2F7FB;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:Sarabun,'Noto Sans Thai',sans-serif}
+#gate .gb{background:#fff;border-top:4px solid #1F3864;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.08);padding:28px 26px;max-width:380px;width:88%;color:#222}
+#gate h2{color:#1F3864;font-size:19px;margin:0 0 6px}#gate p{font-size:14px;margin:0 0 14px;line-height:1.6}
+#gate .row{display:flex;gap:6px}#gate input[type=password],#gate input[type=text]{flex:1;font-size:16px;padding:9px 10px;border:1px solid #b8c4d4;border-radius:6px}
+#gate button{font-family:inherit;font-size:15px;border:0;border-radius:6px;padding:9px 14px;cursor:pointer}#gate .sh{background:#E3E9F1;color:#1F3864}#gate .go{background:#1F3864;color:#fff;width:100%;margin-top:12px}
+#gate label{font-size:13px;display:flex;gap:6px;align-items:center;margin-top:10px}#gate .err{color:#A93226;font-size:13px;min-height:18px;margin-top:8px}</style>
+<div id="gate"><div class="gb"><h2>แอปประจำตำรา</h2><p>สำหรับผู้อ่านตำรา<br><b>SEM และ GenAI ในการวิจัยทางบัญชีและการสอบบัญชี</b><br>ใส่รหัสเข้าแอปที่พิมพ์ไว้ในตำรา</p>
+<div class="row"><input id="gk" type="password" autocomplete="off" placeholder="รหัสเข้าแอป"><button class="sh" type="button" onclick="var i=document.getElementById('gk');i.type=i.type==='password'?'text':'password'">แสดง</button></div>
+<label><input id="gr" type="checkbox"> จำรหัสในเครื่องนี้</label><button class="go" type="button" id="gg">เปิดแอป</button><div class="err" id="ge"></div></div></div>
+<script>(function(){var H="467e451224101a2f5f9b367b93804929e3d8a0a9be77cb73f13736ca0c64e694",K="semgenai_gate";
+function ok(){var g=document.getElementById('gate');if(g)g.remove();}
+try{if(localStorage.getItem(K)===H||sessionStorage.getItem(K)===H){ok();return;}}catch(e){}
+async function chk(){var v=document.getElementById('gk').value.replace(/[\s\-]/g,'').toUpperCase();
+var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));var h=Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('');
+if(h===H){try{(document.getElementById('gr').checked?localStorage:sessionStorage).setItem(K,H)}catch(e){}ok();}else{document.getElementById('ge').textContent='รหัสไม่ถูกต้อง โปรดดูรหัสที่พิมพ์ไว้ในตำรา';}}
+document.getElementById('gg').onclick=chk;document.getElementById('gk').addEventListener('keydown',function(e){if(e.key==='Enter')chk();});})();</script><div style="font-family:Sarabun,sans-serif;font-size:13px;padding:8px 14px;background:#1F3864"><a href="index.html" style="color:#fff;text-decoration:none">← สารบัญแอปประจำตำรา</a></div>
+<main>
+<header>
+  <div class="brand"><img src="logo.png" alt="Dr VIT" width="154" height="40"><span class="org">Siam edu.</span></div>
+  <h1>แอปบทที่ 1 แบบจำลองการยอมรับแบบมีด่าน: ความตั้งใจ–สิทธิ–โอกาส–การใช้</h1>
+  <p>ใช้คู่กับบทที่ 1 ของตำรา SEM และ GenAI ในการวิจัยทางบัญชีและการสอบบัญชี: กรณีศึกษา TSA for LCE มีสามใบงาน: จำลองด่านที่ผู้สอบบัญชีผ่านหรือหยุด จับคู่สมมติฐานกับวิธีทดสอบ และแบบทดสอบตาม LO</p>
+  <p class="note" style="margin-top:10px">ผลในแอปเป็นตรรกะการสอนตามกรอบของบท ไม่ใช่ผลวิจัยหรือการพยากรณ์ ตัวละครเป็นบุคคลสมมติ ห้ามนำข้อมูลผู้ตอบจริงมาใส่ในแอปนี้หรือในเครื่องมือ GenAI</p>
+</header>
+
+<section class="lab" aria-labelledby="l1">
+  <div class="lab-tag">ใบงาน 1 · LO1–LO2</div>
+  <h2 id="l1">จำลองด่านสู่การใช้ TSA for LCE</h2>
+  <p>เลือกสถานการณ์ของผู้สอบบัญชีหนึ่งคน แล้วดูว่าหยุดที่ด่านใด และแบบสอบถามบันทึกข้อมูลไว้ในรหัสใด</p>
+  <div class="cols">
+    <form id="sim" onsubmit="return false">
+      <fieldset><legend>ใบอนุญาต (ข้อ 1.1)</legend>
+        <label class="opt"><input type="radio" name="lic" value="CPA" checked> ผู้สอบบัญชีรับอนุญาต (CPA)</label>
+        <label class="opt"><input type="radio" name="lic" value="TA"> ผู้สอบบัญชีภาษีอากร (TA)</label>
+        <label class="opt"><input type="radio" name="lic" value="BOTH"> ถือทั้งสองใบอนุญาต</label>
+      </fieldset>
+      <fieldset><legend>มีงานลูกค้าที่เข้าเงื่อนไขในช่วงติดตาม (AA0)</legend>
+        <label class="opt"><input type="radio" name="opp" value="yes" checked> มีอย่างน้อยหนึ่งงาน</label>
+        <label class="opt"><input type="radio" name="opp" value="unsure"> ไม่แน่ใจว่าลูกค้าเข้าเงื่อนไข</label>
+        <label class="opt"><input type="radio" name="opp" value="no"> ไม่มี</label>
+      </fieldset>
+      <fieldset><legend>ระดับความตั้งใจเฉลี่ย (AI) <span class="val" id="intv">6</span> / 7</legend>
+        <input type="range" id="int" min="1" max="7" step="1" value="6" aria-describedby="intv">
+      </fieldset>
+      <fieldset><legend>ความเสี่ยงทางวิชาชีพที่รับรู้</legend>
+        <label class="opt"><input type="radio" name="risk" value="low" checked> ต่ำ: เห็นแนวปฏิบัติและแฟ้มงานชัด</label>
+        <label class="opt"><input type="radio" name="risk" value="high"> สูง: กังวลการตรวจคุณภาพงานหรือการโต้แย้ง</label>
+      </fieldset>
+    </form>
+    <div aria-live="polite">
+      <div class="chain" id="chain"></div>
+      <div class="persona" id="persona"></div>
+      <div class="codes"><table><tbody id="codes"></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<section class="lab" aria-labelledby="l2">
+  <div class="lab-tag">ใบงาน 2 · LO4</div>
+  <h2 id="l2">จับคู่สมมติฐานกับวิธีทดสอบและข้อมูล</h2>
+  <p>เลือกวิธีทดสอบของแต่ละสมมติฐานตามแผนวิเคราะห์ในโครงร่าง REC ฉบับ 1.5 แล้วกดตรวจคำตอบ</p>
+  <div class="tbl"><table class="match">
+    <thead><tr><th>สมมติฐาน</th><th>ความสัมพันธ์</th><th>วิธีทดสอบ</th><th>ผล</th></tr></thead>
+    <tbody id="mbody"></tbody>
+  </table></div>
+  <div class="row">
+    <button type="button" id="mcheck">ตรวจคำตอบ</button>
+    <button type="button" class="ghost" id="mreset">ล้างคำตอบ</button>
+    <span class="score" id="mscore"></span>
+  </div>
+  <p class="note" id="mexp" style="display:none;margin-top:12px"></p>
+</section>
+
+<section class="lab" aria-labelledby="l3">
+  <div class="lab-tag">ใบงาน 3 · LO1–LO5</div>
+  <h2 id="l3">แบบทดสอบท้ายบท</h2>
+  <p>ตอบทีละข้อ คำอธิบายจะแสดงทันทีหลังเลือก</p>
+  <div id="quiz"></div>
+  <div class="row"><span class="score" id="qscore"></span><button type="button" class="ghost" id="qreset">เริ่มใหม่</button></div>
+</section>
+
+<footer>อ้างอิงกรอบจากบทที่ 1 และโครงร่างการวิจัย ฉบับที่ 1.5 (11 พฤศจิกายน 2569) ชื่อกรอบ "แบบจำลองการยอมรับแบบมีด่าน" (Gated Adoption Model) ผู้เขียนอนุมัติเมื่อ 17 พฤศจิกายน 2569</footer>
+</main>
+
+<script>
+/* ===== logic (pure) ===== */
+function evaluate(s){
+  // s: {lic:'CPA'|'TA'|'BOTH', opp:'yes'|'unsure'|'no', intent:1..7, risk:'low'|'high'}
+  const group = s.lic === 'TA' ? 'TA' : 'CPA';
+  const high = s.intent >= 5;
+  const g = {right:'skip', opp:'skip', intent:'skip', choice:'skip'};
+  let stop = null;
+  if(group === 'TA'){ g.right = 'stop'; stop = 'right'; }
+  else {
+    g.right = 'pass';
+    if(s.opp !== 'yes'){ g.opp = 'stop'; stop = 'opp'; }
+    else {
+      g.opp = 'pass';
+      if(!high){ g.intent = 'stop'; stop = 'intent'; }
+      else {
+        g.intent = 'pass';
+        if(s.risk === 'high'){ g.choice = 'stop'; stop = 'choice'; }
+        else { g.choice = 'pass'; }
+      }
+    }
+  }
+  return {group, high, gates:g, stop, used: stop === null};
+}
+function codesFor(s, r){
+  const rows = [];
+  rows.push(['1.1', s.lic === 'BOTH' ? 'เลือก "ถือทั้งสองใบอนุญาต" และตอบในฐานะ CPA จึงจัดเข้ากลุ่ม CPA' : (s.lic === 'TA' ? 'TA' : 'CPA')]);
+  rows.push(['AI', r.group === 'TA'
+    ? 'ตอบเป็นความตั้งใจแบบมีเงื่อนไข "หากกรมสรรพากรอนุญาต" ด้วยถ้อยคำข้อเดียวกับ CPA'
+    : 'ความตั้งใจใน Wave 1 ระดับ ' + s.intent + ' (' + (r.high ? 'สูง' : 'ไม่สูง') + ')']);
+  if(r.group === 'TA'){
+    rows.push(['ติดตามผล', 'ไม่อยู่ในการสำรวจติดตาม (เฉพาะ CPA) ข้อมูลของ TA ใช้ใน H9–H10 และ H12']);
+    return rows;
+  }
+  const aa0 = {yes:'1 มีงานที่เข้าเงื่อนไข', unsure:'ไม่แน่ใจ: บันทึกแยก ไม่นับเป็น 0', no:'0 ไม่มีงานที่เข้าเงื่อนไข'}[s.opp];
+  rows.push(['AA0', aa0]);
+  if(s.opp !== 'yes'){
+    rows.push(['AA1', 'ไม่นำเข้าตัวหารของอัตราการใช้ เพราะยังไม่มีโอกาสใช้']);
+    rows.push(['AA4', s.opp === 'unsure' ? 'เหตุผล: ไม่แน่ใจเกณฑ์กิจการ (ประเด็น ก.3 และไม่มีเกณฑ์ขนาดตายตัว)' : 'เหตุผล: ไม่มีลูกค้าที่เข้าเงื่อนไข']);
+    return rows;
+  }
+  rows.push(['AA1', r.used ? '1 ใช้ในงานสอบบัญชีงบการเงิน' : '0 ไม่ใช้ แม้มีโอกาส']);
+  rows.push(['AA2–AA3', r.used ? 'จำนวนงานที่ใช้ และสัดส่วนต่อจำนวนงานที่เข้าเงื่อนไข (K) ของแต่ละคน' : 'AA2 = 0 และ AA3 = 0 เมื่อ K > 0']);
+  rows.push(['AA4', r.used ? 'เหตุผลที่เลือกใช้ (ใช้เลือกกรณีสัมภาษณ์ได้)' :
+    (r.stop === 'choice' ? 'อุปสรรค: ความเสี่ยงทางวิชาชีพที่รับรู้ กรณีตั้งใจสูงแต่ไม่ใช้เป็นกรณีสำคัญของ H12' : 'เหตุผล: ความตั้งใจไม่สูงพอ')]);
+  return rows;
+}
+function personaFor(s, r){
+  if(r.group === 'TA') return 'ตรงกับกรณีวรรณา: หยุดที่ด่านสิทธิ เพราะ TA ใช้ TSA for LCE ไม่ได้ตามระเบียบ ความตั้งใจของ TA จึงเป็นความตั้งใจแบบมีเงื่อนไข และใช้เป็นกลุ่มเปรียบเทียบเชิงสถาบัน';
+  if(r.stop === 'opp') return s.opp === 'unsure'
+    ? 'ตรงกับกรณีกิตติ: มีสิทธิแต่หยุดที่ด่านโอกาส เพราะไม่แน่ใจว่าลูกค้าเข้าเงื่อนไขหรือไม่ ความตั้งใจจึงยังแปลงเป็นการใช้ไม่ได้'
+    : 'มีสิทธิแต่ไม่มีงานที่เข้าเงื่อนไข ผลลัพธ์การใช้ของคนนี้จึงตีความเป็น "ไม่ใช้" ไม่ได้';
+  if(r.stop === 'intent') return 'ผ่านด่านสิทธิและโอกาส แต่ความตั้งใจไม่สูง ใกล้กับกรณีที่ H1–H8 พยายามอธิบายด้วยปัจจัยการรับรู้และแรงกดดันเชิงสถาบัน';
+  if(r.stop === 'choice') return 'ตั้งใจสูงและมีโอกาส แต่เลือกไม่ใช้เพราะความเสี่ยงที่รับรู้ นี่คือช่องว่างความตั้งใจกับการใช้ที่ H11 วัดและ H12 อธิบาย';
+  return 'ตรงกับกรณีมาลี: ผ่านทุกด่าน ความตั้งใจแปลงเป็นการใช้ในงานจริง';
+}
+/* ===== quiz/match data ===== */
+const METHODS = {
+  sem:'SEM เส้นทางในกลุ่ม (Wave 1)',
+  diff:'ผลต่างเส้นทาง CPA − TA หลังผ่าน metric invariance',
+  logit:'ถดถอยโลจิสติก เฉพาะ CPA (Wave 1 เชื่อมผลติดตาม)',
+  desc:'เชิงพรรณนา + joint display ไม่ทดสอบนัยสำคัญระหว่างกลุ่ม'
+};
+const HYP = [
+  ['H1','RA → AI-intention (+)','sem'],['H2','CP → AI-intention (+)','sem'],
+  ['H3','CX → AI-intention (−)','sem'],['H4','TR → AI-intention (+)','sem'],
+  ['H5','OB → AI-intention (+)','sem'],['H6','CO → AI-intention (+)','sem'],
+  ['H7','MI → AI-intention (+)','sem'],['H8','NO → AI-intention (+)','sem'],
+  ['H9','ผลของ CO ต่อความตั้งใจ ต่างระหว่าง CPA กับ TA','diff'],
+  ['H10','ผลของ NO ต่อความตั้งใจ ต่างระหว่าง CPA กับ TA','diff'],
+  ['H11','ความตั้งใจ Wave 1 → การใช้ในงานจริง (AA1)','logit'],
+  ['H12','กลไกช่องว่างความตั้งใจ–การใช้ของ CPA เทียบข้อจำกัดเชิงสถาบันของ TA','desc']
+];
+const QUIZ = [
+  {lo:'LO2',stem:'ทำไม TA จึงไม่อยู่ในการสำรวจติดตามผลการใช้ (AA0–AA4)',
+   opts:['เพราะ TA มีจำนวนน้อยเกินไป','เพราะ TA ใช้ TSA for LCE ไม่ได้ตามระเบียบ การใช้จริงจึงเป็นศูนย์โดยโครงสร้าง','เพราะ TA ไม่มีลูกค้าที่เป็นกิจการขนาดเล็ก','เพราะคณะกรรมการจริยธรรมห้ามติดตาม TA'],
+   a:1,why:'ผลลัพธ์ที่ถูกบังคับให้เป็นศูนย์ไม่ให้ข้อมูลเรื่องความตั้งใจกับการใช้ จึงทดสอบ H11 เฉพาะ CPA และใช้ TA เป็นกลุ่มเปรียบเทียบเชิงสถาบันแทน'},
+  {lo:'LO2',stem:'ข้อใดอธิบาย No-Threshold Paradox ได้ตรงที่สุด',
+   opts:['มาตรฐานกำหนดเกณฑ์รายได้ไว้สูงเกินไป','มาตรฐานไม่มีเกณฑ์ขนาดตายตัว ผู้สอบบัญชีต้องใช้ดุลยพินิจว่ากิจการเข้าเงื่อนไขหรือไม่ จึงเกิดความไม่แน่นอนที่ด่านโอกาส','กิจการทุกแห่งต้องใช้มาตรฐานนี้','ผู้สอบบัญชีเลือกใช้มาตรฐานผสมกันได้'],
+   a:1,why:'การไม่มีเกณฑ์ตายตัว (ก.3, ก.4, FAQ ข้อ 15) ทำให้ความตั้งใจสูงอาจไม่กลายเป็นการใช้ เพราะยังไม่แน่ใจว่างานใดเข้าเงื่อนไข และใช้มาตรฐานผสมกันไม่ได้'},
+  {lo:'LO1',stem:'กิตติตั้งใจสูง แต่ตอบ AA0 ว่า "ไม่แน่ใจ" ควรจัดการข้อมูลของกิตติใน H11 อย่างไร',
+   opts:['นับเป็นผู้ไม่ใช้ (AA1 = 0)','ลบออกจากข้อมูลทั้งหมด','บันทึกแยกเป็นสถานะไม่ทราบโอกาส และไม่นับเข้าตัวหารของอัตราการใช้','นับเป็นผู้ใช้เพราะตั้งใจสูง'],
+   a:2,why:'ถ้านับเป็นผู้ไม่ใช้ จะสับสนการไม่มีโอกาสกับการเลือกไม่ใช้ ตัวหารของอัตราการใช้ต้องเป็นผู้ที่มีงานเข้าเงื่อนไข'},
+  {lo:'LO4',stem:'ก่อนทดสอบผลต่างเส้นทางตาม H9–H10 ต้องผ่านเงื่อนไขใด',
+   opts:['configural invariance เท่านั้น','metric invariance ระหว่าง CPA กับ TA','ขนาดตัวอย่างสองกลุ่มเท่ากัน','ทุกข้อคำถามมีค่าเฉลี่ยเท่ากัน'],
+   a:1,why:'การเทียบความชันหรือเส้นทางข้ามกลุ่มต้องให้น้ำหนักองค์ประกอบเท่ากันก่อน ไม่เช่นนั้นผลต่างอาจมาจากการวัดที่ต่างกัน'},
+  {lo:'LO5',stem:'H12 ฉบับปรับปรุงใช้หลักฐานแบบใด',
+   opts:['t-test ระหว่าง CPA กับ TA','เชิงพรรณนาและ joint display เทียบกลไกของ CPA กับข้อจำกัดเชิงสถาบันของ TA โดยไม่ทดสอบนัยสำคัญระหว่างกลุ่ม','ถดถอยโลจิสติกรวมสองกลุ่ม','Satorra–Bentler Δχ²'],
+   a:1,why:'ช่องว่างของสองกลุ่มเกิดจากกลไกต่างชนิดกัน การทดสอบนัยสำคัญระหว่างกลุ่มจึงไม่ตอบคำถาม H12'},
+  {lo:'LO2',stem:'ผู้ตอบที่ถือทั้ง CPA และ TA ถูกจัดกลุ่มอย่างไร',
+   opts:['TA','CPA','ตัดออก','กลุ่มที่สามแยกต่างหาก'],
+   a:1,why:'ผู้ถือสองใบอนุญาตมีสิทธิใช้ TSA for LCE ในฐานะ CPA แบบสอบถามฉบับ 1.2 จึงให้ตอบในฐานะ CPA'},
+  {lo:'LO3',stem:'สมมติฐาน H6–H8 (CO, MI, NO) อาศัยทฤษฎีใดเป็นหลัก',
+   opts:['ทฤษฎีการแพร่กระจายนวัตกรรม (Rogers)','ทฤษฎีสถาบันว่าด้วยแรงกดดันเชิงบังคับ เลียนแบบ และบรรทัดฐาน (DiMaggio & Powell)','ทฤษฎีตัวแทน','ทฤษฎีความเสี่ยงการสอบบัญชี'],
+   a:1,why:'แรงกดดันสามแบบของ DiMaggio และ Powell (1983) อธิบายระดับองค์การ เมื่อนำมาวัดเป็นการรับรู้ของผู้สอบบัญชีรายบุคคล ต้องให้เหตุผลเรื่องระดับการวิเคราะห์ที่ต่างกัน ส่วน H1–H5 มาจากคุณลักษณะนวัตกรรมของ Rogers (2003)'},
+  {lo:'LO5',stem:'การใช้ GenAI ในการวิจัยนี้ข้อใดถูกต้อง',
+   opts:['ใส่ข้อมูลดิบของผู้ตอบให้ GenAI สรุปผลได้','ใช้ GenAI ช่วยร่างโค้ดกับข้อมูลสังเคราะห์ และปิดผู้ช่วย AI ใน JASP เมื่อใช้ข้อมูลจริง','ให้ GenAI สร้างรายการอ้างอิงแล้วใช้ได้ทันที','ให้ GenAI เติมค่าที่หายไปในข้อมูลจริง'],
+   a:1,why:'ข้อมูลผู้ตอบจริงห้ามเข้า GenAI ทุกช่องทาง ผลและการอ้างอิงที่ GenAI ให้มาต้องตรวจกับแหล่งเดิม'}
+];
+/* ===== UI ===== */
+if(typeof document !== 'undefined'){
+  const $ = id => document.getElementById(id);
+  const GATES = [
+    ['right','สิทธิตามระเบียบ','มีสิทธิใช้ TSA for LCE กับงานสอบบัญชีงบการเงินหรือไม่'],
+    ['opp','โอกาสจากงานที่เข้าเงื่อนไข','มีลูกค้าที่เข้าเงื่อนไขในช่วงติดตามหรือไม่'],
+    ['intent','ความตั้งใจ','ความตั้งใจสูงพอจะลงมือหรือไม่ (เกณฑ์ในแอป ≥ 5 เป็นค่าสอน รอผู้เขียนกำหนดเกณฑ์จริง)'],
+    ['choice','การเลือกภายใต้ความเสี่ยง','ยอมรับความเสี่ยงทางวิชาชีพที่รับรู้หรือไม่']
+  ];
+  function read(){
+    const f = $('sim');
+    return {lic:f.lic.value, opp:f.opp.value, intent:+$('int').value, risk:f.risk.value};
+  }
+  function render(){
+    const s = read(); $('intv').textContent = s.intent;
+    const r = evaluate(s);
+    $('chain').innerHTML = GATES.map((g,i)=>{
+      const st = r.gates[g[0]];
+      const mark = st==='pass'?'ผ่าน':st==='stop'?'หยุด':'ไม่ถึง';
+      return `<div class="gate ${st}"><div class="dot" aria-hidden="true">${i+1}</div><div><b>${g[1]} · ${mark}</b><small>${g[2]}</small></div></div>`;
+    }).join('') + `<div class="gate ${r.used?'pass':'skip'}"><div class="dot" aria-hidden="true">✓</div><div><b>ใช้ในงานจริง · ${r.used?'ใช่':'ไม่'}</b><small>ผลลัพธ์ที่ H11 สนใจ</small></div></div>`;
+    $('persona').textContent = personaFor(s,r);
+    $('codes').innerHTML = codesFor(s,r).map(c=>`<tr><td>${c[0]}</td><td>${c[1]}</td></tr>`).join('');
+  }
+  $('sim').addEventListener('input', render); render();
+
+  const opts = '<option value="">เลือก…</option>' + Object.entries(METHODS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+  $('mbody').innerHTML = HYP.map((h,i)=>`<tr><td><b>${h[0]}</b></td><td>${h[1]}</td><td><select id="m${i}" aria-label="วิธีทดสอบ ${h[0]}">${opts}</select></td><td class="mark" id="mk${i}"></td></tr>`).join('');
+  $('mcheck').onclick = ()=>{
+    let n=0; HYP.forEach((h,i)=>{const ok=$('m'+i).value===h[2]; if(ok)n++;
+      const el=$('mk'+i); el.textContent=ok?'ถูก':'ยังไม่ถูก'; el.className='mark '+(ok?'ok':'no');});
+    $('mscore').textContent = `ถูก ${n} จาก ${HYP.length}`;
+    const e=$('mexp'); e.style.display='block';
+    e.textContent='หลักจำ: H1–H8 อ่านเส้นทางในกลุ่ม; H9–H10 อ่านผลต่าง CPA − TA ด้วย Wald test และ Satorra–Bentler Δχ² ที่คำนวณใน R แบบทางเดียว ปรับ Holm; H11 ใช้เฉพาะ CPA ที่เชื่อมผลติดตามได้ (ใช้ Firth regression เมื่อจำเป็น และถ่วงน้ำหนักการสูญหาย); H12 เป็นข้อเสนอเชิงอธิบาย';
+  };
+  $('mreset').onclick = ()=>{HYP.forEach((h,i)=>{$('m'+i).value='';$('mk'+i).textContent='';}); $('mscore').textContent=''; $('mexp').style.display='none';};
+
+  let answered = {};
+  function drawQuiz(){
+    answered = {};
+    $('quiz').innerHTML = QUIZ.map((q,i)=>`<div class="q"><div class="lo">${q.lo}</div><div class="stem">${i+1}. ${q.stem}</div>`+
+      q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}"> ${o}</label>`).join('')+
+      `<div class="fb" id="fb${i}"></div></div>`).join('');
+    QUIZ.forEach((q,i)=>document.querySelectorAll(`input[name=q${i}]`).forEach(el=>el.addEventListener('change',()=>{
+      const ok=+el.value===q.a; answered[i]=ok; const fb=$('fb'+i);
+      fb.className='fb show '+(ok?'ok':'no'); fb.textContent=(ok?'ถูกต้อง. ':'ยังไม่ใช่. ')+q.why; score();})));
+    score();
+  }
+  function score(){const k=Object.keys(answered).length; const c=Object.values(answered).filter(Boolean).length;
+    $('qscore').textContent = k? `ตอบแล้ว ${k}/${QUIZ.length} · ถูก ${c}` : `${QUIZ.length} ข้อ`;}
+  $('qreset').onclick = drawQuiz; drawQuiz();
+}
+if(typeof module !== 'undefined') module.exports = {evaluate, codesFor, HYP, QUIZ};
+</script>
+</body>
+</html>
