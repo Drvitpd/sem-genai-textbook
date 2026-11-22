@@ -144,7 +144,7 @@ document.getElementById('gg').onclick=chk;document.getElementById('gk').addEvent
   <h2 id="l2">วางแผนโควตาผู้ให้สัมภาษณ์</h2>
   <p>ตัวเลขในตารางคือจำนวนผู้ยินดีให้สัมภาษณ์ในแต่ละช่องและกลุ่มโปรไฟล์ (ตารางที่ 12.5) แก้ตัวเลขหรือจำนวนขั้นต่ำต่อช่อง แล้วดูว่าช่องใดมีปัญหา</p>
   <div class="grid3" style="margin-bottom:8px"><div class="num"><label for="qMin">ขั้นต่ำต่อช่อง</label><input id="qMin" type="number" min="1" max="8" value="3"></div></div>
-  <div class="tbl"><table class="res"><thead><tr><th>ช่องโควตา</th><th>ความสามารถ–โอกาสต่ำ</th><th>แรงจูงใจต่ำ</th><th>สูงทุกด้าน</th><th>สถานะ</th></tr></thead><tbody id="qbody"></tbody></table></div>
+  <div class="tbl"><table class="res"><thead><tr><th>ช่องโควตา</th><th>โปรไฟล์ต่ำ</th><th>โปรไฟล์สูง</th><th>สถานะ</th></tr></thead><tbody id="qbody"></tbody></table></div>
   <div class="msg" id="m2"></div>
 </section>
 
@@ -164,7 +164,7 @@ document.getElementById('gg').onclick=chk;document.getElementById('gk').addEvent
   <div class="row"><span class="score" id="qscore"></span><button type="button" class="ghost" id="qreset">เริ่มใหม่</button></div>
 </section>
 
-<footer>ตัวเลขตั้งต้นมาจากสคริปต์ ch12_lab.R ในบทที่ 12 (R 4.3.3, seed 20261201) ซึ่งต่อจากข้อมูลบทที่ 9 เกณฑ์ตั้งใจสูง 5.0 เป็นค่าสอน รอผู้เขียนกำหนด ช่อง "CPA ตั้งใจสูงแต่ไม่แน่ใจ" เป็นข้อเสนอของตำรา ยังไม่อยู่ในโควตาของโครงร่าง</footer>
+<footer>ตัวเลขตั้งต้นมาจากสคริปต์ ch12_lab.R ในบทที่ 12 (R 4.3.3, seed 20261201) ซึ่งต่อจากข้อมูลบทที่ 9 เกณฑ์ตั้งใจสูงคือค่าเฉลี่ยตั้งแต่ 5 ตามโครงร่างฉบับที่ 1.5 หัวข้อ 1.6 ช่อง "CPA ตั้งใจสูงแต่ไม่แน่ใจ" อยู่ในโควตาของหัวข้อ 3.4.3 จำนวนกลุ่มโปรไฟล์เลือกด้วย silhouette ตามหัวข้อ 3.7 ได้สองกลุ่ม (k = 2, silhouette .303) การสัมภาษณ์ผู้แทนสำนักงาน 3–5 แห่งไม่นับรวมในแผนโควตานี้</footer>
 </main>
 
 <script>
@@ -173,7 +173,7 @@ function h12desc(o){ // {cHi,cOpp,cNon,cUns,tAll,tHi}
   const errs=[]; if(o.cOpp+o.cUns>o.cHi) errs.push('ผู้ตอบว่ามีรวมกับไม่แน่ใจ มากกว่าผู้ตั้งใจสูงที่เชื่อมได้'); if(o.cNon>o.cOpp) errs.push('ผู้ไม่ใช้มากกว่าผู้มีโอกาส'); if(o.tHi>o.tAll) errs.push('TA ตั้งใจสูงมากกว่า TA ทั้งหมด');
   return {errs, cpaNon:o.cNon/o.cOpp, cpaUns:o.cUns/o.cHi, taHi:o.tHi/o.tAll, cpaBlocked:(o.cNon+o.cUns)/o.cHi};
 }
-const CELLS=[{name:'CPA ตั้งใจสูงและใช้',v:[0,2,8],core:true},{name:'CPA ตั้งใจสูงแต่ไม่ใช้',v:[0,0,3],core:true},{name:'CPA ตั้งใจสูงแต่ไม่แน่ใจ (ข้อเสนอ)',v:[0,1,4],core:false},{name:'CPA ตั้งใจต่ำ',v:[4,9,9],core:true},{name:'TA ตั้งใจแบบมีเงื่อนไขสูง',v:[2,2,7],core:true},{name:'TA ตั้งใจแบบมีเงื่อนไขต่ำ',v:[22,18,7],core:true}];
+const CELLS=[{name:'CPA ตั้งใจสูงและใช้',v:[0,10],core:true},{name:'CPA ตั้งใจสูงแต่ไม่ใช้',v:[0,3],core:true},{name:'CPA ตั้งใจสูงแต่ไม่แน่ใจ',v:[1,4],core:true},{name:'CPA ตั้งใจต่ำ',v:[9,13],core:true},{name:'TA ตั้งใจแบบมีเงื่อนไขสูง',v:[3,8],core:true},{name:'TA ตั้งใจแบบมีเงื่อนไขต่ำ',v:[38,9],core:true}];
 function quotaCheck(cells,min){
   const rows=cells.map(c=>{const tot=c.v.reduce((a,b)=>a+b,0), nonEmpty=c.v.filter(x=>x>0).length, take=Math.min(min,tot);
     let status=tot<min?'ไม่ครบ':(nonEmpty<2?'ครบแต่ไม่กระจาย':'ครบและกระจาย'); return {name:c.name,tot,nonEmpty,take,status,core:c.core};});
@@ -182,7 +182,7 @@ function quotaCheck(cells,min){
 }
 const JD=[
  {row:'บริบท (CPA)',q:'ตั้งใจสูงแต่ไม่แน่ใจ 12 จาก 50 ราย · เหตุ "ไม่มีเกณฑ์เชิงปริมาณ" 6 ราย',t:'ใช้เกณฑ์ส่วนตัวแทนตัวเลข (I07, I09)',a:0,why:'ตัวเลขบอกว่าความไม่แน่ใจมีอยู่และเหตุหลักคือไม่มีเกณฑ์ แก่นเรื่องบอกเรื่องเดียวกันจากมุมผู้ตอบ จึงยืนยันกัน'},
- {row:'กลไกความสามารถ (TA)',q:'TA อยู่กลุ่มความสามารถ–โอกาสต่ำ 69 จาก 160',t:'ไม่ลงทุนศึกษาเพราะใช้ไม่ได้ (I14)',a:1,why:'ตัวเลขบอกแค่ว่าความสามารถต่ำ แก่นเรื่องเสนอว่าความสามารถต่ำอาจเป็นผลของการถูกกีดกัน จึงขยายความและอาจกลับทิศของคำอธิบาย'},
+ {row:'กลไกความสามารถ (TA)',q:'TA อยู่กลุ่มโปรไฟล์ต่ำ 108 จาก 160',t:'ไม่ลงทุนศึกษาเพราะใช้ไม่ได้ (I14)',a:1,why:'ตัวเลขบอกแค่ว่าคะแนนโปรไฟล์รวมทั้งความสามารถต่ำ แก่นเรื่องเสนอว่าความสามารถต่ำอาจเป็นผลของการถูกกีดกัน จึงขยายความและอาจกลับทิศของคำอธิบาย'},
  {row:'กลไกแรงจูงใจ (CPA)',q:'AA4 แรงจูงใจ 1 จาก 7 ผู้ไม่ใช้',t:'ใช้ได้แม้แรงจูงใจต่ำเมื่อลูกค้าเข้าเงื่อนไขชัด (I02)',a:1,why:'กรณีสวนทางนี้บอกขอบเขตว่าเมื่อเกณฑ์ชัด แรงจูงใจอาจไม่ใช่เงื่อนไขสำคัญ จึงขยายความพร้อมขอบเขต ไม่ได้ขัดกับตัวเลข'},
  {row:'ผลลัพธ์ (CPA)',q:'ผู้มีโอกาสที่ไม่ใช้ 7 จาก 32 (21.9%)',t:'สมมติว่าพบแก่นเรื่อง "ใช้มาตรฐานแล้วในงานส่วนใหญ่" จากผู้ให้สัมภาษณ์ในช่องนี้',a:2,why:'ถ้าคนในช่องตั้งใจสูงแต่ไม่ใช้เล่าว่าใช้แล้ว แปลว่าคำตอบ AA1 กับคำเล่าขัดกัน ต้องตรวจช่วงเวลาอ้างอิงและนิยามการใช้ก่อนสรุป'}];
 const OPTS=['ยืนยัน','ขยายความ','ขัดแย้ง'];
@@ -204,7 +204,7 @@ if(typeof document!=='undefined'){
     $('m1').textContent=r.errs.length?('ตรวจตัวเลข: '+r.errs.join(' · ')):`สามอัตรานี้ใช้ตัวหารคนละชุดและวัดคนละเรื่อง อัตราแรกคือผู้เลือกไม่ใช้เมื่อมีโอกาส อัตราที่สองคือผู้ที่ตัดสินด่านโอกาสไม่ได้ อัตราที่สามคือความตั้งใจที่ถูกระเบียบกักไว้ วางคู่กันเพื่อเทียบชนิดได้ แต่ห้ามสรุปว่ากลุ่มใดมีช่องว่าง "มากกว่า"`;}
   ['cHi','cOpp','cNon','cUns','tAll','tHi'].forEach(id=>$(id).addEventListener('input',lab1)); lab1();
   $('qbody').innerHTML=CELLS.map((c,i)=>`<tr><td>${c.name}</td>`+c.v.map((x,j)=>`<td><input id="q${i}_${j}" type="number" min="0" value="${x}" aria-label="${c.name} กลุ่ม ${j+1}" style="width:64px"></td>`).join('')+`<td id="qs${i}"></td></tr>`).join('');
-  function lab2(){const cells=CELLS.map((c,i)=>({name:c.name,core:c.core,v:[0,1,2].map(j=>Math.max(0,+$(`q${i}_${j}`).value))})); const r=quotaCheck(cells,Math.max(1,+$('qMin').value));
+  function lab2(){const cells=CELLS.map((c,i)=>({name:c.name,core:c.core,v:c.v.map((_,j)=>Math.max(0,+$(`q${i}_${j}`).value))})); const r=quotaCheck(cells,Math.max(1,+$('qMin').value));
     r.rows.forEach((x,i)=>{const el=$('qs'+i); el.textContent=`${x.status} (${x.tot})`; el.style.color=x.status==='ไม่ครบ'?'var(--stop)':(x.status==='ครบแต่ไม่กระจาย'?'var(--gate)':'var(--accent)');});
     $('m2').textContent=`แผนนี้คัดได้ ${r.plan} ราย ${r.inRange?'อยู่ในช่วง 15–24 ราย ตามโครงร่าง':'อยู่นอกช่วง 15–24 ราย ต้องปรับจำนวนต่อช่องหรือเหตุผลการหยุดเก็บ'} `+(r.short.length?`ช่องที่ไม่ครบ: ${r.short.join(', ')} ต้องบันทึกเหตุผลและพิจารณาขยายการสรรหา `:'')+(r.flat.length?`ช่องที่ครบแต่ทุกคนอยู่กลุ่มเดียว: ${r.flat.join(', ')} ความแตกต่างภายในช่องจึงเกิดไม่ได้`:'');}
   $('qbody').addEventListener('input',lab2); $('qMin').addEventListener('input',lab2); lab2();
